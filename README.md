@@ -26,7 +26,7 @@ python calculate.py
 ```
 
 ## plot results
-plot images
+plot images for analysis
 ```
 python analyze_plot.py
 ```
