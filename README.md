@@ -12,7 +12,7 @@ make sure the cache directory has enough space, the default localtion is `.cache
 cache_dir = Path('~/path/to/cache/dir').expanduser()
 ```
 
-using mpi calculate multiple cases simultaneously, switch `$(nproc)` to the number of cores you want to use. Depending on `num_sample` parameter, using all physical cores may requires lots of RAM.
+using mpi calculate multiple cases simultaneously, switch `$(nproc)` to the number of cores you want to use. Depending on `num_sample` parameter in `initialize_params.py`, using all physical cores may requires lots of RAM.
 ```
 mpiexec -n $(nproc) python calculate.py
 ```
