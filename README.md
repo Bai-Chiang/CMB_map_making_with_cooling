@@ -20,6 +20,10 @@ or running at background direct standard output to `.out`
 ```
 nohup mpiexec -n $(nproc) python calculate.py > .out &
 ```
+or single thread
+```
+python calculate.py
+```
 
 plot images
 ```
