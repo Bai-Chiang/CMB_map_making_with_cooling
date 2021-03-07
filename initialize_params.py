@@ -2,15 +2,12 @@ import numpy as np
 from pathlib import Path, PurePath
 import pickle
 
-running_on_cluster = False
 
 num_iter = 100
 cache_dir = Path('~/HDD/cache').expanduser()
 seed = 0
 f_scan_list = [0.1,0.001,10]
-#num_eta_iter_per_eta = [(5,1),(15,1),(30,1)]
 num_eta_arr = np.array([5,15,30],dtype=int)
-#stop_ratio = 1e-3
 f_sample_list = [100,]
 f_knee_list = [10,]
 
@@ -18,11 +15,6 @@ f_knee_list = [10,]
 num_sample = int(2**20)
 #condition_number_arr = np.logspace(0,20,11)[1:]
 condition_number_arr = np.array([1e2,1e6,1e12])
-
-if running_on_cluster:
-    condition_number_arr = np.array([1e12])
-    num_sample = int(2**25)
-    cache_dir = Path('/data/astro4_4/student20/cache')
 
 
 x_max = y_max = 1*np.pi/180
@@ -37,7 +29,6 @@ results_dir = Path('results/').expanduser()
 
 
 
-#max_iter = max([i*j for (i,j) in num_eta_iter_per_eta])
 
 # f_apo calculated from f_knee, f_sample, and condition number
 f_sample_knee_apo_list = []
