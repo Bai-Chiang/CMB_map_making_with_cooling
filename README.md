@@ -18,7 +18,7 @@ mpiexec -n $(nproc) python calculate.py
 ```
 or running at background direct standard output to `.out`
 ```
-nohup mpiexec -n $(nproc) python calculate.py > .out &
+nohup mpiexec -n $(nproc) python calculate.py > .out 2>&1 &
 ```
 or single thread
 ```
