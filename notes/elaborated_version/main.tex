@@ -43,7 +43,7 @@
 \newcommand{\bb}[1]{\mathbb{#1}}
 \newcommand{\vbd}{\vb{d}}
 \newcommand{\vbm}{\vb{m}}
-\newcommand{\vbep}{\vb{\varepsilon}}
+\newcommand{\vbep}{\vb*{\varepsilon}}
 \newcommand{\vbn}{\vb{n}}
 \newcommand{\vbb}{\vb{b}}
 \newcommand{\inv}[1]{#1^{-1}}
@@ -161,9 +161,9 @@ it is a linear combination of $\vbd$.
 We say that the estimator is unbiased if
 \begin{align}
 \begin{aligned}[b]
-&\mathrel{\phantom{\Rightarrow}}\ev{\hatm} = m \\
-&\Rightarrow\ev{W \vbd} = m\\
-&\Rightarrow\ev{W(Pm + \vbn) } = m \\
+&\mathrel{\phantom{\Rightarrow}}\ev{\hatm} = \vbm \\
+&\Rightarrow\ev{W \vbd} = \vbm\\
+&\Rightarrow\ev{W(P\vbm + \vbn) } = \vbm \\
 &\Rightarrow WP = I.
 \end{aligned}
 \end{align}
@@ -287,7 +287,7 @@ Least Square estimation,
 \begin{align}
 \qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
 \end{align}
-If we define $A = \Pdagger \inv{N} P$ and $b = \Pdagger \inv{N} d$,
+If we define $A = \Pdagger \inv{N} P$ and $\vbb = \Pdagger \inv{N} \vbd$,
 then it could be written as $A\hatm = \vbb$.
 
 Based on current computation power, it is impossible to solve $\hatm$
@@ -474,7 +474,7 @@ $\dv{\eta} \chi^2({\hatm(\eta), \eta}) \leq 0$,
 so $\chi^2(\hatm(\eta), \eta)$ is always decreasing
 as $\eta$ changes from $0$ to $1$.
 
-The relative decrease of $\chi^2(\hatm(\eta), \eta)$ at $\eta$ is defined as
+The fractional decrease of $\chi^2(\hatm(\eta), \eta)$ at $\eta$ is defined as
 \begin{align}
 \begin{aligned}[b]
 -\frac{\delta \chi^2(\hatm(\eta),\eta)} {\chi^2(\hatm(\eta), \eta)}
@@ -498,7 +498,7 @@ $\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$,
 such that it's non-negative.
 If we choose $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
 such that $\eta_1 = \delta \eta$ is very small quantity.
-Then the relative decrease from $\eta_0= 0$ to $\eta_1 = \delta \eta$ is
+Then the fractional decrease from $\eta_0= 0$ to $\eta_1 = \delta \eta$ is
 \begin{align}
 \begin{aligned}[b]
 -\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
@@ -546,7 +546,7 @@ then $\eta_1 \approx \inv{\kappa} (N)$.
 What about the other parameters $\eta_m$ with $m > 1$?
 We could use a similar analysis,
 and suppose $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m$,
-and find the relative decrease
+and find the fractional decrease
 \begin{align}
 \begin{aligned}[b]
 -\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
