@@ -701,7 +701,8 @@ $P\hatm$ from time domain to frequency domain and an inverse Fourier transform
 of $\inv{N} P \hatm$ from frequency domain back to time domain,
 which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
 data.
-If we change $\inv{N}$ to $\inv{N}(\eta)$, it won't add extra cost.
+If we change $\inv{N}$ to $\inv{N(\eta)}$, it won't add extra cost,
+since both matrices are diagnal in frequency domain.
 Therefore the computational cost it the same for one step.
 
 However in previous analysis, our choice of parameters $\eta_i$ is based on
@@ -833,7 +834,7 @@ simple preconditioner.
 
 \section{Numerical Simulations}
 To compare these algorithms, we need to do some simple simulation of scanning
-process, and generate time ordered data from random sky signal.
+processes, and generate time ordered data from random sky signal.
 Our sky is a small rectangular area, with two orthogonal directions $x$ and
 $y$, both with range from $-1\degree$ to $+1\degree$.
 The electromagnetic signal is described as four stokes parameters
@@ -948,7 +949,7 @@ benefits, as showed in Figure(\ref{medium condi num CG}) and
 Figure(\ref{large condi num CG}).
 It outperforms the vanilla conjugate gradient method when 
 $f_{\text{apo}} \approx 0$ and the noise power spectrum becomes the $1/f$ noise model,
-which usually is the intrinsic noise of instruments\cite{1997PhRvD..56.4514T}.
+which usually is the intrinsic noise of instruments (\cite{1997PhRvD..56.4514T}).
 \begin{figure}[htb]
 \centering
 \begin{subfigure}{0.33\textwidth}

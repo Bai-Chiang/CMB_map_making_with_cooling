@@ -438,6 +438,14 @@ For simplicity we fix the preconditioner being $M= \Pdagger P$ for all of
 calculations.
 
 The structure of this paper is organized as follows.
+In section 2 we briefly introduce messenger field fixed point iteration method
+and preconditioned version.
+In section 3 we reinterpret this process and give an analysis on how to determine
+the parameters.
+Section 4 gives the noise power spectrum in our simulation, and Section 5 shows
+results.
+Finally, Section 6 we discuss this method's pro and con for possible future 
+improvements.
 
 
 \section{Messenger Field Method}
@@ -690,6 +698,7 @@ $\eta_1 = \delta \eta$ is
     {\qty\big(\vbd - P \hatm(0))^{\dagger} \qty\big(\vbd - P\hatm(0))}
 %\\
 %& \leq  \frac{\delta \eta}{\tau} \max(\Nbar_f)
+\label{eta upper bound}
 \end{aligned}
 \end{align}
 Here we put a minus sign in front of this expression
@@ -826,22 +835,22 @@ initial guess corresponds to choosing $\eta_0=0$ and $\eta_1= \eta_2 = \cdots
 In this section, let me introduce another way to understand the role of $\eta$.
 Our ultimate goal is to find $\hatm(\eta=1)$ which minimizes 
 $\chi^2(\vbm) = (\vbd - P\vbm)^{\dagger} \inv{N} (\vbd - P\vbm)$.
-Here we also assumed that $N$ is diagonal in frequency space.
-With this condition $\chi^2$ could be written as a sum of all frequency mode 
+Since $N$ is diagonal in frequency space,
+$\chi^2$ could be written as a sum of all frequency mode 
 $\qty|(\vbd-P\vbm)_f|^2$ with weight $\inv{N}_f$, such as
 $\chi^2(\vbm) = \sum_f \qty|(\vbd-P\vbm)_f|^2 \inv{N}_f$.
 $\inv{N}_f$ is large when there is little noise at that frequency,
 and vice versa.
 Which means $\chi^2(\vbm)$ would favor the low noise frequency mode over high 
-noise ones, because low noise part has higher weight.
+noise ones.
 In other words the optimal map $\hatm$ focusing on minimize the error
 $\vb{r} \equiv \vbd - P\vbm$ in the low-noise part.
 
 After introducing $\eta$, we minimize
-$\chi^2(\vbm,\eta)=(\vbd-P\vbm)^{\dagger} N_{\eta}^{-1} (\vbd - P\vbm)$
-for each $\eta$ value as it increase from $0$ to $1$.
+$\chi^2(\vbm,\eta)=(\vbd-P\vbm)^{\dagger} N_{\eta}^{-1} (\vbd - P\vbm)$.
+%for each $\eta$ value as it increase from $0$ to $1$.
 For $\eta=0$, $N^{-1}_{\eta=0} \propto I$ and the estimated map $\hatm(\eta=0)$
-does not prioritize any frequency mode when minimizing the error.
+does not prioritize any frequency mode.
 As we slowly increase $\eta$, we decrease the weight for the frequency modes
 which have large noise, and focusing minimizing error for low noise part.
 If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
@@ -852,68 +861,67 @@ However by introducing $\eta$ parameter, we let the solver first treat every
 frequency equally.
 Then as $\eta$ slowly increases, it gradually shifts focus to low noise
 part.
-If we write the difference between final and initial $\chi^2$ value as
-$\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}
-\dv{\eta} \chi^2(\hatm(\eta),\eta)$,
-and use Eq.(\ref{d chi2}).
-%\begin{align}
-%\dv{\eta} \chi^2(\hatm(\eta), \eta) 
-%&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta} 
-%    (\vbd - P\hatm(\eta)) \tag{\ref{d chi2}}
-%\end{align}
-We note that when $\eta$ is very small, 
-the $\dv{\eta}\chi^2(\hatm(\eta),\eta)$ would have relatively large
-contribution from medium to large noise region, comparing to large $\eta$.
-So introducing $\eta$ might improve the convergence of $\chi^2$ at these
-regions, because the vanilla conjugate gradient method only focuses on the low noise
-part and it may have difficulty at these regions.
+
+% ADD TO APPENDIX
+%If we write the difference between final and initial $\chi^2$ value as
+%$\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}
+%\dv{\eta} \chi^2(\hatm(\eta),\eta)$,
+%and use Eq.(\ref{d chi2}).
+%%\begin{align}
+%%\dv{\eta} \chi^2(\hatm(\eta), \eta) 
+%%&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta} 
+%%    (\vbd - P\hatm(\eta)) \tag{\ref{d chi2}}
+%%\end{align}
+%We note that when $\eta$ is very small, 
+%the $\dv{\eta}\chi^2(\hatm(\eta),\eta)$ would have relatively large
+%contribution from medium to large noise region, comparing to large $\eta$.
+%So introducing $\eta$ might improve the convergence of $\chi^2$ at these
+%regions, because the vanilla conjugate gradient method only focuses on the low noise
+%part and it may have difficulty at these regions.
 
 
 \subsection{Computational Cost}
 To properly compare the performance cost of this method with respect to vanilla
 conjugate gradient method with simple preconditioner,
 we need to compare their computational cost at each iteration.
-The right hand side of parameterized map making equation
-Eq.(\ref{map making para})
+The right hand side of parameterized map-making equation
+Eq.(\ref{map making eq eta})
 %\begin{align}
 %\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
 %= \Pdagger \inv{N(\eta)} \vbd \tag{\ref{map making para}}
 %\end{align}
 could be computed before iterations,
-so it won't introduce extra computational cost during iterations.
+so it won't introduce extra computational cost.
 The most demanding part of conjugate gradient method is calculating
 $\Pdagger \inv{N} P \hatm$, because it contains a Fourier transform of
 $P\hatm$ from time domain to frequency domain and an inverse Fourier transform
 of $\inv{N} P \hatm$ from frequency domain back to time domain,
 which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
 data.
-If we change $\inv{N}$ to $\inv{N}(\eta)$, it won't add extra cost.
+If we change $\inv{N}$ to $\inv{N(\eta)}$, it won't add extra cost,
+since both matrices are diagonal in frequency domain.
 Therefore the computational cost it the same for one step.
 
-However in previous analysis, our choice of parameters $\eta_i$ is based on
-$\delta\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
-$\vbm = \hatm(\eta_i)$ the estimated map at $\eta_i$.
-We update $\eta_i$ to $\eta_{i+1}$ when $\vbm \approx \hatm(\eta_i)$. 
-How do we know current map $\vbm$ is close to $\hatm(\eta_i)$? 
-Because for each new $\eta_i$ value, we are solving a new set of linear
+However our previous analysis is based on
+$\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
+$\hatm(\eta_i)$ the estimated map at $\eta_i$.
+So We should update $\eta_i$ to $\eta_{i+1}$ when $\vbm \approx \hatm(\eta_i)$. 
+How do we know this condition is satisfied?
+Since for each new $\eta_i$ value, we are solving a new set of linear
 equations $A(\eta_i) \hatm = \vbb(\eta_i)$ with
 $A(\eta_i) = \Pdagger \inv{N(\eta_i)} P$ and 
 $\vbb(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
 and we could stop calculation and moving to next value $\eta_{i+1}$ when the 
 norm of residual 
 $\qty||\vb{r}(\eta_i)|| = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$
-smaller than some specific value.
-Since when doing conjugate gradient algorithm we calculate $\vb{r}$ and stop
-the iteration when $\qty||\vb{r}||$ is small enough, now after introducing
-parameter $\eta$, we move to next parameter $\eta_{i+1}$ when 
-$\qty||\vb{r}(\eta_i)||$ is small enough.
-Again, this won't add extra cost compare to vanilla conjugate gradient method.
-
-Therefore we find that the only significant cost after adding perturbation
-parameter $\eta$, is to to find out $\vb{b}(\eta_i)$ for each $\eta_i\neq1$
-before starting the iterations.
-And this is one time calculation, it's negligible compare to remaining
-calculations.
+smaller than some small value.
+%Since when doing conjugate gradient algorithm we calculate $\vb{r}$ and stop
+%the iteration when $\qty||\vb{r}||$ is small enough, now after introducing
+%parameter $\eta$, we move to next parameter $\eta_{i+1}$ when 
+%$\qty||\vb{r}(\eta_i)||$ is small enough.
+Calculate $\qty||\vb{r}(\eta_i)||$ is part of conjugate gradient algorithm,
+so this won't add extra cost compare to vanilla conjugate gradient method.
+Therefore, overall introducing $\eta$ won't have extra computational cost.
 
 
 
@@ -921,30 +929,29 @@ calculations.
 
 \section{Numerical Simulations}
 To compare these algorithms, we need to do some simple simulation of scanning
-process, and generate time ordered data from random sky signal.
+processes, and generate time ordered data from random sky signal.
 Our sky is a small rectangular area, with two orthogonal directions $x$ and
 $y$, both with range from $-1\degree$ to $+1\degree$.
-The electromagnetic signal is described as four stokes parameters
-$(S_0, S_1, S_2, S_3) = (I,Q,U,V)$.
-We model the overall electromagnetic signal is created by some normal
-distributed sources in the sky, with intensity $I_i (x,y)
-= A_i \exp\qty(-\frac{1}{2} \frac{(x-x_{i})^2 + (y-y_{i})^2}{\sigma_i^2})$,
-for each source centered at $(x_i,y_i)$.
-In our simulation, $A_i \sim \text{Unif} (-100, 100)$,
-$\sigma_i \sim \text{Unif}(0.05\degree, 0.2\degree)$ 
-and the center of each source
-$x_i, y_i \sim \text{Unif}(-1\degree, +1\degree)$.
-Every source has its degree of polarization $p_i \sim \text{Unif}(0,1)$ and 
-polarization angle $\psi_i \sim \text{Unif}(0,\pi)$.
-Here we ignored angle $\chi_i$, because our detectors won't be sensitive to
-circular polarization.
-Finally, the stokes parameters over sky is given by
-$S_0(x,y) = \sum_i I_i(x,y)$, $S_1(x,y) = \sum_i I_i(x,y) p_i \cos(2\psi_i)$,
-$S_2(x,y) = \sum_i I_i(x,y) p_i \sin(2\psi_i)$.
-Again, we ignored $S_3$, because it describes circular polarization.
+The signal has first three stokes parameters $(I,Q,U)$.
+%We model the overall electromagnetic signal is created by some normal
+%distributed sources in the sky, with intensity $I_i (x,y)
+%= A_i \exp\qty(-\frac{1}{2} \frac{(x-x_{i})^2 + (y-y_{i})^2}{\sigma_i^2})$,
+%for each source centered at $(x_i,y_i)$.
+%In our simulation, $A_i \sim \text{Unif} (-100, 100)$,
+%$\sigma_i \sim \text{Unif}(0.05\degree, 0.2\degree)$ 
+%and the center of each source
+%$x_i, y_i \sim \text{Unif}(-1\degree, +1\degree)$.
+%Every source has its degree of polarization $p_i \sim \text{Unif}(0,1)$ and 
+%polarization angle $\psi_i \sim \text{Unif}(0,\pi)$.
+%Here we ignored angle $\chi_i$, because our detectors won't be sensitive to
+%circular polarization.
+%Finally, the stokes parameters over sky is given by
+%$S_0(x,y) = \sum_i I_i(x,y)$, $S_1(x,y) = \sum_i I_i(x,y) p_i \cos(2\psi_i)$,
+%$S_2(x,y) = \sum_i I_i(x,y) p_i \sin(2\psi_i)$.
+%Again, we ignored $S_3$, because it describes circular polarization.
 
 For the scanning process, our single telescope contains nine detectors,
-each has different sensitivity to polarization $S_1$ and $S_2$.
+each has different sensitivity to polarization $Q$ and $U$.
 It scans the sky with a raster scanning pattern and scanning frequency
 $f_{\text{scan}} = 0.1$ Hz sampling frequency $f_{\text{sample}} = 100$ Hz.
 The telescope scans the sky horizontally and then vertically,
@@ -975,25 +982,27 @@ adding up signal and noise.
 \section{Results}
 First let's compare the results with vanilla conjugate gradient method with
 simple preconditioner $\Pdagger P$.
-The results are showed in Figure (\ref{small condi num CG}) for different kinds
+The results are showed in Figure.(\ref{small condi num CG}) for different kinds
 of noise power spectra.
-Here note that $\chi^2$ in Figure (\ref{small condi num chi2 CG}) is calculated
-based on Eq.(\ref{chi2 formula})
-\begin{align}
-\chi^2(\vbm) = (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm)
-\tag{\ref{chi2 formula}}
-\end{align}
+Here note that $\chi^2$ in all figures are calculated based on
+Eq.(\ref{chi2 formula})
+%\begin{align}
+%\chi^2(\vbm) = (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm)
+%\tag{\ref{chi2 formula}}
+%\end{align}
 not $\chi^2(\vbm, \eta)$ in Eq.(\ref{chi2 eta formula}).
-The $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
+The $\chi^2_{\text{final}}$ is calculated from perturbative conjugate gradient
 method with more intermediate $\eta$ values, and more iterations after
 $\eta=1$.
 
-As we can see in Figure(\ref{small condi num chi2 CG}), if the condition number
-of noise covariance matrix $\kappa(N)$ is small, and the noise is almost white
-noise, the performance between different these two methods is small.  The vanilla conjugate gradient method converge faster, because its perturbation
-parameter $\eta_{i}=\{0,1,1,\cdots\}$, however for the perturbation method its
-$\eta$ value will slowly reach $1$ in first few iterations as we can see in
-Figure(\ref{small condi num eta CG}).
+As we can see in the center graph in Figure(\ref{small condi num CG}),
+if the condition number of noise covariance matrix $\kappa(N)$ is small,
+and the noise is almost white noise,
+the performance between different these two methods is small.
+The vanilla conjugate gradient method converge faster, because its perturbation
+parameter goes to $1$ at the first iteration, however for the perturbation method its
+$\eta$ value will slowly reach $1$ in few iterations as we can see in
+the third graph in Figure(\ref{small condi num CG}).
 
 \begin{figure*}[htb!]
 \centering
@@ -1018,7 +1027,7 @@ benefits, as showed in Figure(\ref{medium condi num CG}) and
 Figure(\ref{large condi num CG}).
 It outperforms the vanilla conjugate gradient method when 
 $f_{\text{apo}} \approx 0$ and the noise power spectrum becomes the $1/f$ noise model,
-which usually is the intrinsic noise of instruments\cite{1997PhRvD..56.4514T}.
+which usually is the intrinsic noise of instruments (\cite{1997PhRvD..56.4514T}).
 \begin{figure*}[htb!]
 \centering
 \includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
@@ -1041,32 +1050,32 @@ which usually is the intrinsic noise of instruments\cite{1997PhRvD..56.4514T}.
 \label{large condi num CG}
 \end{figure*}
 
-In the conjugate gradient method with messenger cooling parameter $\lambda$, 
-the number of cooling parameters we need is an extra free parameter.
-After the number of $\lambda$ is determined, we construct a geometric series
-with fixed initial and final value, which uses \texttt{logspace}
-function in \texttt{numpy}.
-Since I  show in Eq.(\ref{lambda eta equiv}) that the messenger field
-cooling parameter $\lambda$ is equivalent to $1/\eta$, I use $\eta$ for further analysis.
+%In the conjugate gradient method with messenger cooling parameter $\lambda$, 
+%the number of cooling parameters we need is an extra free parameter.
+%After the number of $\lambda$ is determined, we construct a geometric series
+%with fixed initial and final value, which uses \texttt{logspace}
+%function in \texttt{numpy}.
+%Since I  show in Eq.(\ref{lambda eta equiv}) that the messenger field
+%cooling parameter $\lambda$ is equivalent to $1/\eta$, I use $\eta$ for further analysis.
 
 Now let us compare the performance difference between choosing $\eta$
 parameters based on Eq.(\ref{etai rule})
-and fixing number of $\eta$ parameters $n_{\eta}$ manually.
-Here we choose the $\eta_i$ values using function
+and manually fixing number of $\eta$ parameters $n_{\eta}$ manually.
+We manually choose the $\eta_i$ values using function
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
 The results are showed in Figure(\ref{small condi num}),
 (\ref{medium condi num}), and (\ref{large condi num}).
 
 When $\kappa(N)$ is small, and Eq.(\ref{etai rule}) tells us that only a few
-$\eta$ parameters are good enough, see Figure(\ref{small condi num chi2}).
+$\eta$ parameters are good enough, see the orange line in the last Figure(\ref{small condi num}).
 If unfortunately we choose $n_{\eta}$ being large value, like $15$ or $30$,
 then it will ends up converge slowly, because it needs at least $15$ or $30$
 iterations to reach $\eta=1$, at least one iteration per $\eta$ level.
 
 On the other hand if $\kappa(N)$ is very large and the power spectrum is $1/f$
 noise, we need more $\eta$ parameters.
-If $n_{\eta}$ is too small, for example $n_{\eta}=5$ in
-Figure(\ref{large condi num chi2}), it may be better than the vanilla conjugate
+If $n_{\eta}$ is too small, for example $n_{\eta}=5$ the red line in
+Figure(\ref{large condi num}), it may be better than the vanilla conjugate
 gradient method, but it is still far from optimal.
 
 
@@ -1104,20 +1113,21 @@ gradient method, but it is still far from optimal.
 \label{large condi num}
 \end{figure*}
 
-\section{Possible improvements}
+\section{Future Prospects and Conclusion}
 As you may have noticed in Figure(\ref{medium condi num})
 and Figure(\ref{large condi num}), the perturbation parameter based on
 Eq.(\ref{etai rule}) is more than needed, especially for $1/f$ noise case.
-From Figure(\ref{large condi num eta}) we know that Eq.(\ref{etai rule}) gives
-us $n_{\eta}\approx40$, however based on $\chi^2$ result in 
-Figure(\ref{large condi num chi2}), we notice that $n_{\eta}\approx30$ or 
-even $n_{\eta} \approx 15$ is good enough.
+From the last graph in Figure(\ref{large condi num}) we notice that
+Eq.(\ref{etai rule}) gives us $n_{\eta}\approx40$, however based on $\chi^2$
+result in Figure(\ref{large condi num}) 
+$n_{\eta}\approx30$ or even $n_{\eta} \approx 15$ is good enough.
 Also, for the nearly-white-noise case, we could certainly choose $n_{\eta}=1$
 such that $\eta_1=1$ which corresponds to vanilla conjugate gradient method,
-based on $\chi^2$ result in Figure(\ref{small condi num chi2}).
+based on $\chi^2$ result in Figure(\ref{small condi num}).
 However Eq.(\ref{etai rule}) gives us $n_{\eta} \approx 6$,
-see Figure(\ref{small condi num eta}), even though it does not make the final 
-$\chi^2$ result much different at the end.
+see the last last graph in Figure(\ref{small condi num}),
+even though it does not make the final $\chi^2$ result much different at the
+end.
 
 Is it possible to further improve the analysis, such that it produces
 smaller $n_{\eta}$?
@@ -1125,36 +1135,36 @@ Let's examine how we get $\eta_i$ series.
 Remember that we determine $\delta\eta$ value based on the upper bound of 
 $-\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$, in
 Eq.(\ref{eta upper bound}).
-Here I rewrite it in a simplified form
+For $\eta \neq 0$, the upper bound is
+%Here I rewrite it in a simplified form
 \begin{align}
-\begin{aligned}[b]
--\frac{\delta\chi^2(\hatm(\eta), \eta)}{\chi^2(\hatm(\eta), \eta)}
-%= -\delta\eta
-%    \frac{\dv{\eta} \chi^2(\hatm(\eta), \eta)}
-%    {\chi^2(\hatm(\eta), \eta)}
-&= \delta\eta \frac{\hat{\vb{r}}_{\eta}^{\dagger} \inv{N}_{\eta} \Nbar 
-    \inv{N}_{\eta} \hat{\vb{r}}_{\eta} }
-    {\hat{\vb{r}}_{\eta}^{\dagger} \inv{N}_{\eta} \hat{\vb{r}}_{\eta} }
-\\
-&\leq  \frac{\delta \eta}{\eta + \frac{\tau}{\max(N_f) -\tau}}
-\end{aligned}
+%-\frac{\delta\chi^2(\hatm(\eta), \eta)}{\chi^2(\hatm(\eta), \eta)}
+%%= -\delta\eta
+%%    \frac{\dv{\eta} \chi^2(\hatm(\eta), \eta)}
+%%    {\chi^2(\hatm(\eta), \eta)}
+\delta\eta \frac{\hat{\vb{r}}_{\eta}^{\dagger} \inv{N(\eta)} \Nbar 
+    \inv{N(\eta)} \hat{\vb{r}}_{\eta} }
+    {\hat{\vb{r}}_{\eta}^{\dagger} \inv{N(\eta)} \hat{\vb{r}}_{\eta} }
+%\\
+\leq  \frac{\delta \eta}{\eta + \frac{\tau}{\max(N_f) -\tau}}
 \end{align}
 with
-$\vb{r}_{\eta} = \vbd - P\hatm(\eta) 
-= \qty[ 1 - P\PPinv{\inv{N_{\eta}}}\Pdagger \inv{N_{\eta}}]\vbd
-\equiv \mathcal{P}_{\eta} \vbd$.
-We treated $\vb{r}_{\eta}$ as an arbitrary 
+$
+\vb{r}_{\eta} %= \vbd - P\hatm(\eta) 
+= \qty[ 1 - P\PPinv{\inv{N(\eta)}}\Pdagger \inv{N(\eta)}]\vbd
+\equiv \mathcal{P}_{\eta} \vbd
+$.
+To get the upper bound we treated $\vbd - P\hatm(\eta)$ as an arbitrary 
 vector in frequency domain, since we don't know how to calculate 
 $\mathcal{P}_{\eta}$ for $\eta \neq 0$, and it's hard to 
 analyze the projection matrix $\mathcal{P}_{\eta}$ in frequency space,
-as it contains $\PPinv{\inv{N_{\eta}}}$.
+as it contains $\PPinv{\inv{N(\eta)}}$.
 Note that we have to determine all of $\eta$ value before calculation, 
 because we don't want to keep the time ordered data in system RAM,
 so we need to somehow analytically analyze $\mathcal{P}_{\eta}$, and its behavior
 in frequency space.
-
 Unless $\vb{r}_{\eta}$ almost only has large noise modes,
-$\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)$
+$\qty|\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)|$
 won't get close to the upper bound
 $1/\qty(\eta + \frac{\tau}{\max(N_f) -\tau})$.
 Based on the analysis in Section(\ref{intuitive interp}),
@@ -1164,91 +1174,101 @@ So we would expect that there would be a fair amount of low noise modes
 contribution in $\vb{r}_{\eta}$ especially for the first few $\eta$ values.
 Which means if we could somehow know the frequency distribution of 
 $\vb{r}_{\eta}$, we could tighten the boundary of
-$\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)$,
+$\qty|\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)|$,
 and get larger $\delta\eta$ value.
 This should make $\eta$ goes to $1$ faster, and yields the fewer $\eta$ parameters 
 we need.
 
 Also notice that the $\eta$ values determined from Eq.(\ref{etai rule})
-\begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
-\tag{\ref{etai rule}}
-\end{align}
+%\begin{align}
+%\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
+%\tag{\ref{etai rule}}
+%\end{align}
 are not dependent on any scanning information,
 it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
+In appendix we would show 
+%Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
 two examples with same parameters as in Figure(\ref{large condi num}) except 
-scanning frequency $f_{\text{scan}}$, in Figure(\ref{large condi num 0.001}) it
-scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
-In these two cases our $\eta$ values based on Eq.(\ref{etai rule}) are better
-than manually selected values.
-Based on these two results we know, the $\eta$ values should somehow depends
+scanning frequency $f_{\text{scan}}$.%, in Figure(\ref{large condi num 0.001}) it
+%scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
+%In these two cases our $\eta$ values based on Eq.(\ref{etai rule}) are better
+%than manually selected values.
+%Based on these two results we know,
+It turns out the $\eta$ values should somehow depends
 on scanning scheme.
-Again that's because when we determine the upper bound of 
-$\dv{\eta} \chi^2(\hatm(\eta), \eta)$ we treat
-$\vb{r}_{\eta} = \vbd - P\hatm = \mathcal{P}_{\eta} \vbd$
+Again that's because when we determine the upper bound% of 
+%$\dv{\eta} \chi^2(\hatm(\eta), \eta)$
+we treated
+$\vb{r}_{\eta}$ % = \vbd - P\hatm = \mathcal{P}_{\eta} \vbd$
 as an arbitrary vector, such that we lose all information related to scanning 
 scheme in the pointing matrix $P$.
 
 
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
-\caption{In this case all frequencies are the same as
-    Figure(\ref{large condi num}) except $f_{\text{scan}} = 0.001$.
-}
-\label{large condi num 0.001}
-\end{figure*}
+%\begin{figure*}[htb!]
+%\centering
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
+%\caption{In this case all frequencies are the same as
+%    Figure(\ref{large condi num}) except $f_{\text{scan}} = 0.001$.
+%}
+%\label{large condi num 0.001}
+%\end{figure*}
+%
+%\begin{figure*}[htb!]
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
+%\caption{In this case all frequencies are the same as
+%    Figure(\ref{large condi num}) except $f_{\text{scan}} = 10$.
+%}
+%\label{large condi num 10}
+%\end{figure*}
 
-\begin{figure*}[htb!]
-\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
-\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
-\caption{In this case all frequencies are the same as
-    Figure(\ref{large condi num}) except $f_{\text{scan}} = 10$.
-}
-\label{large condi num 10}
-\end{figure*}
 
 
+%\section{Conclusion}
+%Here we discussed a method to solve map making equation
+%Eq.(\ref{map making equation})
+%\begin{align}
+%\hatm = \PPinv{N} \Pdagger \inv{N} \vbd \tag{\ref{map making equation}}
+%\end{align}
+%by separating noise covariance matrix $N$ into two parts, white noise part
+%$\tau I$ and the remaining noise $\Nbar$.
+%Then we could think $\Nbar$ as a perturbation added to white noise, 
+%by introducing a parameter $\eta$, as $\eta$ change from $0$ to $1$,
+%we gradually add this non white noise in to system.
+%
+%The $\eta$ values can be predetermined analytically.
+%This property is very important, because we don't want to keep entire time
+%ordered data in system RAM.
+%If these $\eta$ values can be determined before calculation, then we only need
+%to keep several map sized object, which is much smaller than timed ordered 
+%data.
+%Also we showed that this method has same computational cost as vanilla
+%conjugate gradient method but performs better when the condition number of 
+%noise covariance matrix $\kappa(N)$ is large, especially in $1/f$ noise case.
+%The only extra free parameter added is to determine whether the error at
+%current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
+%enough such that we change advance to next value $\eta_{i+1}$.
 
-\section{Conclusion}
-Here we discussed a method to solve map making equation
-Eq.(\ref{map making equation})
-\begin{align}
-\hatm = \PPinv{N} \Pdagger \inv{N} \vbd \tag{\ref{map making equation}}
-\end{align}
-by separating noise covariance matrix $N$ into two parts, white noise part
-$\tau I$ and the remaining noise $\Nbar$.
-Then we could think $\Nbar$ as a perturbation added to white noise, 
-by introducing a parameter $\eta$, as $\eta$ change from $0$ to $1$,
-we gradually add this non white noise in to system.
-
-The $\eta$ values can be predetermined analytically.
-This property is very important, because we don't want to keep entire time
-ordered data in system RAM.
-If these $\eta$ values can be determined before calculation, then we only need
-to keep several map sized object, which is much smaller than timed ordered 
-data.
-Also we showed that this method has same computational cost as vanilla
-conjugate gradient method but performs better when the condition number of 
-noise covariance matrix $\kappa(N)$ is large, especially in $1/f$ noise case.
+Even though the perturbation parameter $\eta$ get from Eq.(\ref{etai rule}) are
+not the most optimal,
+it still performs much better than traditional conjugate gradient method under
+$1/f$ noise scenario without adding extra computational cost.
 The only extra free parameter added is to determine whether the error at
 current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
-enough such that we change advance to next value $\eta_{i+1}$.
+enough such that we advance to next value $\eta_{i+1}$.
+%Since it only takes in to account the noise information in $N$,
+%but ignored all scanning information contained in pointing matrix $P$, because
+%we are unable to analyze the structure of
+%$\vb{r}_{\eta} = \vbd - P\hatm(\eta) = \mathcal{P}_{\eta} \vbd$ in frequency
+%space.
 
-The perturbation parameter $\eta$ get from Eq.(\ref{etai rule}) are not
-perfect. Since it only takes in to account the noise information in $N$,
-but ignored all scanning information contained in pointing matrix $P$, because
-we are unable to analyze the structure of
-$\vb{r}_{\eta} = \vbd - P\hatm(\eta) = \mathcal{P}_{\eta} \vbd$ in frequency
-space.
 
-The analysis of $\eta$ value also explains why cooling parameters
+Also this analysis of $\eta$ value also explains why cooling parameters
 $\lambda=1/\eta$ in messenger field are chosen to be geometric series or
-\texttt{logspace} \cite{Huffenberger_2018}.
+\texttt{logspace} used in \cite{Huffenberger_2018}.
 
 All of the calculation are using simple preconditioner $\Pdagger P$, but 
 the entire analysis is independent of preconditioner.
