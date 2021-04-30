@@ -194,7 +194,9 @@
 %\title{Template aastex Article with Examples: 
 %v6.31\footnote{Released on March, 1st, 2021}}
 \title{Perturbative Approach to Solve the Map-Making Equation}
-
+\footnote{
+The source code and other information are available at \url{https://github.com/Bai-Qiang/map_making_perturbative_approach}
+}
 %% LaTeX will automatically break titles if they run longer than
 %% one line. However, you may use \\ to force a line break if
 %% you desire. In v6.31 you can include a footnote in the title.
@@ -313,13 +315,14 @@
 %abstract\footnote{Abstracts for Research Notes of the American Astronomical 
 %Society (RNAAS) are limited to 150 words}.  If you exceed this length the
 %Editorial office will ask you to shorten it. This abstract has 182 words.
-We present a method to solve map-making equation by reinterpreate messenger field method
+We present a method to solve map-making equation by reinterpret messenger field method
 and using conjugate gradient algorithm.
 We separating noise covariance matrix $N$ into two parts, white noise part
 and the remaining noise part as perturbation, with perturbation parameter $\eta$.
 Then we give an analytical expression for $\eta$, and show that it won't 
 introduce extra computational cost compare to traditional conjugate gradient method,
 but give better result for $1/f$ frequency model.
+
 
 
 \end{abstract}
@@ -870,21 +873,21 @@ frequency equally.
 Then as $\eta$ slowly increases, it gradually shifts focus to low noise
 part.
 
-%If we write the difference between final and initial $\chi^2$ value as
-%$\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}
-%\dv{\eta} \chi^2(\hatm(\eta),\eta)$,
-%and use Eq.(\ref{d chi2}).
-%%\begin{align}
-%%\dv{\eta} \chi^2(\hatm(\eta), \eta) 
-%%&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta} 
-%%    (\vbd - P\hatm(\eta)) \tag{\ref{d chi2}}
-%%\end{align}
-%We note that when $\eta$ is very small, 
-%the $\dv{\eta}\chi^2(\hatm(\eta),\eta)$ would have relatively large
-%contribution from medium to large noise region, comparing to large $\eta$.
-%So introducing $\eta$ might improve the convergence of $\chi^2$ at these
-%regions, because the vanilla conjugate gradient method only focuses on the low noise
-%part and it may have difficulty at these regions.
+If we write the difference between final and initial $\chi^2$ value as
+$\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}
+\dv{\eta} \chi^2(\hatm(\eta),\eta)$,
+and use Eq.(\ref{d chi2}).
+%\begin{align}
+%\dv{\eta} \chi^2(\hatm(\eta), \eta) 
+%&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta} 
+%    (\vbd - P\hatm(\eta)) \tag{\ref{d chi2}}
+%\end{align}
+We note that when $\eta$ is very small, 
+the $\dv{\eta}\chi^2(\hatm(\eta),\eta)$ would have relatively large
+contribution from medium to large noise region, comparing to large $\eta$.
+So introducing $\eta$ might improve the convergence of $\chi^2$ at these
+regions, because the vanilla conjugate gradient method only focuses on the low noise
+part and it may have difficulty at these regions.
 
 
 \subsection{Computational Cost}
