@@ -313,7 +313,14 @@
 %abstract\footnote{Abstracts for Research Notes of the American Astronomical 
 %Society (RNAAS) are limited to 150 words}.  If you exceed this length the
 %Editorial office will ask you to shorten it. This abstract has 182 words.
-Some abstract
+We present a method to solve map-making equation by reinterpreate messenger field method
+and using conjugate gradient algorithm.
+We separating noise covariance matrix $N$ into two parts, white noise part
+and the remaining noise part as perturbation, with perturbation parameter $\eta$.
+Then we give an analytical expression for $\eta$, and show that it won't 
+introduce extra computational cost compare to traditional conjugate gradient method,
+but give better result for $1/f$ frequency model.
+
 
 \end{abstract}
 
@@ -489,7 +496,7 @@ Therefore messenger field is solving modified map making equation
 \Pdagger \inv{N(\lambda)}  P\ \hatm = \Pdagger \inv{N(\lambda)} \vbd
 \end{align}
 with preconditioner $M = \Pdagger P$.
-More detailed analysis could be found in \cite{2018A&A...620A..59P}.
+More detailed derivation could be found in \cite{2018A&A...620A..59P}.
 
 
 %\begin{align}
@@ -740,7 +747,8 @@ What about the other parameters $\eta_m$ with $m > 1$?
 We could use a similar analysis,
 let $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m$,
 and set the upper bound of relative decrease equal to 1.
-And we would get
+See Appendix \ref{derive other etas} for detailed derivation.
+We would get
 %\begin{align}
 %\begin{aligned}[b]
 %&-\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
@@ -862,7 +870,6 @@ frequency equally.
 Then as $\eta$ slowly increases, it gradually shifts focus to low noise
 part.
 
-% ADD TO APPENDIX
 %If we write the difference between final and initial $\chi^2$ value as
 %$\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}
 %\dv{\eta} \chi^2(\hatm(\eta),\eta)$,
@@ -1186,7 +1193,7 @@ Also notice that the $\eta$ values determined from Eq.(\ref{etai rule})
 %\end{align}
 are not dependent on any scanning information,
 it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-In appendix we would show 
+In Appendix \ref{other cases} we would show 
 %Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
 two examples with same parameters as in Figure(\ref{large condi num}) except 
 scanning frequency $f_{\text{scan}}$.%, in Figure(\ref{large condi num 0.001}) it
@@ -1329,7 +1336,135 @@ Using better preconditioners, it would also have improvements.
 %% command and will number appendix equations (A1), (A2), etc. The
 %% Figure and Table counter will not reset.
 
+\vspace{5mm}
 \appendix
+
+\section{Upper bound for $\eta$} \label{derive other etas}
+We want to find the upper bound for 
+$
+-\frac{\delta \chi^2(\hatm(\eta_m),\eta_m)} {\chi^2(\hatm(\eta_m), \eta_m)}
+$
+First let's calculate $\dv{\eta} \chi^2(\hatm(\eta), \eta)$
+\begin{align}
+\begin{aligned}[b]
+\dv{\eta} \chi^2(\hatm(\eta), \eta)  &= \pdv{\eta} \chi^2(\hatm(\eta), \eta) \\
+&= \pdv{\eta} \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{N(\eta)} 
+    \qty\big(\vbd - P\hatm(\eta))\\
+&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{N(\eta)} \Nbar \inv{N(\eta)} 
+    (\vbd - P\hatm(\eta))\\
+&= - \vb{r}^{\dagger}(\eta) \inv{N(\eta)} \Nbar \inv{N(\eta)} \vb{r}(\eta)
+\label{d chi2}.
+\end{aligned}
+\end{align}
+where the first line comes from, $\chi^2(\hatm(\eta),\eta)$ is minimum $\chi^2$
+value for certain $\eta$, therefore $\pdv{\vbm} \chi^2(\vbm, \eta) \Bigr|_{\vbm = \hatm(\eta)} = 0$.
+So the third line we only take partial derivative with respect to $\inv{N(\eta)}$.
+The last line we define $\vb{r}(\eta) =\vbd - P\hatm(\eta)$.
+
+The upper bound is given by
+\begin{align}
+\begin{aligned}[b]
+-\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
+&= \delta\eta_m
+\frac{\vb{r}^{\dagger}
+    \inv{N(\eta_m)} \Nbar \inv{N(\eta_m)}
+    \vb{r}
+}
+{ \vb{r}^{\dagger}
+    \inv{N(\eta_m)}
+    \vb{r}
+}
+\\
+& \leq \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
+%\label{eta upper bound}
+\end{aligned}
+\end{align}
+
+For the last line, both matrix $\Nbar$ and $\inv{N(\eta_m)}$ 
+can be simultaneously diagonalized in frequency space.
+For each eigenvector $\vb{e}_f$,
+the corresponding eigenvalues of the matrix 
+$\inv{N(\eta_m)} \Nbar \inv{N(\eta_m)}$
+are
+$\lambda_f = \Nbar_f (\tau + \eta_m \Nbar_f)^{-2}$,
+and the eigenvalues for matrix 
+$\inv{N(\eta_m)}$
+are
+$\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
+Their eigenvalues are related by
+$\lambda_f = \frac{\Nbar_f}{\tau + \eta_m \Nbar_f} \gamma_f$.
+For vector $\vb{r} = \sum_f \alpha_f \vb{e}_f$, we have
+$\frac{\vb{r}^{\dagger} \inv{N(\eta_m)} \Nbar \inv{N(\eta_m)} \vb{r}}
+{\vb{r}^{\dagger} \inv{N(\eta_m)} \vb{r}}
+= \frac{\sum_f \alpha_f^2 \lambda_f}{\sum_f \alpha_f^2 \gamma_f}
+= \frac{\sum_f \alpha_f^2 \gamma_f \Nbar_f/(\tau + \eta_m \Nbar_f)}
+{\sum_f \alpha_f^2 \gamma_f}
+\leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
+$.
+
+If we set the upper bound
+$\delta\eta_m \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})=1$,
+\footnote{Here we also assumed that
+$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
+which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
+Since final result Eq.(\ref{etai rule}) is geometric series,
+only a few $\eta_m$ values won't satisfy this condition.
+}
+and then we get
+\begin{align}
+\delta \eta_m 
+= \min \qty(\frac{\tau + \eta_m \Nbar_f}{\Nbar_f})
+= \eta_m + \frac{\tau }{\max(\Nbar_f)}.
+\end{align}
+
+\vspace{5mm}
+\section{Other Cases} \label{other cases}
+
+%Here we show two other results with different scaning frequency from Figure.(\ref{large condi num}),
+%but keep every other parameters sames.
+Since the $\eta$ values determined from Eq.(\ref{etai rule})
+\begin{align}
+\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
+\tag{\ref{etai rule}}
+\end{align}
+are not dependent on any scanning information,
+it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
+Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
+two examples with same parameters as in Figure(\ref{large condi num}) except 
+scanning frequency $f_{\text{scan}}$, in Figure(\ref{large condi num 0.001}) it
+scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
+In these two cases our $\eta$ values based on Eq.(\ref{etai rule}) are better
+than manually selected values.
+Based on these two results we know, the $\eta$ values should somehow depends
+on scanning scheme.
+
+\begin{figure*}[htb!]
+\centering
+\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
+\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
+\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
+\caption{In this case all frequencies are the same as
+    Figure(\ref{large condi num}) except $f_{\text{scan}} = 0.001$.
+}
+\label{large condi num 0.001}
+\end{figure*}
+
+\begin{figure*}[htb!]
+\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
+\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
+\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
+\caption{In this case all frequencies are the same as
+    Figure(\ref{large condi num}) except $f_{\text{scan}} = 10$.
+}
+\label{large condi num 10}
+\end{figure*}
+
+
+
+
+
+
+
 
 
 %% For this sample we use BibTeX plus aasjournals.bst to generate the
