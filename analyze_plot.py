@@ -103,6 +103,20 @@ for data_dic in  data_list:
             CG_PT_result = pickle.load(_file)
             results_list.append(CG_PT_result)
 
+    # MF iteration
+    for num_eta in num_eta_arr:
+        description_list.append(
+            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]
+        )
+        description_latex_list.append(
+            data_dic['MF_ln_{:d}_eta_description_latex'\
+                .format(num_eta)]
+        )
+        with open (data_dic['MF_ln_{:d}_eta_file'.format(num_eta)],
+                'rb') as _file:
+            MF_result = pickle.load(_file)
+            results_list.append(MF_result)
+
 
 
 

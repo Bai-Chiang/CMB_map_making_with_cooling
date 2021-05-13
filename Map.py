@@ -783,7 +783,7 @@ class Map:
 
 ### solvers
 
-    def conjugate_gradient_solve_map(self,
+    def conjugate_gradient_solver(self,
             num_iter,
             preconditioner_inv, 
             preconditioner_description,
@@ -958,12 +958,13 @@ class Map:
         return CG_file, CG_results
 
 
-    def messenger_field_solve_map(self,
+    def messenger_field_solver(self,
             lambs,
             num_iter_per_lamb,
             num_iter,
-            num_snapshots=2,
+            #num_snapshots=2,
             #stop_ratio=0,
+            #next_lamb_ratio = 1e-2,
             ):
         """
         messenger field solve map based on Huffenberger 2018: 
@@ -981,17 +982,7 @@ class Map:
                 --- number of iteration per lambda
             num_iter
                 --- int
-                --- maximum iteration >=  num_lamb * num_iter_per_lamb
-            num_snapshots
-                --- int >= 2
-                --- number of snapshots of map, r, Χ² per freq mode etc.
-            #stop_ratio
-            #    --- float
-            #    --- when the 2-norm of the residual ratio
-            #        ||r||₂ / ||r0||₂ < stop_ratio the iteration stops
-            #        and stopping point is stored in 
-            #        CG_result['stop_point'], the results after 
-            #        stop poinint will be the value at stop point.
+                --- number of iteration
         return:
             MF_file
                 --- pathlib.Path
@@ -1000,35 +991,35 @@ class Map:
                 --- dictionary {}, with keys:
                     [
                         'chi2_hist',
+                        'chi2_eta_hist',
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
                         'chi2_f_hist',
-                        'snapshots_index',
-                        #'stop_point',
+                        'etas_iter',
+                        'etas',
                         ]
         """
         assert isinstance(num_iter_per_lamb, int)
-        assert isinstance(num_snapshots, int) and num_snapshots >= 2
+        #assert isinstance(num_snapshots, int) and num_snapshots >= 2
         assert isinstance(num_iter, int)
         assert num_iter >= len(lambs) * num_iter_per_lamb
         MF_info = str([
             lambs,
             num_iter_per_lamb,
             num_iter,
-            num_snapshots,
-            stop_ratio
             ]).encode()
         MF_hash = hashlib.md5(MF_info).hexdigest()
-        MF_file_name = ('MF cooling={:d}x{:d} num_iter={:d} λ0={:.5g} '
-            'num_snapshots={:d} {}').format(
+        MF_file_name = (
+            'MF method {:d}x{:d} num_iter={:d} {}'
+            ).format(
             len(lambs),
             num_iter_per_lamb,
             num_iter,
-            lambs[0],
             #stop_ratio,
-            num_snapshots,
-            MF_hash)
+            #num_snapshots,
+            MF_hash
+        )
         MF_file = self.map_dir/MF_file_name
 
         try:
@@ -1037,33 +1028,36 @@ class Map:
         except FileNotFoundError:
             num_pix_x = self.num_pix_x
             num_pix_y = self.num_pix_y
-            m_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3), 
+            m_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3), 
                 dtype=np.float32)
-            r_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3), 
+            r_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3), 
                 dtype=np.float32)
             chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
+            chi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
-            chi2_f_hist = np.zeros(shape=(num_snapshots, self.num_f), 
+            chi2_f_hist = np.zeros(shape=(2, self.num_f), 
                 dtype=np.float32)
-            snapshots_index = np.linspace(0, num_iter, num_snapshots, 
-                endpoint=True, dtype=int)
+            #snapshots_index = np.linspace(0, num_iter, num_snapshots, 
+            #    endpoint=True, dtype=int)
             #stop_point = num_iter + 1
+            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
 
-            print('MF cooling={:d}x{:d} num_iter={:d} λ0={:.5g}'.format(
-                len(lambs), num_iter_per_lamb, num_iter, lambs[0]))
+            print('MF num_iter={:d}'.format(num_iter))
             b = self.b
             A = self._A
             m = self.simple_binned_map.copy()
             r = b - A(m)
+            tau = np.min(self.N_f_diag)
+            Nbar_f = self.N_f_diag - tau
             chi2 = self.get_chi2(m)
             chi2_hist[0] = chi2
+            chi2_eta_hist[0] = self.get_chi2_eta(m, 0, tau, Nbar_f)
+            etas_iter[0] = 0
             r_2norm_hist[0] = r0_2norm = self._get_2norm(r)
             m_hist[0,:,:,:] = m
             r_hist[0,:,:,:] = r
             chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
-            i_snapshot = 0
-            tau = np.min(self.N_f_diag)
-            Nbar_f = self.N_f_diag - tau
+
             print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
             for i_iter in range(1, num_iter+1):
                 i_lamb = (i_iter-1)//num_iter_per_lamb
@@ -1071,6 +1065,7 @@ class Map:
                     lamb = lambs[i_lamb]
                 else:
                     lamb = 1
+                etas_iter[i_iter] = 1/lamb
                 Pm = self._P(m)
                 Pm_f = fft.rfft(Pm, axis=1)
                 m += tau * self._PTP_inv( self._PT( fft.irfft(
@@ -1080,36 +1075,47 @@ class Map:
                 r = b - A(m)
                 chi2 = self.get_chi2(m)
                 chi2_hist[i_iter] = chi2
+                chi2_eta = self.get_chi2_eta(m, 1/lamb, tau, Nbar_f)
+                chi2_eta_hist[i_iter] = chi2_eta
                 r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r)
                 ratio_2norm = r_2norm/r0_2norm
-                if i_iter in snapshots_index:
-                    i_snapshot += 1
-                    m_hist[i_snapshot,:,:,:] = m
-                    r_hist[i_snapshot,:,:,:] = r
-                    chi2_f_hist[i_snapshot,:] = self.get_chi2(m,
-                        freq_mode=True)
+                #if i_iter in snapshots_index:
+                #    i_snapshot += 1
+                #    m_hist[i_snapshot,:,:,:] = m
+                #    r_hist[i_snapshot,:,:,:] = r
+                #    chi2_f_hist[i_snapshot,:] = self.get_chi2(m,
+                #        freq_mode=True)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'\
                     .format(i_iter, chi2, ratio_2norm))
-                if (ratio_2norm < 1e-5/(num_pix_x*num_pix_y) 
+                if (ratio_2norm/(num_pix_x*num_pix_y) < 1e-10
                         and i_iter != num_iter):
-                    # stop calculation if norm per pixel is smaller than 1e-5
+                    # stop calculation if norm per pixel is smaller than 1e-10
                     stop_point = i_iter
                     chi2_hist[stop_point:] = chi2
+                    chi2_eta_hist[stop_point:] = chi2_eta
                     r_2norm_hist[stop_point:] = r_2norm
-                    i_snapshot += 1
-                    m_hist[i_snapshot:,:,:,:] = m
-                    r_hist[i_snapshot:,:,:,:] = r
-                    chi2_f_hist[i_snapshot:,:] = chi2_f_hist[i_snapshot-1,:]
+                    lambs_iter[stop_point:] = lamb 
+                    #i_snapshot += 1
+                    #m_hist[i_snapshot:,:,:,:] = m
+                    #r_hist[i_snapshot:,:,:,:] = r
+                    #chi2_f_hist[i_snapshot:,:] = chi2_f_hist[i_snapshot-1,:]
                     break
+
+            m_hist[1,:,:,:] = m
+            r_hist[1,:,:,:] = r
+            chi2_f_hist[1,:] = self.get_chi2(m, freq_mode=True)
 
             MF_results = {}
             MF_results['chi2_hist'] = chi2_hist
+            MF_results['chi2_eta_hist'] = chi2_eta_hist
             MF_results['m_hist'] = m_hist
             MF_results['r_hist'] = r_hist
             MF_results['r_2norm_hist'] = r_2norm_hist
             MF_results['chi2_f_hist'] = chi2_f_hist
-            MF_results['snapshots_index'] = snapshots_index
+            #MF_results['snapshots_index'] = snapshots_index
             #MF_results['stop_point'] = stop_point
+            MF_results['etas_iter'] = etas_iter
+            MF_results['etas'] = 1/lambs
             with open(MF_file, 'wb') as _file:
                 pickle.dump(MF_results, _file)
         return MF_file, MF_results
@@ -1321,232 +1327,232 @@ class Map:
     #    return CG_file, CG_results
 
 
-    def conjugate_gradient_solver_perturbative_manual_eta(self,
-            etas,
-            num_iter_per_eta,
-            num_iter,
-            preconditioner_inv,
-            preconditioner_description,
-            num_snapshots=2,
-            #stop_ratio=0,
-            ):
-        """ 
-        solve map making equation with conjugate gradient method 
-        P.T N(η)^(-1) P m = P.T N(η)^(-1) d(η)  <==> A x = b 
-        where x = m, A(η) = P.T N(η)^(-1) P, b(η) = P.T N(η)^(-1) d
-        
-        N = Nbar + τI
-        with τ = min(diag(N)) in frequency space
+    #def conjugate_gradient_solver_perturbative_manual_eta(self,
+    #        etas,
+    #        num_iter_per_eta,
+    #        num_iter,
+    #        preconditioner_inv,
+    #        preconditioner_description,
+    #        num_snapshots=2,
+    #        #stop_ratio=0,
+    #        ):
+    #    """ 
+    #    solve map making equation with conjugate gradient method 
+    #    P.T N(η)^(-1) P m = P.T N(η)^(-1) d(η)  <==> A x = b 
+    #    where x = m, A(η) = P.T N(η)^(-1) P, b(η) = P.T N(η)^(-1) d
+    #    
+    #    N = Nbar + τI
+    #    with τ = min(diag(N)) in frequency space
 
-        and perterbative parameter η from 0 to 1
-        N(η) = η*Nbar + τI
-        A(η) = P.T N(η)^{-1} P
-        b(η) = P.T N(η)^{-1} d
+    #    and perterbative parameter η from 0 to 1
+    #    N(η) = η*Nbar + τI
+    #    A(η) = P.T N(η)^{-1} P
+    #    b(η) = P.T N(η)^{-1} d
 
-        the algorithm notation follows:
-        https://en.wikipedia.org/wiki/Conjugate_gradient_method
-        #The_preconditioned_conjugate_gradient_method
+    #    the algorithm notation follows:
+    #    https://en.wikipedia.org/wiki/Conjugate_gradient_method
+    #    #The_preconditioned_conjugate_gradient_method
 
-        args:
-            etas
-                --- np.array, etas[-1] = 1
-                --- values of cooling parameter η
-            num_iter_per_eta
-                --- int
-                --- number of iteration per eta
-            num_iter
-                --- int
-                --- number of iteration >= len(etas)*num_iter_per_eta
-            preconditioner_inv
-                --- function with input (m, η)
-                    map size object m and cooling parameter η
-                --- the inverse of preconditioner
-            preconditioner_description
-                --- description of preconditioner
-            num_snapshots
-                --- int >= 2
-                --- number of snapshots of map, r, Χ² per freq mode etc.
-                    e.g. 2 means store the initial and final resuls
-            #stop_ratio
-            #    --- float
-            #    --- when the 2-norm of the residual ratio
-            #        ||r||₂ / ||r0||₂ < stop_ratio the iteration stops
-            #        and stopping point is stored in 
-            #        CG_result['stop_point'], the results after stop 
-            #        point will be the value at stop point.
-        return:
-            CG_file
-                --- pathlib.Path
-                --- file of calculation results
-            CG_results
-                --- dictionary {}, with keys:
-                    [
-                        'chi2_hist',
-                        'chi2_eta_hist',
-                        'm_hist',
-                        'r_hist',
-                        'r_2norm_hist',
-                        'chi2_f_hist',
-                        'snapshots_index',
-                        #'stop_point',
-                        'etas_iter',
-                        ]
-        """
-        assert isinstance(num_iter_per_eta, int)
-        assert isinstance(num_snapshots, int) and num_snapshots >= 2
-        assert isinstance(num_iter, int)
-        assert etas[-1] == 1
-        assert num_iter >= len(etas) * num_iter_per_eta
-        random.seed(self.seed)
-        num_pix_x = self.num_pix_x
-        num_pix_y = self.num_pix_y
-        CG_info = str([
-            etas,
-            num_iter_per_eta,
-            num_iter, num_snapshots,
-            preconditioner_description,
-            #stop_ratio,
-            preconditioner_inv(
-                random.rand(num_pix_y, num_pix_x, 3),1) ]
-                ).encode()
-        CG_hash = hashlib.md5(CG_info).hexdigest()
-        CG_file_name = ('CG with perturbative noise {:d}x{:d} '
-            'preconditioner={} num_iter={:d} num_snapshots={:d} {}').format(
-            len(etas),
-            num_iter_per_eta,
-            preconditioner_description,
-            num_iter,
-            #stop_ratio,
-            num_snapshots,
-            CG_hash)
-        CG_file = self.map_dir/CG_file_name
+    #    args:
+    #        etas
+    #            --- np.array, etas[-1] = 1
+    #            --- values of cooling parameter η
+    #        num_iter_per_eta
+    #            --- int
+    #            --- number of iteration per eta
+    #        num_iter
+    #            --- int
+    #            --- number of iteration >= len(etas)*num_iter_per_eta
+    #        preconditioner_inv
+    #            --- function with input (m, η)
+    #                map size object m and cooling parameter η
+    #            --- the inverse of preconditioner
+    #        preconditioner_description
+    #            --- description of preconditioner
+    #        num_snapshots
+    #            --- int >= 2
+    #            --- number of snapshots of map, r, Χ² per freq mode etc.
+    #                e.g. 2 means store the initial and final resuls
+    #        #stop_ratio
+    #        #    --- float
+    #        #    --- when the 2-norm of the residual ratio
+    #        #        ||r||₂ / ||r0||₂ < stop_ratio the iteration stops
+    #        #        and stopping point is stored in 
+    #        #        CG_result['stop_point'], the results after stop 
+    #        #        point will be the value at stop point.
+    #    return:
+    #        CG_file
+    #            --- pathlib.Path
+    #            --- file of calculation results
+    #        CG_results
+    #            --- dictionary {}, with keys:
+    #                [
+    #                    'chi2_hist',
+    #                    'chi2_eta_hist',
+    #                    'm_hist',
+    #                    'r_hist',
+    #                    'r_2norm_hist',
+    #                    'chi2_f_hist',
+    #                    'snapshots_index',
+    #                    #'stop_point',
+    #                    'etas_iter',
+    #                    ]
+    #    """
+    #    assert isinstance(num_iter_per_eta, int)
+    #    assert isinstance(num_snapshots, int) and num_snapshots >= 2
+    #    assert isinstance(num_iter, int)
+    #    assert etas[-1] == 1
+    #    assert num_iter >= len(etas) * num_iter_per_eta
+    #    random.seed(self.seed)
+    #    num_pix_x = self.num_pix_x
+    #    num_pix_y = self.num_pix_y
+    #    CG_info = str([
+    #        etas,
+    #        num_iter_per_eta,
+    #        num_iter, num_snapshots,
+    #        preconditioner_description,
+    #        #stop_ratio,
+    #        preconditioner_inv(
+    #            random.rand(num_pix_y, num_pix_x, 3),1) ]
+    #            ).encode()
+    #    CG_hash = hashlib.md5(CG_info).hexdigest()
+    #    CG_file_name = ('CG with perturbative noise {:d}x{:d} '
+    #        'preconditioner={} num_iter={:d} num_snapshots={:d} {}').format(
+    #        len(etas),
+    #        num_iter_per_eta,
+    #        preconditioner_description,
+    #        num_iter,
+    #        #stop_ratio,
+    #        num_snapshots,
+    #        CG_hash)
+    #    CG_file = self.map_dir/CG_file_name
 
-        try:
-            with open(CG_file, 'rb') as _file:
-                CG_results = pickle.load(_file)
-        except FileNotFoundError:
-            m_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
-                dtype=np.float32)
-            r_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
-                dtype=np.float32)
-            chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
-            chi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
-            r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
-            chi2_f_hist = np.zeros(shape=(num_snapshots, self.num_f),
-                dtype=np.float32)
-            dchi2_f_hist = np.zeros(shape=(num_snapshots, self.num_f),
-                dtype=np.float32)
-            snapshots_index = np.linspace(0, num_iter, num_snapshots,
-                endpoint=True, dtype=int)
-            #stop_point = num_iter + 1
-            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
+    #    try:
+    #        with open(CG_file, 'rb') as _file:
+    #            CG_results = pickle.load(_file)
+    #    except FileNotFoundError:
+    #        m_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
+    #            dtype=np.float32)
+    #        r_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
+    #            dtype=np.float32)
+    #        chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
+    #        chi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
+    #        r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
+    #        chi2_f_hist = np.zeros(shape=(num_snapshots, self.num_f),
+    #            dtype=np.float32)
+    #        dchi2_f_hist = np.zeros(shape=(num_snapshots, self.num_f),
+    #            dtype=np.float32)
+    #        snapshots_index = np.linspace(0, num_iter, num_snapshots,
+    #            endpoint=True, dtype=int)
+    #        #stop_point = num_iter + 1
+    #        etas_iter = np.zeros(num_iter+1, dtype=np.float32)
 
-            print(('CG with perturbative noise {:d}x{:d} preconditioner={} '
-                'num_iter={:d}').format(
-                len(etas),
-                num_iter_per_eta,
-                preconditioner_description,
-                num_iter))
-            tau = np.min(self.N_f_diag)
-            Nbar_f = self.N_f_diag - tau
-            b = lambda eta: self._PT( fft.irfft(
-                self.tod_f/(eta*Nbar_f + tau),
-                axis=1))
-            def A(m, eta):
-                Pm = self._P(m)
-                Pm_f = fft.rfft(Pm)
-                return self._PT( fft.irfft(
-                    Pm_f/(eta*Nbar_f + tau),
-                    axis=1))
+    #        print(('CG with perturbative noise {:d}x{:d} preconditioner={} '
+    #            'num_iter={:d}').format(
+    #            len(etas),
+    #            num_iter_per_eta,
+    #            preconditioner_description,
+    #            num_iter))
+    #        tau = np.min(self.N_f_diag)
+    #        Nbar_f = self.N_f_diag - tau
+    #        b = lambda eta: self._PT( fft.irfft(
+    #            self.tod_f/(eta*Nbar_f + tau),
+    #            axis=1))
+    #        def A(m, eta):
+    #            Pm = self._P(m)
+    #            Pm_f = fft.rfft(Pm)
+    #            return self._PT( fft.irfft(
+    #                Pm_f/(eta*Nbar_f + tau),
+    #                axis=1))
 
-            # dot product in conjugate gradient algorithm
-            dot = lambda x,y: np.sum(x*y)
-                
-            # preconditioned algorithm for conjugate gradient method 
-            m = self.simple_binned_map.copy()
-            r_true = self.b - self._A(m)
-            chi2 = self.get_chi2(m)
-            chi2_hist[0] = chi2
-            chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
-            chi2_eta_hist[0] = chi2_eta
-            etas_iter[0] = 0
-            dchi2_f_hist[0,:] = self.get_dchi2_deta(m,
-                eta=0, tau=tau, Nbar_f=Nbar_f)
-            r_2norm_hist[0] = r0_2norm = self._get_2norm(r_true)
-            m_hist[0,:,:,:] = m
-            r_hist[0,:,:,:] = r_true
-            chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
-            i_snapshot = 0
-            print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
-            for i_iter in range(1, num_iter+1):
-                i_eta = (i_iter-1)//num_iter_per_eta
-                if i_eta < len(etas):
-                    eta = etas[i_eta]
-                    if (i_iter-1)%num_iter_per_eta == 0:
-                        r = b(eta) - A(m, eta)
-                        z = preconditioner_inv(r, eta)
-                        p = z.copy()
-                else:
-                    eta = 1
-                    #r = b(eta) - A(m, eta)
-                    #z = preconditioner_inv(r, eta)
-                    #p = z.copy()
+    #        # dot product in conjugate gradient algorithm
+    #        dot = lambda x,y: np.sum(x*y)
+    #            
+    #        # preconditioned algorithm for conjugate gradient method 
+    #        m = self.simple_binned_map.copy()
+    #        r_true = self.b - self._A(m)
+    #        chi2 = self.get_chi2(m)
+    #        chi2_hist[0] = chi2
+    #        chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
+    #        chi2_eta_hist[0] = chi2_eta
+    #        etas_iter[0] = 0
+    #        dchi2_f_hist[0,:] = self.get_dchi2_deta(m,
+    #            eta=0, tau=tau, Nbar_f=Nbar_f)
+    #        r_2norm_hist[0] = r0_2norm = self._get_2norm(r_true)
+    #        m_hist[0,:,:,:] = m
+    #        r_hist[0,:,:,:] = r_true
+    #        chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
+    #        i_snapshot = 0
+    #        print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
+    #        for i_iter in range(1, num_iter+1):
+    #            i_eta = (i_iter-1)//num_iter_per_eta
+    #            if i_eta < len(etas):
+    #                eta = etas[i_eta]
+    #                if (i_iter-1)%num_iter_per_eta == 0:
+    #                    r = b(eta) - A(m, eta)
+    #                    z = preconditioner_inv(r, eta)
+    #                    p = z.copy()
+    #            else:
+    #                eta = 1
+    #                #r = b(eta) - A(m, eta)
+    #                #z = preconditioner_inv(r, eta)
+    #                #p = z.copy()
 
-                alpha = dot(r,z) / dot(p, A(p, eta))
-                m += alpha * p
-                r_old = r.copy()
-                r -= alpha * A(p, eta)
-                z_old = z.copy()
-                z = preconditioner_inv(r, eta)
-                beta = dot(r,z) / dot(r_old,z_old)
-                p = z + beta * p
+    #            alpha = dot(r,z) / dot(p, A(p, eta))
+    #            m += alpha * p
+    #            r_old = r.copy()
+    #            r -= alpha * A(p, eta)
+    #            z_old = z.copy()
+    #            z = preconditioner_inv(r, eta)
+    #            beta = dot(r,z) / dot(r_old,z_old)
+    #            p = z + beta * p
 
-                chi2 = self.get_chi2(m)
-                chi2_hist[i_iter] = chi2
-                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
-                chi2_eta_hist[i_iter] = chi2_eta
-                etas_iter[i_iter] = eta
-                r_true = self.b - self._A(m)
-                r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
-                #ratio_2norm = r_2norm/r0_2norm
-                if i_iter in snapshots_index:
-                    i_snapshot += 1
-                    m_hist[i_snapshot,:,:,:] = m
-                    r_hist[i_snapshot,:,:,:] = r_true
-                    chi2_f_hist[i_snapshot,:] = self.get_chi2(m,
-                        freq_mode=True)
-                    dchi2_f_hist[i_snapshot,:] = self.get_dchi2_deta(m,
-                        eta, tau, Nbar_f)
-                print('iter={:<5d} η={:.5e}  Χ²={:.10e}'.format(
-                    i_iter, eta, chi2,))
-                if (r_2norm/(num_pix_x*num_pix_y) < 1e-10
-                        and i_iter != num_iter):
-                    # stop calculation if norm per pixel is smaller than 1e-10
-                    stop_point = i_iter
-                    chi2_hist[stop_point:] = chi2
-                    chi2_eta_hist[stop_point:] = chi2_eta
-                    etas_iter[stop_point:] = eta
-                    r_2norm_hist[stop_point:] = r_2norm
-                    i_snapshot += 1
-                    m_hist[i_snapshot:,:,:,:] = m
-                    r_hist[i_snapshot:,:,:,:] = r
-                    chi2_f_hist[i_snapshot:,:] = chi2_f_hist[i_snapshot-1,:]
-                    break
+    #            chi2 = self.get_chi2(m)
+    #            chi2_hist[i_iter] = chi2
+    #            chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+    #            chi2_eta_hist[i_iter] = chi2_eta
+    #            etas_iter[i_iter] = eta
+    #            r_true = self.b - self._A(m)
+    #            r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+    #            #ratio_2norm = r_2norm/r0_2norm
+    #            if i_iter in snapshots_index:
+    #                i_snapshot += 1
+    #                m_hist[i_snapshot,:,:,:] = m
+    #                r_hist[i_snapshot,:,:,:] = r_true
+    #                chi2_f_hist[i_snapshot,:] = self.get_chi2(m,
+    #                    freq_mode=True)
+    #                dchi2_f_hist[i_snapshot,:] = self.get_dchi2_deta(m,
+    #                    eta, tau, Nbar_f)
+    #            print('iter={:<5d} η={:.5e}  Χ²={:.10e}'.format(
+    #                i_iter, eta, chi2,))
+    #            if (r_2norm/(num_pix_x*num_pix_y) < 1e-10
+    #                    and i_iter != num_iter):
+    #                # stop calculation if norm per pixel is smaller than 1e-10
+    #                stop_point = i_iter
+    #                chi2_hist[stop_point:] = chi2
+    #                chi2_eta_hist[stop_point:] = chi2_eta
+    #                etas_iter[stop_point:] = eta
+    #                r_2norm_hist[stop_point:] = r_2norm
+    #                i_snapshot += 1
+    #                m_hist[i_snapshot:,:,:,:] = m
+    #                r_hist[i_snapshot:,:,:,:] = r
+    #                chi2_f_hist[i_snapshot:,:] = chi2_f_hist[i_snapshot-1,:]
+    #                break
 
-            CG_results = {}
-            CG_results['chi2_hist'] = chi2_hist
-            CG_results['chi2_eta_hist'] = chi2_eta_hist
-            CG_results['m_hist'] = m_hist
-            CG_results['r_hist'] = r_hist
-            CG_results['r_2norm_hist'] = r_2norm_hist
-            CG_results['chi2_f_hist'] = chi2_f_hist
-            CG_results['dchi2_f_hist'] = dchi2_f_hist
-            CG_results['snapshots_index'] = snapshots_index
-            #CG_results['stop_point'] = stop_point
-            CG_results['etas_iter'] = etas_iter
-            with open(CG_file, 'wb') as _file:
-                pickle.dump(CG_results, _file)
-        return CG_file, CG_results
+    #        CG_results = {}
+    #        CG_results['chi2_hist'] = chi2_hist
+    #        CG_results['chi2_eta_hist'] = chi2_eta_hist
+    #        CG_results['m_hist'] = m_hist
+    #        CG_results['r_hist'] = r_hist
+    #        CG_results['r_2norm_hist'] = r_2norm_hist
+    #        CG_results['chi2_f_hist'] = chi2_f_hist
+    #        CG_results['dchi2_f_hist'] = dchi2_f_hist
+    #        CG_results['snapshots_index'] = snapshots_index
+    #        #CG_results['stop_point'] = stop_point
+    #        CG_results['etas_iter'] = etas_iter
+    #        with open(CG_file, 'wb') as _file:
+    #            pickle.dump(CG_results, _file)
+    #    return CG_file, CG_results
 
 
     def conjugate_gradient_solver_perturbative_eta(self,
@@ -1580,7 +1586,7 @@ class Map:
         args:
             num_iter
                 --- int
-                --- number of iteration >= len(etas)*num_iter_per_eta
+                --- number of iteration
             preconditioner_inv
                 --- function with input (m, η)
                     map size object m and cooling parameter η
@@ -1618,9 +1624,8 @@ class Map:
                         'r_hist',
                         'r_2norm_hist',
                         'chi2_f_hist',
-                        'snapshots_index',
-                        #'stop_point',
                         'etas_iter',
+                        'etas',
                         ]
         """
         #assert isinstance(num_snapshots, int) and num_snapshots >= 2

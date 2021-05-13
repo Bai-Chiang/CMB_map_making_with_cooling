@@ -100,7 +100,7 @@ for f_scan in f_scan_list:
             'preconditioner=simple preconditioner').format(num_iter)
         CG_SP_description_latex = ('CG step={:d} '
             'preconditioner=$P^T P$').format(num_iter)
-        CG_SP_file,_ = _map.conjugate_gradient_solve_map(
+        CG_SP_file,_ = _map.conjugate_gradient_solver(
             num_iter,
             preconditioner_inv=_map.PTP_preconditioner,
             preconditioner_description='PTP',
@@ -188,6 +188,31 @@ for f_scan in f_scan_list:
                 = CG_PT_description_latex
             data_dic['CG_PT_manual_ln_{:d}_eta_file'.format(
                 num_eta)] = CG_PT_file
+
+        # MF iteration
+        for num_eta in num_eta_arr:
+            tau = np.min(_map.N_f_diag)
+            Nbar_f = _map.N_f_diag - tau
+            eta_min = tau/Nbar_f.max()
+            etas=np.logspace(
+                np.log(eta_min), 0, num=num_eta, base=np.e
+            )
+            print('MF ln {:d} eta'.format(num_eta))
+            MF_description = ('MF ln {:d} eta '.format(num_eta))
+            MF_description_latex = ('MF $\ln$ {:d} $\eta$'.format(num_eta))
+            MF_file,_ =\
+                _map.messenger_field_solver(
+                    lambs=1/etas,
+                    num_iter_per_lamb=1,
+                    num_iter=num_iter,
+                )
+            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
+                = MF_description
+            data_dic['MF_ln_{:d}_eta_description_latex'
+                .format(num_eta)]\
+                = MF_description_latex
+            data_dic['MF_ln_{:d}_eta_file'.format(
+                num_eta)] = MF_file
 
         #for num_eta, num_iter_eta in num_eta_iter_per_eta:
 
