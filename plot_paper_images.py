@@ -165,15 +165,38 @@ for f_scan in f_scan_list:
         ax.label_outer()
     #plt.show()
     plt.savefig(figs_dir/('f_scan={}.pdf'.format(f_scan)), bbox_inches="tight")
-#plt.figure(figsize=(3,3))
-#for i in range(len(lines)):
-#    plt.plot(lines[i]/chi2_min - 1, '-', label=description_latex_list[i])
-#plt.legend(loc='upper right')
-#tikzplotlib.clean_figure()
-#tikzplotlib.save(
-#    plot_dir/'chi2.tex',
-#    axis_width='2in',
-#    axis_height='2in',
-#)
-#plt.close()
+    plt.close()
+
+# plot (Χ²-min)/(min - ini)
+f_scan = 0.1
+fig = plt.figure(figsize=(9,3))
+gs = fig.add_gridspec(1,3, wspace=0)
+axs = gs.subplots(sharey='row')
+for i in range(len(results_list)):
+    if f_scan_results_list[i] == f_scan:
+        condition_number = condi_num_list[i]
+        if condition_number  < 1e3:
+            fig_index = 0
+            title = r'$\kappa=10^2$'
+        elif condition_number > 1e5 and condition_number < 1e7:
+            fig_index = 1
+            title = r'$\kappa=10^6$'
+        elif condition_number > 1e11:
+            fig_index = 2
+            title = r'$\kappa=10^{12}$'
+        for j in range(2):
+            chi2 = results_list[i]['chi2'][j]
+            description = results_list[i]['description'][j]
+            axs[fig_index].plot(chi2, label=description)
+        axs[fig_index].set_title(title)
+        axs[fig_index].set_yscale('log')
+        axs[fig_index].set_ylabel(r'$\frac{\chi^2-\chi^2_{ini}} {\chi^2_{final}- \chi^2_{ini}}$') 
+        axs[fig_index].grid()
+axs[1].set_xlabel('number of iteration')
+axs[2].legend(bbox_to_anchor=(1,1), loc="upper left")
+for ax in axs:
+    ax.label_outer()
+#plt.show()
+plt.savefig(figs_dir/('f_scan={}_CG.pdf'.format(f_scan)), bbox_inches="tight")
+plt.close()
 
