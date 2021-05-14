@@ -110,7 +110,7 @@ As an alternative technique, \citet{Huffenberger_2018} showed that the ``messeng
 
 \citet{2018A&A...620A..59P} showed that the splitting of the covariance in the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the modified system that incorporates the cooling scheme can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the linear system, in contrast to findings of \citet{Huffenberger_2018}.
 
-In this paper, we show that the difference arose because  the tests in \citet{2018A&A...620A..59P} used much less low-frequency ($1/f$) noise, and show that the cooling technique improves mapmaking performance especially when the low frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.
+In this paper, we show that the difference arose because  the tests in \citet{2018A&A...620A..59P} used much less low-frequency ($1/f$) noise, and show that the cooling technique improves mapmaking performance especially when the low frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.  \citet{2017MNRAS.468.1782K} showed that for Wiener filter the cooling parameter should be chosen as a geometric series.  In this work, we give an alternative interpretation of the parameterizing process and show that for map-making the optimal choice (unsurprisingly) is also a geometric series.
 
 %The time-ordered data we collected is given by map signal $P\vbm$ plus noise 
 %$\vbn$.
@@ -262,11 +262,7 @@ More detailed derivation could be found in \cite{2018A&A...620A..59P}.
 \subsection{Introduce the Idea}
 The messenger field method introduced an extra cooling parameter $\lambda$ to
 map-making equation, so we want to know how to choose this parameter.
-In \cite{2017MNRAS.468.1782K}, they showed that for Wiener filter the cooling
-parameter should be chosen as a geometric series.
-In this work, we are going to give an alternative interpretation of the
-parameterizing process then show that for map-making equation the optimal choice
-for $\lambda$ would also be a geometric series.
+
 
 Based on previous analysis, we know that what messenger field method really
 does is parameterizing the map-making equation.
