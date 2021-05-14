@@ -33,7 +33,8 @@
 
 \begin{document}
 
-\title{Perturbative Approach to Solve the Map-Making Equation}
+%\title{Perturbative Approach to Solve the Map-Making Equation}
+\title{Cosmic Microwave Background map-making solutions with a cooled or perturbative approach}
 
 \footnote{
 The source code and other information are available at \url{https://github.com/Bai-Qiang/map_making_perturbative_approach}
@@ -45,9 +46,9 @@ The source code and other information are available at \url{https://github.com/B
 \author[0000-0001-7109-0099]{Kevin M. Huffenberger}
 \affiliation{Department of Physics, Florida State University, Tallahassee, Florida 32306}
 
-
+ 
 \begin{abstract}
-  \kmh{I think we need a new title.  Perturbation usually means a small change, whereas this is a big change that we apply gradually. Word ideas: ``Linear system, map-making, Cosmic Microwave Background, annealing,''}
+%  \kmh{I think we maybe need a new title?  Perturbation usually means a small change, whereas this is a big change that we apply gradually.  Although I guess we are building up the final solution but repeated small perturbations. Word ideas: ``Linear system, map-making, Cosmic Microwave Background, annealing''.  It's the same as cooling, but cooling doesn't make sense.}
 
 In the context of the Cosmic Microwave Background, we study the solution to the equation that transforms scanning data into a map.  We show that splitting the noise covariance into two parts, as suggested by ``messenger'' methods for solving linear systems, is particularly effective when there is significant low-frequency noise in the timestream.  A conjugate gradient algorithm applied to the modified system converges faster and to a higher fidelity solution than the standard approach, for the same computational cost per iteration.
 %We present a method to solve map-making equation by reinterpret messenger field method and using conjugate gradient algorithm.
@@ -86,7 +87,7 @@ The time-ordered scanning data is summarized by
 \begin{equation}
 \vbd = P\vbm + \vbn \label{map making model}
 \end{equation}
-where $\vbd$, $\vbm$, and $\vbn$ are the vectors of time-ordered data (TOD), pointing matrix, the CMB sky map, and noise, and $P$ is the sparse matrix that encoodes the telescope's pointing.  Of several mapmaking methods \citep{1997ApJ...480L..87T}, one of the most commonly used method is the method introduced for the Cosmic Background Explorer \cite[COBE,][]{cobecitation}.  This linear solution is 
+where $\vbd$, $\vbm$, and $\vbn$ are the vectors of time-ordered data (TOD), the CMB sky-map signal, and measurement noise, and $P$ is the sparse matrix that encodes the telescope's pointing.  Of several mapmaking methods \citep{1997ApJ...480L..87T}, one of the most common is the method introduced for the Cosmic Background Explorer \cite[COBE,][]{1992ASIC..359..391J}.  This optimal, linear solution is 
 \begin{align}
 \qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
 \end{align}
@@ -96,31 +97,20 @@ where  $\hatm$ provides the generalized least squares minimization of the $\chi^
 \label{chi2 formula}
 \end{align}
 Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
-and noise covariance matrix could be written as $N = \ev{\vbn \vbn^{\dagger}}$.  This casts mapmaking  as a standard linear regression problem.
-In case the noise is Gaussian, the COBE-GLS solution is also the maximum likelihood solution.
+and noise covariance matrix could be written as $N = \ev{\vbn \vbn^{\dagger}}$. We cast mapmaking  as a standard linear regression problem.
+In case the noise is Gaussian, the COBE solution is also the maximum likelihood solution.
 
-Based on current computation power, it is impossible to solve for $\hatm$
-by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly,
-since the noise covariance matrix $N$ is sparse in frequency domain
-and the pointing matrix $P$ is sparse in the time-by-pixel domain, their product is dense, and the matrices are too large to invert.   In experiments currently under design, there may be $\sim 10^{16}$ time samples
-and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
+With current computation power, we cannot solve for $\hatm$
+by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\dag \inv{N}P)$ matrix is too large to invert.  The noise covariance matrix $N$ is sparse in frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain, and their product is dense.   In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
 %It is impossible to do these matrix multiplication directly and then take
 %inverse.
 Therefore we use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, while executing each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
 
-As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  idea of \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and over the course of the iterative solution adjusts the relative weight of those two parts.  Starting with the uniform covariance, the system is gradually transformed into the final solution.  \citet{Huffenberger_2018} found that the large scales of map produced by the messenger method converged significantly faster than for conjugate gradient methods, and to higher fidelity.  \kmh{call it cooling or avoid that terminology?}
+As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and, over the course of the iterative solution, it adjusts the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system via a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that the large scales of map produced by the cooled messenger method converged significantly faster than for standard methods, and to higher fidelity.  
 
+\citet{2018A&A...620A..59P} showed that the splitting of the covariance in the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the modified system that incorporates the cooling scheme can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the linear system, in contrast to findings of \citet{Huffenberger_2018}.
 
-It has been shown by \cite{2018A&A...620A..59P} this messenger field method
-is equivalent to applying a preconditioner to the original problem and 
-introducing an extra cooling parameter $\lambda$,
-but whether this cooling parameter will boost performance compare to
- the (traditional) conjugate gradient method is still controversial . 
-Here I give a detailed analysis of this parameter and show that
-it may improve performance under some circumstances, if we properly choose
-its values.
-
-
+In this paper, we show that the difference arose because  the tests in \citet{2018A&A...620A..59P} used much less low-frequency ($1/f$) noise, and show that the cooling technique improves mapmaking performance especially when the low frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.
 
 %The time-ordered data we collected is given by map signal $P\vbm$ plus noise 
 %$\vbn$.
@@ -150,10 +140,7 @@ its values.
 %\end{equation}
 %Or rewrite it as
 
-
-This is the map-making equation we need to solve.
-
-The structure of this paper is organized as follows.
+\kmh{Update this as paper structure changes...}
 In section 2 we briefly introduce messenger field fixed point iteration method
 and preconditioned version.
 In section 3 we reinterpret this process and give an analysis on how to determine
