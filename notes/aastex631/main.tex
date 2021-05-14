@@ -57,29 +57,7 @@ We give an analytical expression for the parameter that controls how gradually t
 
 \end{abstract}
 
-%% Keywords should appear after the \end{abstract} command. 
-%% The AAS Journals now uses Unified Astronomy Thesaurus concepts:
-%% https://astrothesaurus.org
-%% You will be asked to selected these concepts during the submission process
-%% but this old "keyword" functionality is maintained in case authors want
-%% to include these concepts in their preprints.
-%\keywords{Classical Novae (251) --- Ultraviolet astronomy(1736) --- History of astronomy(1868) --- Interdisciplinary astronomy(804)}
-\keywords{Some Keywords}
-
-%% From the front matter, we move on to the body of the paper.
-%% Sections are demarcated by \section and \subsection, respectively.
-%% Observe the use of the LaTeX \label
-%% command after the \subsection to give a symbolic KEY to the
-%% subsection for cross-referencing in a \ref command.
-%% You can use LaTeX's \ref and \label commands to keep track of
-%% cross-references to sections, equations, tables, and figures.
-%% That way, if you change the order of any elements, LaTeX will
-%% automatically renumber them.
-%%
-%% We recommend that authors also use the natbib \citep
-%% and \citet commands to identify citations.  The citations are
-%% tied to the reference list via symbolic KEYs. The KEY corresponds
-%% to the KEY in the \bibitem in the reference list below. 
+\keywords{Computational methods --- Cosmic microwave background radiation --- Astronomy data reduction}
 
 \section{Introduction} \label{sec:intro}
 
@@ -99,19 +77,40 @@ We give an analytical expression for the parameter that controls how gradually t
 %One step of the the processing is map making, which gives an estimated map based on the raw observation data.
 
 %map-making
-Map-making is an intermediate process between data collection and estimate
-various cosmological parameters.
-As the next generation CMB observations will have much higher resolution and 
-generate more data, we need an efficient way to process the data.
-There are many map-making methods introduced in \cite{1997ApJ...480L..87T}.
-Currently, one the most commonly used method is COBE method.
 
-Recently \cite{2013A&A...549A.111E} introduced a new
-method called messenger field to solve Wiener filter,
-and then this technique was being applied to map-making by
-\cite{Huffenberger_2018},
-and messenger field could outperform traditional conjugate gradient method, 
-with proper cooling technique.
+In observations of the Cosmic Microwave Background (CMB), map-making is an intermediate step between the collection of raw scanning data and the scientific analyses, such as the estimation of power spectra and cosmological parameters.
+Next generation CMB observations will generate much more data that today, and so
+it is worth exploring efficient ways to process the data, even though, on paper, the map-making problem has long been solved.
+
+The time-ordered scanning data is summarized by
+\begin{equation}
+\vbd = P\vbm + \vbn \label{map making model}
+\end{equation}
+where $\vbd$, $\vbm$, and $\vbn$ are the vectors of time-ordered data (TOD), pointing matrix, the CMB sky map, and noise, and $P$ is the sparse matrix that encoodes the telescope's pointing.  Of several mapmaking methods \citep{1997ApJ...480L..87T}, one of the most commonly used method is the method introduced for the Cosmic Background Explorer \cite[COBE,][]{cobecitation}.  This linear solution is 
+\begin{align}
+\qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
+\end{align}
+where  $\hatm$ provides the generalized least squares minimization of the $\chi^2$ statistic
+\begin{align}
+\chi^2(\vbm) & \equiv (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm).
+\label{chi2 formula}
+\end{align}
+Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
+and noise covariance matrix could be written as $N = \ev{\vbn \vbn^{\dagger}}$.  This casts mapmaking  as a standard linear regression problem.
+In case the noise is Gaussian, the COBE-GLS solution is also the maximum likelihood solution.
+
+Based on current computation power, it is impossible to solve for $\hatm$
+by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly,
+since the noise covariance matrix $N$ is sparse in frequency domain
+and the pointing matrix $P$ is sparse in the time-by-pixel domain, their product is dense, and the matrices are too large to invert.   In experiments currently under design, there may be $\sim 10^{16}$ time samples
+and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
+%It is impossible to do these matrix multiplication directly and then take
+%inverse.
+Therefore we use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, while executing each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
+
+As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  idea of \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and over the course of the iterative solution adjusts the relative weight of those two parts.  Starting with the uniform covariance, the system is gradually transformed into the final solution.  \citet{Huffenberger_2018} found that the large scales of map produced by the messenger method converged significantly faster than for conjugate gradient methods, and to higher fidelity.  \kmh{call it cooling or avoid that terminology?}
+
+
 It has been shown by \cite{2018A&A...620A..59P} this messenger field method
 is equivalent to applying a preconditioner to the original problem and 
 introducing an extra cooling parameter $\lambda$,
@@ -122,26 +121,19 @@ it may improve performance under some circumstances, if we properly choose
 its values.
 
 
-The map making procedure could be summarized in equation
-\begin{equation}
-\vbd = P\vbm + \vbn \label{map making model}
-\end{equation}
-where $\vbd$, $P$, $\vbm$, $\vbn$ are time-ordered data (TOD), pointing matrix,
-CMB map, and noise.
+
 %The time-ordered data we collected is given by map signal $P\vbm$ plus noise 
 %$\vbn$.
 %The pointing matrix $P$ acting on the map gives the signal of the map at some specific 
 %position of sky where telescope is pointing at.
-Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
-and noise covariance matrix could be written as $N = \ev{\vbn \vbn^{\dagger}}$.
 
-As we can see the map making model Eq.(\ref{map making model}) mathematically 
-is a standard linear regression problem,
-with \textit{design matrix} being pointing matrix $P$, and \textit{regression
-coefficients} are $\vbm$.
-For COBE method, we estimate linear regression coefficients $\vbm$ with
-\textit{generalized least square} (GLS) technique, since the noise $\vbn$ is 
-\textit{heteroscedastic}.
+%As we can see the map making model Eq.(\ref{map making model}) mathematically 
+%is a standard linear regression problem,
+%with \textit{design matrix} being pointing matrix $P$, and \textit{regression
+%coefficients} are $\vbm$.
+%For COBE method, we estimate linear regression coefficients $\vbm$ with
+%\textit{generalized least square} (GLS) technique, since the noise $\vbn$ is 
+%\textit{heteroscedastic}.
 %: the variances $N$ are different for various frequencies.
 %Usually detectors have a $1/f$ noise pattern
 %\cite{1997PhRvD..56.4514T}.
@@ -150,32 +142,16 @@ For COBE method, we estimate linear regression coefficients $\vbm$ with
 %heteroscedastic so we would like to focusing on fitting the data with lower 
 %noise.
 %then the estimated map $\hatm$ minimize
-The GLS minimize
-\begin{align}
-\chi^2(\vbm) & \equiv (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm).
-\label{chi2 formula}
-\end{align}
-and the estimated map $\hatm$ is given by
-\begin{equation}
-\hatm = \argmin_{\vbm}  \chi^2(\vbm) = \PPinv{N} \Pdagger \inv{N} \vbd 
-\end{equation}
-Or rewrite it as 
-\begin{align}
-\qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
-\end{align}
+%The GLS minimize
+
+%and the estimated map $\hatm$ is given by
+%\begin{equation}
+%\hatm = \argmin_{\vbm}  \chi^2(\vbm) = \PPinv{N} \Pdagger \inv{N} \vbd 
+%\end{equation}
+%Or rewrite it as
+
+
 This is the map-making equation we need to solve.
-However, based on current computation power, it is impossible to solve $\hatm$
-by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly,
-since the noise covariance matrix $N$ is sparse in frequency domain,
-and pointing matrix $P$ is sparse in (time by pixel) domain.
-In experiments currently under design, there may be $\sim 10^{16}$ time samples
-and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
-%It is impossible to do these matrix multiplication directly and then take
-%inverse.
-Therefore we use Conjugate Gradient method, which is an iterative algorithm,
-to solve this map-making equation.
-For simplicity we fix the preconditioner being $M= \Pdagger P$ for all of 
-calculations.
 
 The structure of this paper is organized as follows.
 In section 2 we briefly introduce messenger field fixed point iteration method
@@ -313,6 +289,8 @@ parameterized map-making equation is
 \Pdagger \inv{N(\eta)}  P\ \hatm = \Pdagger \inv{N(\eta)} \vbd
 \label{map making eq eta}
 \end{align}
+For simplicity we fix the preconditioner being $M= \Pdagger P$ for all of calculations.
+
 
 %Here we now show that we can improve performance in some cases by using a parameterized version of the map making equation Eq.(\ref{map making eq}).
 The idea is that map-making equation Eq.(\ref{map making eq}) is hard to solve
