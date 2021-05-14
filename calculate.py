@@ -171,8 +171,8 @@ for f_scan in f_scan_list:
             print('CG manual ln {:d} eta'.format(num_eta))
             CG_PT_description = ('CG manual ln {:d} eta '
                 'preconditioner=PTP').format(num_eta)
-            CG_PT_description_latex = ('CG manual $\ln$ {:d} $\eta$ '
-                'preconditioner=$P^T P$').format(num_eta)
+            CG_PT_description_latex = ('CG manual $\ln$ scale, '
+                '$n_{{\eta}}={:d}$ preconditioner=$P^T P$').format(num_eta)
             CG_PT_file,_ =\
                 _map.conjugate_gradient_solver_perturbative_eta(
                     num_iter,
@@ -197,9 +197,10 @@ for f_scan in f_scan_list:
             etas=np.logspace(
                 np.log(eta_min), 0, num=num_eta, base=np.e
             )
-            print('MF ln {:d} eta'.format(num_eta))
-            MF_description = ('MF ln {:d} eta '.format(num_eta))
-            MF_description_latex = ('MF $\ln$ {:d} $\eta$'.format(num_eta))
+            print('MF ln {:d}x1 eta'.format(num_eta))
+            MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
+            MF_description_latex = (r'MF $\ln$ scale, '
+                r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
             MF_file,_ =\
                 _map.messenger_field_solver(
                     lambs=1/etas,
