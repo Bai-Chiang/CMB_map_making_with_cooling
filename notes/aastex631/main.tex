@@ -673,9 +673,22 @@ it becomes a $1/f$ noise model.
 The noise covariance matrix 
 \begin{equation}
 N_{ff'} = P(f) \frac{\delta_{ff'}}{\Delta_f}
+\label{noise covariance matrix}
 \end{equation}
 is a diagonal matrix in frequency space, where $\Delta_f$ is equal to reciprocal
 of total scanning time $T$.
+In our calculations we choose the $f_\text{apo}$ such that the condition
+numbers $\kappa$ are $10^2$, $10^6$, and $10^12$.
+The corresponding power spectrum are shown in Figure(\ref{power spectrum}).
+\begin{figure}[htb!]
+\includegraphics[width=\linewidth]{P_f.pdf}
+\caption{The noise power spectum based on Eq.(\ref{noise power spectrum}) with 
+    $\sigma^2 = 10$ $\mu$K$^2$, $\alpha = 2$ and $f_{\text{knee}} = 10$ Hz.
+    And fixing the condition number $\kappa$ of noise covariance
+    matrix Eq.(\ref{noise covariance matrix}) by choosing $f_\text{apo}$.
+}
+\label{power spectrum}
+\end{figure}
 
 Finally, we get the simulated time ordered data $\vb{d} = \vb{s} + \vb{n}$ by
 adding up signal and noise.
@@ -683,7 +696,7 @@ adding up signal and noise.
 \section{Results}
 First let's compare the results with vanilla conjugate gradient method with
 simple preconditioner $\Pdagger P$.
-The results are showed in Figure.(\ref{small condi num CG}) for different kinds
+The results are showed in Figure.(\ref{f scan 0.1 CG}) for different kinds
 of noise power spectra.
 Here note that $\chi^2$ in all figures are calculated based on
 Eq.(\ref{chi2 formula})
@@ -692,64 +705,57 @@ Eq.(\ref{chi2 formula})
 %\tag{\ref{chi2 formula}}
 %\end{align}
 not $\chi^2(\vbm, \eta)$ in Eq.(\ref{chi2 eta formula}).
-The $\chi^2_{\text{final}}$ is calculated from perturbative conjugate gradient
+The $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
 method with more intermediate $\eta$ values, and more iterations after
 $\eta=1$.
 
-As we can see in the center graph in Figure(\ref{small condi num CG}),
-if the condition number of noise covariance matrix $\kappa(N)$ is small,
-and the noise is almost white noise,
-the performance between different these two methods is small.
+As we can see in the left graph in Figure(\ref{f scan 0.1 CG}),
+when the condition number of noise covariance matrix $\kappa(N)$ is small,
+the performance between different these two methods are small.
 The vanilla conjugate gradient method converge faster, because its perturbation
 parameter goes to $1$ at the first iteration, however for the perturbation method its
-$\eta$ value will slowly reach $1$ in few iterations as we can see in
-the third graph in Figure(\ref{small condi num CG}).
+$\eta$ value will slowly reach $1$ in about ten iterations.
+%as we can see in
+%the third graph in Figure(\ref{small condi num CG}).
 
 \begin{figure*}[htb!]
 \centering
-\includegraphics[width=0.3\textwidth]{0.1/small_condition_num/P_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/small_condition_num/chi2_CG.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/small_condition_num/eta_CG.pdf}
-\caption{The left graph shows the noise power spectrum
-    Eq.(\ref{noise power spectrum}) with $f_{\text{apo}} \approx 0.99$ and
-    $\kappa(N) = 10^2$. The center one shows the
-    $\chi^2(\vbm)/\chi^2_{\text{final}} - 1$, with $\chi^2(\vbm)$ calculated
-    based on Eq.(\ref{chi2 formula}).
-    The right one shows the $\eta$ value for each iteration. For vanilla 
-    conjugate gradient method $\eta$ always equal to $1$, so it's a horizontal
-    line at $\eta=1$.
+\includegraphics[width=\textwidth]{f_scan=0.1_CG.pdf}
+\caption{These three figures show the 
+$\frac{\chi^2(\vbm) - \chi^2_\text{ini}}{\chi^2_\text{min} - \chi^2_\text{ini}}$
+changes for each iteration under different noise covariance matrix with
+condition number being $10^2$, $10^6$, and $10^{12}$.
 }
-\label{small condi num CG}
+\label{f scan 0.1 CG}
 \end{figure*}
 
 Notice that as we increase $\kappa(N)$, or equivalently decrease
 $f_{\text{apo}}$, the perturbation parameter $\eta$ starts showing its 
-benefits, as showed in Figure(\ref{medium condi num CG}) and 
-Figure(\ref{large condi num CG}).
+benefits, as showed in the second and third graph in Figure(\ref{f scan 0.1 CG}).
 It outperforms the vanilla conjugate gradient method when 
 $f_{\text{apo}} \approx 0$ and the noise power spectrum becomes the $1/f$ noise model,
 which usually is the intrinsic noise of instruments (\cite{1997PhRvD..56.4514T}).
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/chi2_CG.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/eta_CG.pdf}
-\caption{The figure shows results for $f_{\text{apo}}\approx 9.8\times10^{-3}$ 
-    and $\kappa(N) = 10^6$.
-}
-\label{medium condi num CG}
-\end{figure*}
-
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/P_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/chi2_CG.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/eta_CG.pdf}
-\caption{The figure shows results for $f_{\text{apo}}\approx 9.8\times10^{-6}$ 
-    and $\kappa(N) = 10^{12}$.
-}
-\label{large condi num CG}
-\end{figure*}
+%\begin{figure*}[htb!]
+%\centering
+%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/chi2_CG.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/eta_CG.pdf}
+%\caption{The figure shows results for $f_{\text{apo}}\approx 9.8\times10^{-3}$ 
+%    and $\kappa(N) = 10^6$.
+%}
+%\label{medium condi num CG}
+%\end{figure*}
+%
+%\begin{figure*}[htb!]
+%\centering
+%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/P_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/chi2_CG.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/eta_CG.pdf}
+%\caption{The figure shows results for $f_{\text{apo}}\approx 9.8\times10^{-6}$ 
+%    and $\kappa(N) = 10^{12}$.
+%}
+%\label{large condi num CG}
+%\end{figure*}
 
 %In the conjugate gradient method with messenger cooling parameter $\lambda$, 
 %the number of cooling parameters we need is an extra free parameter.
@@ -764,69 +770,69 @@ parameters based on Eq.(\ref{etai rule})
 and manually fixing number of $\eta$ parameters $n_{\eta}$ manually.
 We manually choose the $\eta_i$ values using function
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
-The results are showed in Figure(\ref{small condi num}),
-(\ref{medium condi num}), and (\ref{large condi num}).
+The results are showed in Figure(\ref{f scan 0.1}).
 
 When $\kappa(N)$ is small, and Eq.(\ref{etai rule}) tells us that only a few
-$\eta$ parameters are good enough, see the orange line in the last Figure(\ref{small condi num}).
+$\eta$ parameters are good enough, see the orange line in the first Figure(\ref{f scan 0.1}),
+where we have $\sim 10$ $\eta$ levels.
 If unfortunately we choose $n_{\eta}$ being large value, like $15$ or $30$,
 then it will ends up converge slowly, because it needs at least $15$ or $30$
 iterations to reach $\eta=1$, at least one iteration per $\eta$ level.
 
 On the other hand if $\kappa(N)$ is very large and the power spectrum is $1/f$
 noise, we need more $\eta$ parameters.
-If $n_{\eta}$ is too small, for example $n_{\eta}=5$ the red line in
-Figure(\ref{large condi num}), it may be better than the vanilla conjugate
+If $n_{\eta}$ is too small, for example $n_{\eta}=5$ the green line in
+last Figure(\ref{f scan 0.1}), it may be better than the vanilla conjugate
 gradient method, but it is still far from optimal.
 
 
 \begin{figure*}[htb!]
 \centering
-\includegraphics[width=0.3\textwidth]{0.1/small_condition_num/P_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/small_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/small_condition_num/eta.pdf}
-\caption{Same as Figure(\ref{small condi num CG}) with extra manually chosen 
-    $n_{\eta}$ results.
+\includegraphics[width=\textwidth]{f_scan=0.1.pdf}
+\caption{The blue line and the orange line are the same as Figure.(\ref{f scan 0.1 CG}).
+For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manully.
+Instead of using Eq.(\ref{etai rule}), we use
+\texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
+to get all $\eta$ parameters.
 }
-\label{small condi num}
+\label{f scan 0.1}
 \end{figure*}
 
 
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/eta.pdf}
-\caption{Same as Figure(\ref{medium condi num CG}) with extra manually chosen 
-    $n_{\eta}$ results.
-}
-\label{medium condi num}
-\end{figure*}
-
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/p_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/eta.pdf}
-\caption{Same as Figure(\ref{large condi num CG}) with extra manually chosen 
-    $n_{\eta}$ results.
-}
-\label{large condi num}
-\end{figure*}
+%\begin{figure*}[htb!]
+%\centering
+%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/eta.pdf}
+%\caption{Same as Figure(\ref{medium condi num CG}) with extra manually chosen 
+%    $n_{\eta}$ results.
+%}
+%\label{medium condi num}
+%\end{figure*}
+%
+%\begin{figure*}[htb!]
+%\centering
+%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/eta.pdf}
+%\caption{Same as Figure(\ref{large condi num CG}) with extra manually chosen 
+%    $n_{\eta}$ results.
+%}
+%\label{large condi num}
+%\end{figure*}
 
 \section{Future Prospects and Conclusion}
-As you may have noticed in Figure(\ref{medium condi num})
-and Figure(\ref{large condi num}), the perturbation parameter based on
+As you may have noticed in the second and third Figure(\ref{f scan 0.1}),
+the perturbation parameter based on
 Eq.(\ref{etai rule}) is more than needed, especially for $1/f$ noise case.
-From the last graph in Figure(\ref{large condi num}) we notice that
-Eq.(\ref{etai rule}) gives us $n_{\eta}\approx40$, however based on $\chi^2$
-result in Figure(\ref{large condi num}) 
+For the case $\kappa=10^{12}$, we notice that based on Eq.(\ref{etai rule})
+it gives us $n_{\eta}\approx40$, however from $\chi^2$
+result in the last Figure(\ref{f scan 0.1}) 
 $n_{\eta}\approx30$ or even $n_{\eta} \approx 15$ is good enough.
 Also, for the nearly-white-noise case, we could certainly choose $n_{\eta}=1$
 such that $\eta_1=1$ which corresponds to vanilla conjugate gradient method,
-based on $\chi^2$ result in Figure(\ref{small condi num}).
+based on $\chi^2$ result in first Figure(\ref{f scan 0.1}).
 However Eq.(\ref{etai rule}) gives us $n_{\eta} \approx 6$,
-see the last last graph in Figure(\ref{small condi num}),
 even though it does not make the final $\chi^2$ result much different at the
 end.
 
@@ -889,7 +895,7 @@ are not dependent on any scanning information,
 it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
 In Appendix \ref{other cases} we would show 
 %Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
-two examples with same parameters as in Figure(\ref{large condi num}) except 
+two examples with same parameters as in Figure(\ref{f scan 0.1}) except 
 scanning frequency $f_{\text{scan}}$.%, in Figure(\ref{large condi num 0.001}) it
 %scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
 %In these two cases our $\eta$ values based on Eq.(\ref{etai rule}) are better
@@ -1123,34 +1129,39 @@ Since the $\eta$ values determined from Eq.(\ref{etai rule})
 \end{align}
 are not dependent on any scanning information,
 it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
-two examples with same parameters as in Figure(\ref{large condi num}) except 
-scanning frequency $f_{\text{scan}}$, in Figure(\ref{large condi num 0.001}) it
-scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
-In these two cases our $\eta$ values based on Eq.(\ref{etai rule}) are better
-than manually selected values.
-Based on these two results we know, the $\eta$ values should somehow depends
-on scanning scheme.
+Figure.(\ref{f scan 0.001}) and Figure.(\ref{f scan 10}) show
+two examples with same parameters as in Figure.(\ref{f scan 0.1}) except 
+scanning frequency $f_{\text{scan}}$
+(also we need to change $f_\text{apo}$ to fix condition number),
+in Figure.(\ref{f scan 0.001}) it scans very slow
+and in Figure.(\ref{f scan 10}) it's very fast.
+In these two cases under $1/f$ noise model, 
+our $\eta$ values based on Eq.(\ref{etai rule}) are better than manually selected values.
+Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
 
 \begin{figure*}[htb!]
 \centering
-\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
-\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
-\caption{In this case all frequencies are the same as
-    Figure(\ref{large condi num}) except $f_{\text{scan}} = 0.001$.
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
+\includegraphics[width=\textwidth]{f_scan=0.001.pdf}
+\caption{In this case all parameters are the same as
+    Figure.(\ref{f scan 0.1}) except $f_{\text{scan}} = 0.001$,
+    and corresponding $f_\text{apo}$ to fix the condition number.
 }
-\label{large condi num 0.001}
+\label{f scan 0.001}
 \end{figure*}
 
 \begin{figure*}[htb!]
-\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
-\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
-\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
-\caption{In this case all frequencies are the same as
-    Figure(\ref{large condi num}) except $f_{\text{scan}} = 10$.
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
+\includegraphics[width=\textwidth]{f_scan=10.pdf}
+\caption{In this case all parameters are the same as
+    Figure.(\ref{f scan 0.1}) except $f_{\text{scan}} = 10$,
+    and corresponding $f_\text{apo}$ to fix the condition number.
 }
-\label{large condi num 10}
+\label{f scan 10}
 \end{figure*}
 
 
