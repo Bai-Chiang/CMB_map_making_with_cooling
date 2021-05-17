@@ -1,0 +1,106 @@
+
+\section{Messenger Field Method}
+
+Messenger field method separate noise covariance matrix
+$N = \Nbar + T$, with $T = \tau I $ and $\tau$ being the minimum eigenvalue of
+$N$.
+Then there is a cooling parameter $\lambda$ such that 
+$N(\lambda) = \Nbar + \lambda T$, with initial $\lambda$ being a very large
+number and final $\lambda$ being $1$.
+
+After apply preconditioner $\Pdagger \inv{T} P$ to the map making equation
+Eq.(\ref{map making eq}), we would get:
+\begin{align}
+\begin{aligned}[b]
+\hatm &= \PPinv{\inv{T}} \Pdagger \inv{T} 
+    \inv{\qty(\inv{T} + \inv{\Nbar})} 
+\\ &\mathrel{\phantom{=}} \quad \times \qty[ \inv{T}P\hatm + \inv{\Nbar}\vbd]
+\end{aligned}
+\end{align}
+
+To add cooling parameter $\lambda$, we need to change $T$ to $\lambda T$
+and $N$ to $N(\lambda)$.
+Then we could  rewrite it as a fixed point iteration form
+\begin{equation}
+\left\{\!
+\begin{aligned}
+\vb{t}_i &= \inv{\qty(\inv{(\lambda T)} + \inv{\Nbar})} 
+    \qty[ \inv{(\lambda T)}P\hatm_i + \inv{\Nbar}\vbd]\\
+\hatm_{i+1} &= \PPinv{\inv{(\lambda T)}} \Pdagger \inv{(\lambda T)} \vb{t}_i 
+\end{aligned}
+\right.
+\end{equation}
+This is fixed point iteration form of messenger field method.
+It's equivalent to solving map-making equation Eq.(\ref{map making eq}) with
+preconditioner $\Pdagger \inv{(\lambda T)} P = \inv{\tau} \Pdagger P$.
+This preconditioner is equivalent to preconditioner $M = \Pdagger P$,
+since multiply a constant won't change condition number.
+Therefore messenger field is solving modified map making equation
+\begin{align}
+\Pdagger \inv{N(\lambda)}  P\ \hatm = \Pdagger \inv{N(\lambda)} \vbd
+\end{align}
+with preconditioner $M = \Pdagger P$.
+More detailed derivation could be found in \cite{2018A&A...620A..59P}.
+
+
+%\begin{align}
+%\PPinv{\inv{(\lambda T)}} \Pdagger \inv{(\Nbar + \lambda T)} P \hatm
+%= \PPinv{\inv{(\lambda T)}} \Pdagger \inv{(\Nbar + \lambda T)} \vbd
+%\end{align}
+
+%If we substitute $T = \tau I$, then messenger field method is equivalent solving
+%If we add 
+%\begin{align}
+%\begin{aligned}[b]
+%&\PPinv{} \Pdagger \inv{\qty(\tau I + \frac{1}{\lambda}\Nbar)} P \hatm 
+%\\&\quad= \PPinv{} \Pdagger \inv{\qty(\tau I + \frac{1}{\lambda}\Nbar)} \vbd
+%\end{aligned}
+%\label{lambda eta equiv}
+%\end{align}
+%since multiplying a constant won't change the condition number, it's equivalent
+%to solve map making equation with perturbation parameter $\eta = 1/\lambda$ and
+%simple preconditioner.
+
+%The map making equation Eq.(\ref{map making equation}) derived from Generalized
+%Least Square estimation,
+%Rewrite the map making equation Eq.(\ref{map making equation}) in the form
+%\begin{align}
+%\qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
+%\end{align}
+%If we define $A = \Pdagger \inv{N} P$ and $\vbb = \Pdagger \inv{N} \vbd$,
+%then it could be written as $A\hatm = \vbb$.
+
+%However, for a vector with size of map $\hatm$, we could calculate
+%$\Pdagger \inv{N} P \hatm = A\hatm$ by first taking Fourier transform $P\hatm$
+%then inverse Fourier transform $\inv{N}P\hatm$.
+%This means it can be solved by the conjugate gradient method.
+
+
+%\subsection{Preconditioner}
+%To improve the performance of the conjugate gradient method,
+%we could apply a preconditioner $M$ to original problem $A\hatm = \vbb$,
+%which then becomes $\inv{M}A\hatm = \inv{M} \vbb$.
+%The preconditioner should reduce the condition number of original problem,
+%so that the conjugate gradient method will converge faster.
+%We want the preconditioner to capture as much information as possible from 
+%matrix $A$, but still keep it relative easy to calculate $\inv{M}$.
+%For example, if $M = A$, $\inv{M} A \hatm = \inv{M} \vbb$ would be solved
+%immediately, but $\inv{M}$ will be extremely difficult to calculate.
+%We could simply choose $M = \Pdagger P$,
+%and the operation $\inv{M} \vbm = \PPinv{} \vbm$ is the average over each pixel 
+%of map $\vbm$.
+%
+%For the conjugate gradient method, we need an initial guess map $\hatm_0$. 
+%We can use zero vector $\hatm_0 = \vb{0}$ as initial guess,
+%but the simple binned map $\hatm_0 = \PPinv{} \Pdagger \vbd$ is a better 
+%choice (it is a the solution for white noise case $N \propto I$).
+%(Pape\v{z} et al. 2018\cite{2018A&A...620A..59P}) showed that using 
+%$\hatm_0$ as initial guess could improve performance significantly compare to
+%zero vector $\vb{0}$ in come cases.
+%As stated before, we can calculate $\PPinv{}$ acting on any map-sized object,
+%and $\Pdagger \vbd$ is indeed a map size object, 
+%so we could obtain simple binned map by calculating
+%$\hatm_0 = \PPinv{} \Pdagger \vbd$ directly.
+%
+%For the conjugate gradient method with simple preconditioner $M = \Pdagger P$,
+%we have all we need.  Next we only need to use conjugate gradient algorithm solve the problem.

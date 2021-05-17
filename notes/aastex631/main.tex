@@ -151,145 +151,41 @@ Finally, Section 6 we discuss this method's pro and con for possible future
 improvements.
 
 
-\section{Messenger Field Method}
+\section{Methods}
 
-Messenger field method separate noise covariance matrix
-$N = \Nbar + T$, with $T = \tau I $ and $\tau$ being the minimum eigenvalue of
-$N$.
-Then there is a cooling parameter $\lambda$ such that 
-$N(\lambda) = \Nbar + \lambda T$, with initial $\lambda$ being a very large
-number and final $\lambda$ being $1$.
-
-After apply preconditioner $\Pdagger \inv{T} P$ to the map making equation
-Eq.(\ref{map making eq}), we would get:
-\begin{align}
-\begin{aligned}[b]
-\hatm &= \PPinv{\inv{T}} \Pdagger \inv{T} 
-    \inv{\qty(\inv{T} + \inv{\Nbar})} 
-\\ &\mathrel{\phantom{=}} \quad \times \qty[ \inv{T}P\hatm + \inv{\Nbar}\vbd]
-\end{aligned}
-\end{align}
-
-To add cooling parameter $\lambda$, we need to change $T$ to $\lambda T$
-and $N$ to $N(\lambda)$.
-Then we could  rewrite it as a fixed point iteration form
+\subsection{Parameterized Conjugate Gradient Method}
+The messenger field approach introduced an extra cooling parameter $\lambda$ to
+map-making equation, and solved the linear system with the alternative covariance $N(\lambda) =  \lambda \tau I + \Nbar $.  The parameter $\tau$ represents the uniform level of (white) noise in the covariance, $\Nbar$ is the balance of the noise, and the parameterized covariance equals the original covariance when the cooling parameter $\lambda = 1$.  In this work we find it more convenient to work with the inverse cooling parameter $\eta = \lambda^{-1}$ and define the covariance as
 \begin{equation}
-\left\{\!
-\begin{aligned}
-\vb{t}_i &= \inv{\qty(\inv{(\lambda T)} + \inv{\Nbar})} 
-    \qty[ \inv{(\lambda T)}P\hatm_i + \inv{\Nbar}\vbd]\\
-\hatm_{i+1} &= \PPinv{\inv{(\lambda T)}} \Pdagger \inv{(\lambda T)} \vb{t}_i 
-\end{aligned}
-\right.
+  N(\eta) = \tau I +  \eta \Nbar 
 \end{equation}
-This is fixed point iteration form of messenger field method.
-It's equivalent to solving map-making equation Eq.(\ref{map making eq}) with
-preconditioner $\Pdagger \inv{(\lambda T)} P = \inv{\tau} \Pdagger P$.
-This preconditioner is equivalent to preconditioner $M = \Pdagger P$,
-since multiply a constant won't change condition number.
-Therefore messenger field is solving modified map making equation
-\begin{align}
-\Pdagger \inv{N(\lambda)}  P\ \hatm = \Pdagger \inv{N(\lambda)} \vbd
-\end{align}
-with preconditioner $M = \Pdagger P$.
-More detailed derivation could be found in \cite{2018A&A...620A..59P}.
-
-
-%\begin{align}
-%\PPinv{\inv{(\lambda T)}} \Pdagger \inv{(\Nbar + \lambda T)} P \hatm
-%= \PPinv{\inv{(\lambda T)}} \Pdagger \inv{(\Nbar + \lambda T)} \vbd
-%\end{align}
-
-%If we substitute $T = \tau I$, then messenger field method is equivalent solving
-%If we add 
-%\begin{align}
-%\begin{aligned}[b]
-%&\PPinv{} \Pdagger \inv{\qty(\tau I + \frac{1}{\lambda}\Nbar)} P \hatm 
-%\\&\quad= \PPinv{} \Pdagger \inv{\qty(\tau I + \frac{1}{\lambda}\Nbar)} \vbd
-%\end{aligned}
-%\label{lambda eta equiv}
-%\end{align}
-%since multiplying a constant won't change the condition number, it's equivalent
-%to solve map making equation with perturbation parameter $\eta = 1/\lambda$ and
-%simple preconditioner.
-
-%The map making equation Eq.(\ref{map making equation}) derived from Generalized
-%Least Square estimation,
-%Rewrite the map making equation Eq.(\ref{map making equation}) in the form
-%\begin{align}
-%\qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
-%\end{align}
-%If we define $A = \Pdagger \inv{N} P$ and $\vbb = \Pdagger \inv{N} \vbd$,
-%then it could be written as $A\hatm = \vbb$.
-
-%However, for a vector with size of map $\hatm$, we could calculate
-%$\Pdagger \inv{N} P \hatm = A\hatm$ by first taking Fourier transform $P\hatm$
-%then inverse Fourier transform $\inv{N}P\hatm$.
-%This means it can be solved by the conjugate gradient method.
-
-
-%\subsection{Preconditioner}
-%To improve the performance of the conjugate gradient method,
-%we could apply a preconditioner $M$ to original problem $A\hatm = \vbb$,
-%which then becomes $\inv{M}A\hatm = \inv{M} \vbb$.
-%The preconditioner should reduce the condition number of original problem,
-%so that the conjugate gradient method will converge faster.
-%We want the preconditioner to capture as much information as possible from 
-%matrix $A$, but still keep it relative easy to calculate $\inv{M}$.
-%For example, if $M = A$, $\inv{M} A \hatm = \inv{M} \vbb$ would be solved
-%immediately, but $\inv{M}$ will be extremely difficult to calculate.
-%We could simply choose $M = \Pdagger P$,
-%and the operation $\inv{M} \vbm = \PPinv{} \vbm$ is the average over each pixel 
-%of map $\vbm$.
-%
-%For the conjugate gradient method, we need an initial guess map $\hatm_0$. 
-%We can use zero vector $\hatm_0 = \vb{0}$ as initial guess,
-%but the simple binned map $\hatm_0 = \PPinv{} \Pdagger \vbd$ is a better 
-%choice (it is a the solution for white noise case $N \propto I$).
-%(Pape\v{z} et al. 2018\cite{2018A&A...620A..59P}) showed that using 
-%$\hatm_0$ as initial guess could improve performance significantly compare to
-%zero vector $\vb{0}$ in come cases.
-%As stated before, we can calculate $\PPinv{}$ acting on any map-sized object,
-%and $\Pdagger \vbd$ is indeed a map size object, 
-%so we could obtain simple binned map by calculating
-%$\hatm_0 = \PPinv{} \Pdagger \vbd$ directly.
-%
-%For the conjugate gradient method with simple preconditioner $M = \Pdagger P$,
-%we have all we need.  Next we only need to use conjugate gradient algorithm solve the problem.
-
-\section{Parameterized Conjugate Gradient Method}
-
-\subsection{Introduce the Idea}
-The messenger field method introduced an extra cooling parameter $\lambda$ to
-map-making equation, so we want to know how to choose this parameter.
-
-
-Based on previous analysis, we know that what messenger field method really
-does is parameterizing the map-making equation.
-Here to avoid confusion, we introduce another parameter $\eta$, such that the 
-parameterized map-making equation is
+which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation is insensitive to to scalar multiple of the covariance since is appears on both sides.)  \citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to parameterized map-making equation is
 \begin{align}
 \Pdagger \inv{N(\eta)}  P\ \hatm = \Pdagger \inv{N(\eta)} \vbd
 \label{map making eq eta}
 \end{align}
-For simplicity we fix the preconditioner being $M= \Pdagger P$ for all of calculations.
+For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
 
-
+%Based on previous analysis, we know that what messenger field method really
+%does is parameterizing the map-making equation.
+%Here to avoid confusion, we introduce another parameter $\eta$, such that the 
 %Here we now show that we can improve performance in some cases by using a parameterized version of the map making equation Eq.(\ref{map making eq}).
-The idea is that map-making equation Eq.(\ref{map making eq}) is hard to solve
-due to noise covariance matrix is sandwiched between $\Pdagger P$.
-But if noise covariance matrix $N$ is proportional to identity matrix $I$, 
-then its solution is given by simple binned map
+%The idea is that map-making equation Eq.(\ref{map making eq}) is hard to solve
+%due to noise covariance matrix is sandwiched between $\Pdagger P$.
+
+When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity matrix $I$, and solution is given by simple binned map
 $\vbm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
-which could be solved directly. 
-We can parameterize the noise covariance matrix $N$ with a parameter $\eta$,
-such that initially $\eta = \eta_i$ we have $N\qty(\eta_i) \propto I$.
-In the end $\eta = \eta_f$ and $N\qty(\eta_f) \propto N$,
-such that the final solution is what we want.
-We expect that the parameterized noise covariance matrix $N(\eta)$
-would connect our initial guess $\hatm_0$ and final solution $\hatm$ as we 
-change $\eta$ from $\eta_i$ to $\eta_f$, such that it would help improve
-convergence speed.
+which can be solved directly.  From this starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_n = 1$, at which point we are looking at the original system.
+
+
+%We can parameterize the noise covariance matrix $N$ with a parameter $\eta$,
+%such that initially $\eta = \eta_i$ we have $N\qty(\eta_i) \propto I$.
+%In the end $\eta = \eta_f$ and $N\qty(\eta_f) \propto N$,
+%such that the final solution is what we want.
+%We expect that the parameterized noise covariance matrix $N(\eta)$
+%would connect our initial guess $\hatm_0$ and final solution $\hatm$ as we 
+%change $\eta$ from $\eta_i$ to $\eta_f$, such that it would help improve
+%convergence speed.
 
 %Now instead of Eq.(\ref{map making eq}), we are solving
 %\begin{align}
@@ -297,231 +193,54 @@ convergence speed.
 %= \Pdagger \inv{N(\eta)} \vbd \label{map making para}
 %\end{align}
 
-Now question is how to find $N(\eta)$ such that $N(\eta_i) \propto I$
-and $N (\eta_f) \propto N$?
-Since the non-white noise part of $N$ is the difficult portion,
-we could think of it as a perturbation term, which adds upon the white noise.
-Initially there is only white noise and solution is given by $\hatm_0$,
-then we gradually add extra noise into this equation by changing $\eta$ from 
-$0$ to $1$.
-At the end when $\eta=1$ we are solving equation Eq.(\ref{map making eq}).
+%Now question is how to find $N(\eta)$ such that $N(\eta_i) \propto I$
+%and $N (\eta_f) \propto N$?
+Since the non-white part of $N$ is the difficult portion,
+we could think of the $\eta$ parameter as turning on slowly, each step adding a perturbation to the solution achieved at a particular stage, building upon the initial the white noise covariance model.
+%Initially there is only white noise and solution is given by $\hatm_0$,
+%then we gradually add extra noise into this equation by changing $\eta$ from 
+%$0$ to $1$.
+%At the end when $\eta=1$ we are solving equation Eq.(\ref{map making eq}).
 
-Therefore we separate noise covariance matrix into two parts
-$N = \tau I + \Nbar$ where $\tau$ is the minimum eigenvalue of $N$. 
-Then we define $N(\eta) = \tau I + \eta \Nbar$, 
-with perturbation parameter $\eta$ which satisfies $\eta_i = 0$ and $\eta_f=1$.
+%Therefore we separate noise covariance matrix into two parts
+%$N = \tau I + \Nbar$ where $\tau$ is the minimum eigenvalue of $N$. 
+%Then we define $N(\eta) = \tau I + \eta \Nbar$, 
+%with perturbation parameter $\eta$ which satisfies $\eta_i = 0$ and $\eta_f=1$.
 
-Eq.(\ref{map making eq eta}) then becomes
-\begin{align}
-\qty(\Pdagger \inv{(\tau I + \eta \Nbar)}P) \, \hatm(\eta) 
-= \Pdagger \inv{\qty(\tau I + \eta \Nbar)} \vbd \label{map making perturb} 
-\end{align}
+%Eq.(\ref{map making eq eta}) then becomes
+%\begin{align}
+%\qty(\Pdagger \inv{(\tau I + \eta \Nbar)}P) \, \hatm(\eta) 
+%= \Pdagger \inv{\qty(\tau I + \eta \Nbar)} \vbd \label{map making perturb} 
+%\end{align}
 
-We require the perturbation parameter $\eta$ being monotonically increase
-series $0 = \eta_0 < \eta_1 < \cdots < \eta_n = 1$.
-For some specific $\eta_m$, we use conjugate gradient method to solve equation 
-$\qty(\Pdagger \inv{N(\eta_m)} P)\, 
-\hatm(\eta_m) = \Pdagger \inv{N(\eta_m)} \vbd$
+For some intermediate $\eta_i$, we use conjugate gradient method to solve equation 
+$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
+\hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$
 with simple preconditioner $\Pdagger P$,
-and using $\hatm(\eta_{m-1})$ as the initial value.
-The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
+and using $\hatm(\eta_{i-1})$ as the initial value.
+%The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
 
-As you can see, $\eta$ is the reciprocal of $\lambda$.
-The reason I switch to $\eta$ in stead of keeping $\lambda$ is that it would
-be easier for further derivations, and it's a different interpretation.
+%As you can see, $\eta$ is the reciprocal of $\lambda$.
+%The reason I switch to $\eta$ in stead of keeping $\lambda$ is that it would
+%be easier for further derivations, and it's a different interpretation.
 
-\subsection{Choosing perturbation parameters $\eta$}
+\subsection{Choosing inverse cooling parameters $\eta$}
 The next question is how we choose these monotonically increasing parameters
 $\eta$. 
-If we choose these parameters inappropriately, it would only makes it converge
-slower.
-Also we want to determine $\eta_1, \cdots, \eta_{n-1}$ before starting conjugate
-gradient iteration.
-That's because time ordered data $\vbd$ is very large,
-and we don't want to keep it in the system RAM during calculation.
-If $\eta_1, \cdots, \eta_{n-1}$ could be determined before the iterations, 
-then we can first calculate $\Pdagger \inv{N(\eta)} \vbd$ for each $\eta_m$
-and store these map-sized objects in RAM,
-instead of the entire time-ordered data $\vbd$.
+If we choose these parameters inappropriately, it  makes the system converge
+slowly, because waste effort converging on the wrong system.
+We also want to determine $\eta_1, \cdots, \eta_{n-1}$ before starting conjugate
+gradient iterations.  The time ordered data $\vbd$ is very large,
+and we do not want to keep it in the system RAM during calculation.  If we determine $\eta_1, \cdots, \eta_{n-1}$ before the iterations, 
+then we can precompute the right-hand side $\Pdagger \inv{N(\eta)} \vbd$ for each $\eta_i$ and keep these map-sized objects in RAM, instead of the entire time-ordered data.
 
-First let us try to find out our starting point $\eta_1$.
-What would be good value for $\eta_1$?
-
-Here to simplify notation, I will use $\Neta$ to denote $N(\eta)$.
-The parameterized estimated map
-$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$
-minimizes the parameterized
+In the appendix, we show that a good choice for the $\eta$ parameters are a geometric series
 \begin{align}
-\chi^2 (\vbm, \eta)
-= \qty(\vbd - P \vbm)^{\dagger} \inv{\Neta} (\vbd - P\vbm).
-\label{chi2 eta formula}
+\eta_i =\min \qty\bigg{ \qty(2^i -1)\frac{\tau}{\max(\Nbar_f)},\; 1 }
 \end{align}
-For some specific $\eta$ value, the minimum $\chi^2$ value is given by
-\begin{align}
-\begin{aligned}[b]
-\chi^2 (\hatm(\eta), \eta)
-&= \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{\Neta} 
-    \qty\big(\vbd - P\hatm(\eta))
-\end{aligned}
-\end{align}
-To further simplify the analysis, let's assume that the noise covariance matrix
-$N = \ev{\vbn\vbn^{\dagger}}$ is diagonal in the frequency domain.
 
-%Now let us see how $\chi^2(\hatm(\eta),\eta)$ changes as we change $\eta$.
-%The relative decrease of $\chi^2(\hatm(\eta), \eta)$ at $\eta$ is defined as
-%\begin{align}
-%\begin{aligned}[b]
-%&-\frac{\delta \chi^2(\hatm(\eta),\eta)} {\chi^2(\hatm(\eta), \eta)}\\
-%=& 
-%\delta \eta 
-%\frac{\qty(\vbd - P\hatm(\eta))^{\dagger}
-%    \inv{\Neta} \Nbar \inv{\Neta}
-%    (\vbd - P\hatm(\eta)) 
-%}
-%{\qty\big(\vbd - P \hatm(\eta))^{\dagger} 
-%    \inv{\Neta}
-%    \qty\big(\vbd - P\hatm(\eta))
-%}
-%\end{aligned}
-%\end{align}
-%Here we put a minus sign in front of
-%$\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$,
-Let's first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
-such that $\eta_1 = \delta \eta$ is very small quantity.
-Then the relative decrease of $\chi^2(\hatm(0),0)$ from $\eta_0= 0$ to 
-$\eta_1 = \delta \eta$ is
-\begin{align}
-\begin{aligned}[b]
--\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
-&= \delta \eta 
-\frac{1}{\tau}
-\frac{\qty(\vbd - P\hatm(0))^{\dagger} \Nbar  (\vbd - P\hatm(0)) }
-    {\qty\big(\vbd - P \hatm(0))^{\dagger} \qty\big(\vbd - P\hatm(0))}
-%\\
-%& \leq  \frac{\delta \eta}{\tau} \max(\Nbar_f)
-\label{eta upper bound}
-\end{aligned}
-\end{align}
-Here we put a minus sign in front of this expression
-such that it's non-negative.
 
-%where in first line we used the property $N_{\eta=0} = \tau I$,
-%and in second line we used the property that the positive semi-definite $\Nbar$ is diagonal in frequency 
-%domain and its maximum eigenvalue is $\max(\Nbar_f)$.
-%To prove this, notice that matrix $\Nbar$ is diagonalized in frequency space 
-%with eigenvalues $\Nbar_f\geq0$ and the corresponding eigenvectors $\vb{e}_f$
-%(these eigenvectors form a complete orthogonal basis).
-%Any vector could be decomposed into these frequency basis
-%$\vb{v} = \sum_f \alpha_f \vb{e}_f$, therefore we have
-%$\frac{\vb{v}^{\dagger} \Nbar \vb{v}}{\vb{v}^{\dagger} \vb{v}} 
-%= \frac{\sum_f \alpha_f^2\Nbar_f}{\sum_f \alpha_f^2}
-%\leq \max(\Nbar_f) $
-
-Ideally, we want
-$\delta \chi^2(\hatm(0),0) = \chi^2(\hatm(1), 1) - \chi^2(\hatm(0),0)$,
-such that it would get close to the final $\chi^2$ at next iteration.
-Here if we assume that initial $\chi^2$ value $\chi^2(\hatm(0),0)$ is much
-larger than final value $\chi^2(\hatm(1),1)$,
-then we would expect
-$\qty|\delta\chi^2(\hatm(0),0)/\chi^2(\hatm(0),0)| \approx 1^-$,
-strictly smaller than 1.
-To make sure it will not start too fast, 
-we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$.
-This gives
-\begin{equation}
-\eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}
-\end{equation}
-Here $N_f$ and $\Nbar_f$ are the eigenvalues of $N$ and $\Nbar$ under frequency
-domain.
-If the condition number of noise covariance matrix
-$\kappa(N) = \max(N_f)/\min(N_f) \gg 1$,
-then $\eta_1 \approx \inv{\kappa} (N)$.
-
-What about the other parameters $\eta_m$ with $m > 1$?
-We could use a similar analysis,
-let $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m$,
-and set the upper bound of relative decrease equal to 1.
-See Appendix \ref{derive other etas} for detailed derivation.
-We would get
-%\begin{align}
-%\begin{aligned}[b]
-%&-\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
-%\\
-%=& \delta\eta_m
-%\frac{\qty(\vbd - P\hatm(\eta_m))^{\dagger}
-%    \inv{N_{\eta_m}} \Nbar \inv{N_{\eta_m}}
-%    (\vbd - P\hatm(\eta_m))
-%}
-%{\qty\big(\vbd - P \hatm(\eta_m))^{\dagger}
-%    \inv{N_{\eta_m}}
-%    \qty\big(\vbd - P\hatm(\eta_m))
-%}
-%\\
-%\leq & \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-%\label{eta upper bound}
-%\end{aligned}
-%\end{align}
-%The upper bound in the second line is a little bit tricky.
-%Both matrix $\Nbar$ and $\inv{N}_{\eta_m}$ 
-%can be simultaneously diagonalized in frequency space.
-%For each eigenvector $\vb{e}_f$,
-%the corresponding eigenvalue of the matrix 
-%$\inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m}$
-%is
-%$\lambda_f = \Nbar_f (\tau + \eta_m \Nbar_f)^{-2}$,
-%and the eigenvalue for matrix 
-%$\inv{N}_{\eta_m}$
-%is
-%$\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
-%Their eigenvalues are related by
-%$\lambda_f = \frac{\Nbar_f}{\tau + \eta_m \Nbar_f} \gamma_f$.
-%For any vector $\vb{v} = \sum_f \alpha_f \vb{e}_f$, we have
-%$\frac{\vb{v}^{\dagger} \inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m} \vb{v}}
-%{\vb{v}^{\dagger} \inv{N}_{\eta_m} \vb{v}}
-%= \frac{\sum_f \alpha_f^2 \lambda_f}{\sum_f \alpha_f^2 \gamma_f}
-%= \frac{\sum_f \alpha_f^2 \gamma_f \Nbar_f/(\tau + \eta_m \Nbar_f)}
-%{\sum_f \alpha_f^2 \gamma_f}
-%\leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-%$
-
-%Similarly, we could set the upper bound
-%$\delta\eta_m \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})=1$,
-%\footnote{Here we also assumed that
-%$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
-%which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
-%Since final result Eq.(\ref{etai rule}) is geometric series,
-%only a few $\eta_m$ values won't satisfy this condition.
-%}
-%and then we get
-\begin{align}
-\delta \eta_m 
-= \min \qty(\frac{\tau + \eta_m \Nbar_f}{\Nbar_f})
-= \eta_m + \frac{\tau }{\max(\Nbar_f)}.
-\end{align}
-Therefore 
-\begin{align}
-\eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
-\end{align}
-As we can see, $\eta_1, \cdots, \eta_n$ increase like a geometric series. 
-%And written in the form $\eta_{m+1} + \frac{\tau }{\max(\Nbar_f)}
-%= 2 \qty( \eta_m + \frac{\tau}{\max(\Nbar_f)})$
-%it's easy to see that for $m \geq 1$,
-%$\eta_{m} + \frac{\tau }{\max(\Nbar_f)}$ forms a geometric series
-%\begin{align}
-%\eta_m +  \frac{\tau }{\max(\Nbar_f)}
-%%=\qty(\eta_1 + \frac{\tau }{\max(\Nbar_f)}) 2^{m-1}
-%=\frac{\tau}{\max(\Nbar_f)} 2^m
-%\end{align}
-%where we used $\eta_1 = \frac{\tau}{\max(\bar{N}_f)}$
-%Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
-%final expression for all $\eta_i$
-\begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) }
-\label{etai rule}
-\end{align}
-Here we need to truncate the series when $\eta_i > 1$.
-
-This is the main result.  Eq.(\ref{etai rule}) tells us not only how to choose parameters $\eta_i$,
+This is the main result.  It tells us not only how to choose parameters $\eta_i$,
 but also when we should stop the perturbation, and set $\eta = 1$.
 For example, if noise covariance matrix $N$ is almost white noise,
 then $\Nbar = N - \tau I \approx 0$,
@@ -628,7 +347,7 @@ Therefore, overall introducing $\eta$ won't have extra computational cost.
 
 
 
-\section{Numerical Simulations}
+\subsection{Numerical Simulations}
 To compare these algorithms, we need to do some simple simulation of scanning
 processes, and generate time ordered data from random sky signal.
 Our sky is a small rectangular area, with two orthogonal directions $x$ and
@@ -1000,8 +719,9 @@ Using better preconditioners, it would also have improvements.
 %% thus been replaced with the acknowledgment environment. If you try to 
 %% compile with \acknowledgment you will get an error print to the screen
 %% and in the compiled pdf.
-%\begin{acknowledgments}
-%\end{acknowledgments}
+\begin{acknowledgments}
+BQ and KH are supported by NSF award 1815887.
+\end{acknowledgments}
 
 %% To help institutions obtain information on the effectiveness of their 
 %% telescopes the AAS Journals has created a group of keywords for telescope 
@@ -1038,6 +758,187 @@ Using better preconditioners, it would also have improvements.
 
 \vspace{5mm}
 \appendix
+
+
+\section{The sequence of inverse cooling parameters}
+
+First let us try to find out our starting point $\eta_1$.
+What would be good value for $\eta_1$?
+
+Here to simplify notation, I will use $\Neta$ to denote $N(\eta)$.
+The parameterized estimated map
+$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$
+minimizes the parameterized
+\begin{align}
+\chi^2 (\vbm, \eta)
+= \qty(\vbd - P \vbm)^{\dagger} \inv{\Neta} (\vbd - P\vbm).
+\label{chi2 eta formula}
+\end{align}
+For some specific $\eta$ value, the minimum $\chi^2$ value is given by
+\begin{align}
+\begin{aligned}[b]
+\chi^2 (\hatm(\eta), \eta)
+&= \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{\Neta} 
+    \qty\big(\vbd - P\hatm(\eta))
+\end{aligned}
+\end{align}
+To further simplify the analysis, let's assume that the noise covariance matrix
+$N = \ev{\vbn\vbn^{\dagger}}$ is diagonal in the frequency domain.
+
+%Now let us see how $\chi^2(\hatm(\eta),\eta)$ changes as we change $\eta$.
+%The relative decrease of $\chi^2(\hatm(\eta), \eta)$ at $\eta$ is defined as
+%\begin{align}
+%\begin{aligned}[b]
+%&-\frac{\delta \chi^2(\hatm(\eta),\eta)} {\chi^2(\hatm(\eta), \eta)}\\
+%=& 
+%\delta \eta 
+%\frac{\qty(\vbd - P\hatm(\eta))^{\dagger}
+%    \inv{\Neta} \Nbar \inv{\Neta}
+%    (\vbd - P\hatm(\eta)) 
+%}
+%{\qty\big(\vbd - P \hatm(\eta))^{\dagger} 
+%    \inv{\Neta}
+%    \qty\big(\vbd - P\hatm(\eta))
+%}
+%\end{aligned}
+%\end{align}
+%Here we put a minus sign in front of
+%$\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$,
+Let's first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
+such that $\eta_1 = \delta \eta$ is very small quantity.
+Then the relative decrease of $\chi^2(\hatm(0),0)$ from $\eta_0= 0$ to 
+$\eta_1 = \delta \eta$ is
+\begin{align}
+\begin{aligned}[b]
+-\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
+&= \delta \eta 
+\frac{1}{\tau}
+\frac{\qty(\vbd - P\hatm(0))^{\dagger} \Nbar  (\vbd - P\hatm(0)) }
+    {\qty\big(\vbd - P \hatm(0))^{\dagger} \qty\big(\vbd - P\hatm(0))}
+%\\
+%& \leq  \frac{\delta \eta}{\tau} \max(\Nbar_f)
+\label{eta upper bound}
+\end{aligned}
+\end{align}
+Here we put a minus sign in front of this expression
+such that it's non-negative.
+
+%where in first line we used the property $N_{\eta=0} = \tau I$,
+%and in second line we used the property that the positive semi-definite $\Nbar$ is diagonal in frequency 
+%domain and its maximum eigenvalue is $\max(\Nbar_f)$.
+%To prove this, notice that matrix $\Nbar$ is diagonalized in frequency space 
+%with eigenvalues $\Nbar_f\geq0$ and the corresponding eigenvectors $\vb{e}_f$
+%(these eigenvectors form a complete orthogonal basis).
+%Any vector could be decomposed into these frequency basis
+%$\vb{v} = \sum_f \alpha_f \vb{e}_f$, therefore we have
+%$\frac{\vb{v}^{\dagger} \Nbar \vb{v}}{\vb{v}^{\dagger} \vb{v}} 
+%= \frac{\sum_f \alpha_f^2\Nbar_f}{\sum_f \alpha_f^2}
+%\leq \max(\Nbar_f) $
+
+Ideally, we want
+$\delta \chi^2(\hatm(0),0) = \chi^2(\hatm(1), 1) - \chi^2(\hatm(0),0)$,
+such that it would get close to the final $\chi^2$ at next iteration.
+Here if we assume that initial $\chi^2$ value $\chi^2(\hatm(0),0)$ is much
+larger than final value $\chi^2(\hatm(1),1)$,
+then we would expect
+$\qty|\delta\chi^2(\hatm(0),0)/\chi^2(\hatm(0),0)| \approx 1^-$,
+strictly smaller than 1.
+To make sure it will not start too fast, 
+we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$.
+This gives
+\begin{equation}
+\eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}
+\end{equation}
+Here $N_f$ and $\Nbar_f$ are the eigenvalues of $N$ and $\Nbar$ under frequency
+domain.
+If the condition number of noise covariance matrix
+$\kappa(N) = \max(N_f)/\min(N_f) \gg 1$,
+then $\eta_1 \approx \inv{\kappa} (N)$.
+
+What about the other parameters $\eta_m$ with $m > 1$?
+We could use a similar analysis,
+let $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m$,
+and set the upper bound of relative decrease equal to 1.
+See Appendix \ref{derive other etas} for detailed derivation.
+We would get
+%\begin{align}
+%\begin{aligned}[b]
+%&-\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
+%\\
+%=& \delta\eta_m
+%\frac{\qty(\vbd - P\hatm(\eta_m))^{\dagger}
+%    \inv{N_{\eta_m}} \Nbar \inv{N_{\eta_m}}
+%    (\vbd - P\hatm(\eta_m))
+%}
+%{\qty\big(\vbd - P \hatm(\eta_m))^{\dagger}
+%    \inv{N_{\eta_m}}
+%    \qty\big(\vbd - P\hatm(\eta_m))
+%}
+%\\
+%\leq & \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
+%\label{eta upper bound}
+%\end{aligned}
+%\end{align}
+%The upper bound in the second line is a little bit tricky.
+%Both matrix $\Nbar$ and $\inv{N}_{\eta_m}$ 
+%can be simultaneously diagonalized in frequency space.
+%For each eigenvector $\vb{e}_f$,
+%the corresponding eigenvalue of the matrix 
+%$\inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m}$
+%is
+%$\lambda_f = \Nbar_f (\tau + \eta_m \Nbar_f)^{-2}$,
+%and the eigenvalue for matrix 
+%$\inv{N}_{\eta_m}$
+%is
+%$\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
+%Their eigenvalues are related by
+%$\lambda_f = \frac{\Nbar_f}{\tau + \eta_m \Nbar_f} \gamma_f$.
+%For any vector $\vb{v} = \sum_f \alpha_f \vb{e}_f$, we have
+%$\frac{\vb{v}^{\dagger} \inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m} \vb{v}}
+%{\vb{v}^{\dagger} \inv{N}_{\eta_m} \vb{v}}
+%= \frac{\sum_f \alpha_f^2 \lambda_f}{\sum_f \alpha_f^2 \gamma_f}
+%= \frac{\sum_f \alpha_f^2 \gamma_f \Nbar_f/(\tau + \eta_m \Nbar_f)}
+%{\sum_f \alpha_f^2 \gamma_f}
+%\leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
+%$
+
+%Similarly, we could set the upper bound
+%$\delta\eta_m \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})=1$,
+%\footnote{Here we also assumed that
+%$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
+%which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
+%Since final result Eq.(\ref{etai rule}) is geometric series,
+%only a few $\eta_m$ values won't satisfy this condition.
+%}
+%and then we get
+\begin{align}
+\delta \eta_m 
+= \min \qty(\frac{\tau + \eta_m \Nbar_f}{\Nbar_f})
+= \eta_m + \frac{\tau }{\max(\Nbar_f)}.
+\end{align}
+Therefore 
+\begin{align}
+\eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
+\end{align}
+As we can see, $\eta_1, \cdots, \eta_n$ increase like a geometric series. 
+%And written in the form $\eta_{m+1} + \frac{\tau }{\max(\Nbar_f)}
+%= 2 \qty( \eta_m + \frac{\tau}{\max(\Nbar_f)})$
+%it's easy to see that for $m \geq 1$,
+%$\eta_{m} + \frac{\tau }{\max(\Nbar_f)}$ forms a geometric series
+%\begin{align}
+%\eta_m +  \frac{\tau }{\max(\Nbar_f)}
+%%=\qty(\eta_1 + \frac{\tau }{\max(\Nbar_f)}) 2^{m-1}
+%=\frac{\tau}{\max(\Nbar_f)} 2^m
+%\end{align}
+%where we used $\eta_1 = \frac{\tau}{\max(\bar{N}_f)}$
+%Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
+%final expression for all $\eta_i$
+\begin{align}
+\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) }
+\label{etai rule}
+\end{align}
+Here we need to truncate the series when $\eta_i > 1$.
+
 
 \section{Upper bound for $\eta$} \label{derive other etas}
 We want to find the upper bound for 
