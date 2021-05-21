@@ -1,6 +1,7 @@
 \documentclass[twocolumn,linenumbers]{aastex631}
 \usepackage{physics}
 \usepackage{gensymb}
+\usepackage{CJK}
 
 % Operators
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -38,8 +39,7 @@
 \title{Cosmic Microwave Background map-making solutions improve with cooling}
 
 
-
-\author{Bai-Qiang Qiang}
+  \author{Bai-Qiang Qiang (\kmh{want chinese characters? 羌})}
 \affiliation{Department of Physics, Florida State University, Tallahassee, Florida 32306}
 
 \author[0000-0001-7109-0099]{Kevin M. Huffenberger}
@@ -630,6 +630,8 @@ as an arbitrary vector, such that we lose all information related to scanning
 scheme in the pointing matrix $P$.
 
 
+\kmh{We need some discussion of the things that haven't yet been demonstrated with the PCG, like multiple messenger fields.  Has the Kodi-Ramanah dual messenger field scheme been demonstrated in a PCG scheme by Papez?}
+
 %\begin{figure*}[htb!]
 %\centering
 %\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
@@ -698,7 +700,7 @@ $\lambda=1/\eta$ in messenger field are chosen to be geometric series or
 
 All of the calculation are using simple preconditioner $\Pdagger P$, but 
 the entire analysis is independent of preconditioner.
-Using better preconditioners, it would also have improvements.
+Better preconditioners would also lead to improvements.
 
 
 
@@ -756,25 +758,29 @@ BQ and KH are supported by NSF award 1815887.
 %% command and will number appendix equations (A1), (A2), etc. The
 %% Figure and Table counter will not reset.
 
-\vspace{5mm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% APPENDIX
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
-
-
 \section{The sequence of inverse cooling parameters}
 
-First let us try to find out our starting point $\eta_1$.
-What would be good value for $\eta_1$?
-
-Here to simplify notation, I will use $\Neta$ to denote $N(\eta)$.
-The parameterized estimated map
-$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$
-minimizes the parameterized
-\begin{align}
-\chi^2 (\vbm, \eta)
-= \qty(\vbd - P \vbm)^{\dagger} \inv{\Neta} (\vbd - P\vbm).
-\label{chi2 eta formula}
-\end{align}
-For some specific $\eta$ value, the minimum $\chi^2$ value is given by
+We know that the initial inverse cooling parameter $\eta_0 = 0$.  
+What would be good value for the next parameter $\eta_1$?
+To simplify notation, we use $\Neta$ to denote $N(\eta) = \tau I +  \eta \bar N$.
+%The parameterized estimated map
+%$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$
+%minimizes the parameterized
+%\begin{align}
+%\chi^2 (\vbm, \eta)
+%= \qty(\vbd - P \vbm)^{\dagger} \inv{\Neta} (\vbd - P\vbm).
+%\label{chi2 eta formula}
+%\end{align}
+For some specific $\eta$ value, the minimum $\chi^2$ value is given by the optimized map $\hatm(\eta)$, 
 \begin{align}
 \begin{aligned}[b]
 \chi^2 (\hatm(\eta), \eta)
@@ -782,8 +788,8 @@ For some specific $\eta$ value, the minimum $\chi^2$ value is given by
     \qty\big(\vbd - P\hatm(\eta))
 \end{aligned}
 \end{align}
-To further simplify the analysis, let's assume that the noise covariance matrix
-$N = \ev{\vbn\vbn^{\dagger}}$ is diagonal in the frequency domain.
+We restrict to the case  that the noise covariance matrix
+$N$ is diagonal in the frequency domain.
 
 %Now let us see how $\chi^2(\hatm(\eta),\eta)$ changes as we change $\eta$.
 %The relative decrease of $\chi^2(\hatm(\eta), \eta)$ at $\eta$ is defined as
@@ -821,7 +827,7 @@ $\eta_1 = \delta \eta$ is
 \end{aligned}
 \end{align}
 Here we put a minus sign in front of this expression
-such that it's non-negative.
+such that it's non-negative.  \kmh{This statement is kind of non trivial...  I think you need to explain more the step $(\tau I + \delta \eta \bar N)^{-1} \approx \tau I - \delta \eta \bar N$. (I think that's right, even if you don't restrict to the frequency diagonal case.)}
 
 %where in first line we used the property $N_{\eta=0} = \tau I$,
 %and in second line we used the property that the positive semi-definite $\Nbar$ is diagonal in frequency 
@@ -844,7 +850,7 @@ then we would expect
 $\qty|\delta\chi^2(\hatm(0),0)/\chi^2(\hatm(0),0)| \approx 1^-$,
 strictly smaller than 1.
 To make sure it will not start too fast, 
-we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$.
+we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$ \kmh{explain this reasoning a bit better}.
 This gives
 \begin{equation}
 \eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}
@@ -941,10 +947,7 @@ Here we need to truncate the series when $\eta_i > 1$.
 
 
 \section{Upper bound for $\eta$} \label{derive other etas}
-We want to find the upper bound for 
-$
--\frac{\delta \chi^2(\hatm(\eta_m),\eta_m)} {\chi^2(\hatm(\eta_m), \eta_m)}
-$
+We want to find the upper bound for $-{\delta \chi^2(\hatm(\eta_m),\eta_m)}/{\chi^2(\hatm(\eta_m), \eta_m)}$.  \kmh{I think you need more details on the steps of this derivation.} 
 First let's calculate $\dv{\eta} \chi^2(\hatm(\eta), \eta)$
 \begin{align}
 \begin{aligned}[b]
