@@ -39,7 +39,7 @@
 \title{Cosmic Microwave Background map-making solutions improve with cooling}
 
 
-  \author{Bai-Qiang Qiang (\kmh{want chinese characters? 羌})}
+  \author{Bai-Qiang Qiang (\kmh{want chinese characters? 羌})} % KMH: I don't know how to do it...
 \affiliation{Department of Physics, Florida State University, Tallahassee, Florida 32306}
 
 \author[0000-0001-7109-0099]{Kevin M. Huffenberger}
@@ -49,11 +49,11 @@
 \begin{abstract}
 %  \kmh{I think we maybe need a new title?  Perturbation usually means a small change, whereas this is a big change that we apply gradually.  Although I guess we are building up the final solution but repeated small perturbations. Word ideas: ``Linear system, map-making, Cosmic Microwave Background, annealing''.  It's the same as cooling, but cooling doesn't make sense.}
 
-In the context of the Cosmic Microwave Background, we study the solution to the equation that transforms scanning data into a map.  We show that splitting the noise covariance into two parts, as suggested by ``messenger'' methods for solving linear systems, is particularly effective when there is significant low-frequency noise in the timestream.  A conjugate gradient algorithm applied to the modified system converges faster and to a higher fidelity solution than the standard approach, for the same computational cost per iteration.
+  In the context of Cosmic Microwave Background data analysis, we study the solution to the equation that transforms scanning data into a map.  As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjusting their relative weight during the iterative solution.  This ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.  A conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach, for the same computational cost per iteration.  We conclude that cooling is helpful separate from its appearance in the messenger methods.
 %We present a method to solve map-making equation by reinterpret messenger field method and using conjugate gradient algorithm.
 %We separating noise covariance matrix $N$ into two parts, white noise part and the remaining noise part as perturbation, with perturbation parameter $\eta$.
 %
-We give an analytical expression for the parameter that controls how gradually the non-uniform noise is switched on during the course of the solution. 
+We give an analytical expression for the parameter that controls how gradually should change during the course of the solution. 
 
 \end{abstract}
 
@@ -105,9 +105,9 @@ by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\
 %inverse.
 Therefore we use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, while executing each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
 
-As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and, over the course of the iterative solution, it adjusts the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system via a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that the large scales of map produced by the cooled messenger method converged significantly faster than for standard methods, and to higher fidelity.  
+As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and, over the course of the iterative solution, it adjusts the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system via a cooling parameter.  The cooling idea again comes from \cite{2013A&A...549A.111E}.  In numerical experiments, \citet{Huffenberger_2018} found that the large scales of map produced by the cooled messenger method converged significantly faster than for standard methods, and to higher fidelity.  
 
-\citet{2018A&A...620A..59P} showed that the splitting of the covariance in the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the modified system that incorporates the cooling scheme can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the linear system, in contrast to findings of \citet{Huffenberger_2018}.
+\citet{2018A&A...620A..59P} showed that the splitting of the covariance in the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the modified system that incorporates the cooling scheme can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the mapmaking system, in contrast to findings of \citet{Huffenberger_2018}.
 
 In this paper, we show that the difference arose because  the tests in \citet{2018A&A...620A..59P} used much less low-frequency ($1/f$) noise, and show that the cooling technique improves mapmaking performance especially when the low frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.  \citet{2017MNRAS.468.1782K} showed that for Wiener filter the cooling parameter should be chosen as a geometric series.  In this work, we give an alternative interpretation of the parameterizing process and show that for map-making the optimal choice (unsurprisingly) is also a geometric series.
 
@@ -116,7 +116,7 @@ In this paper, we show that the difference arose because  the tests in \citet{20
 %The pointing matrix $P$ acting on the map gives the signal of the map at some specific 
 %position of sky where telescope is pointing at.
 
-%As we can see the map making model Eq.(\ref{map making model}) mathematically 
+%As we can see the map making model Eq.~(\ref{map making model}) mathematically 
 %is a standard linear regression problem,
 %with \textit{design matrix} being pointing matrix $P$, and \textit{regression
 %coefficients} are $\vbm$.
@@ -146,7 +146,7 @@ In Section \ref{sec:methods} we describe our methods for treating the mapmaking 
 \section{Methods}\label{sec:methods}
 
 \subsection{Parameterized Conjugate Gradient Method}
-The messenger field approach introduced an extra cooling parameter $\lambda$ to
+The messenger field approach introduced an extra cooling parameter $\lambda$ to the
 map-making equation, and solved the linear system with the alternative covariance $N(\lambda) =  \lambda \tau I + \Nbar $.  The parameter $\tau$ represents the uniform level of (white) noise in the covariance, $\Nbar$ is the balance of the noise, and the parameterized covariance equals the original covariance when the cooling parameter $\lambda = 1$.  In this work we find it more convenient to work with the inverse cooling parameter $\eta = \lambda^{-1}$ and define the covariance as
 \begin{equation}
   N(\eta) = \tau I +  \eta \Nbar 
@@ -169,8 +169,8 @@ using $\hatm(\eta_{i-1})$ as the initial value.
 %Based on previous analysis, we know that what messenger field method really
 %does is parameterizing the map-making equation.
 %Here to avoid confusion, we introduce another parameter $\eta$, such that the 
-%Here we now show that we can improve performance in some cases by using a parameterized version of the map making equation Eq.(\ref{map making eq}).
-%The idea is that map-making equation Eq.(\ref{map making eq}) is hard to solve
+%Here we now show that we can improve performance in some cases by using a parameterized version of the map making equation Eq.~(\ref{map making eq}).
+%The idea is that map-making equation Eq.~(\ref{map making eq}) is hard to solve
 %due to noise covariance matrix is sandwiched between $\Pdagger P$.
 
 When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity matrix $I$, and solution is given by simple binned map
@@ -187,7 +187,7 @@ which can be solved directly.  From this starting point, the cooling scheme requ
 %change $\eta$ from $\eta_i$ to $\eta_f$, such that it would help improve
 %convergence speed.
 
-%Now instead of Eq.(\ref{map making eq}), we are solving
+%Now instead of Eq.~(\ref{map making eq}), we are solving
 %\begin{align}
 %\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
 %= \Pdagger \inv{N(\eta)} \vbd \label{map making para}
@@ -200,14 +200,14 @@ we can think of the $\eta$ parameter as turning it on slowly, adding a perturbat
 %Initially there is only white noise and solution is given by $\hatm_0$,
 %then we gradually add extra noise into this equation by changing $\eta$ from 
 %$0$ to $1$.
-%At the end when $\eta=1$ we are solving equation Eq.(\ref{map making eq}).
+%At the end when $\eta=1$ we are solving equation Eq.~(\ref{map making eq}).
 
 %Therefore we separate noise covariance matrix into two parts
 %$N = \tau I + \Nbar$ where $\tau$ is the minimum eigenvalue of $N$. 
 %Then we define $N(\eta) = \tau I + \eta \Nbar$, 
 %with perturbation parameter $\eta$ which satisfies $\eta_i = 0$ and $\eta_f=1$.
 
-%Eq.(\ref{map making eq eta}) then becomes
+%Eq.~(\ref{map making eq eta}) then becomes
 %\begin{align}
 %\qty(\Pdagger \inv{(\tau I + \eta \Nbar)}P) \, \hatm(\eta) 
 %= \Pdagger \inv{\qty(\tau I + \eta \Nbar)} \vbd \label{map making perturb} 
@@ -298,10 +298,11 @@ numbers $\kappa$ are $10^2$, $10^6$, and $10^{12}$.
 The corresponding power spectrum are shown in Figure(\ref{power spectrum}).
 \begin{figure}[htb!]
 \includegraphics[width=\linewidth]{P_f.pdf}
-\caption{The noise power spectum based on Eq.(\ref{noise power spectrum}) with 
+\caption{The noise power spectum based on Eq.~(\ref{noise power spectrum}) with 
     $\sigma^2 = 10$ $\mu$K$^2$, $\alpha = 2$ and $f_{\text{knee}} = 10$ Hz.
     And fixing the condition number $\kappa$ of noise covariance
-    matrix Eq.(\ref{noise covariance matrix}) by choosing $f_\text{apo}$.
+    matrix Eq.~(\ref{noise covariance matrix}) by choosing $f_\text{apo}$.
+    \kmh{show the scanning freqency with a vertical (dashed?) line.  Can use axvline().}
 }
 \label{power spectrum}
 \end{figure}
@@ -315,15 +316,15 @@ adding up signal and noise.
 \section{Results} \label{sec:results}
 First let's compare the results with vanilla conjugate gradient method with
 simple preconditioner $\Pdagger P$.
-The results are showed in Figure.(\ref{f scan 0.1 CG}) for different kinds
+The results are showed in Figure~(\ref{f scan 0.1 CG}) for different kinds
 of noise power spectra.
 Here note that $\chi^2$ in all figures are calculated based on
-Eq.(\ref{chi2 formula})
+Eq.~(\ref{chi2 formula})
 %\begin{align}
 %\chi^2(\vbm) = (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm)
 %\tag{\ref{chi2 formula}}
 %\end{align}
-not $\chi^2(\vbm, \eta)$ in Eq.(\ref{chi2 eta formula}).
+not $\chi^2(\vbm, \eta)$ in Eq.~(\ref{chi2 eta formula}).
 The $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
 method with more intermediate $\eta$ values, and more iterations after
 $\eta=1$.
@@ -381,17 +382,17 @@ which usually is the intrinsic noise of instruments (\cite{1997PhRvD..56.4514T})
 %After the number of $\lambda$ is determined, we construct a geometric series
 %with fixed initial and final value, which uses \texttt{logspace}
 %function in \texttt{numpy}.
-%Since I  show in Eq.(\ref{lambda eta equiv}) that the messenger field
+%Since I  show in Eq.~(\ref{lambda eta equiv}) that the messenger field
 %cooling parameter $\lambda$ is equivalent to $1/\eta$, I use $\eta$ for further analysis.
 
 Now let us compare the performance difference between choosing $\eta$
-parameters based on Eq.(\ref{etai rule})
+parameters based on Eq.~(\ref{etai rule})
 and manually fixing number of $\eta$ parameters $n_{\eta}$ manually.
 We manually choose the $\eta_i$ values using function
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
 The results are showed in Figure(\ref{f scan 0.1}).
 
-When $\kappa(N)$ is small, and Eq.(\ref{etai rule}) tells us that only a few
+When $\kappa(N)$ is small, and Eq.~(\ref{etai rule}) tells us that only a few
 $\eta$ parameters are good enough, see the orange line in the first Figure(\ref{f scan 0.1}),
 where we have $\sim 10$ $\eta$ levels.
 If unfortunately we choose $n_{\eta}$ being large value, like $15$ or $30$,
@@ -408,14 +409,64 @@ gradient method, but it is still far from optimal.
 \begin{figure*}[htb!]
 \centering
 \includegraphics[width=\textwidth]{f_scan=0.1.pdf}
-\caption{The blue line and the orange line are the same as Figure.(\ref{f scan 0.1 CG}).
+\caption{The blue line and the orange line are the same as Figure~(\ref{f scan 0.1 CG}).
 For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manully.
-Instead of using Eq.(\ref{etai rule}), we use
+Instead of using Eq.~(\ref{etai rule}), we use
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
-to get all $\eta$ parameters. 
+to get all $\eta$ parameters.
+\kmh{In these figures you use $\chi^2_{\rm final}$ as the label, but I think ``min'' is better than ``final''.  You used ``min'' in Figure~(\ref{f scan 0.1 CG}).}
 }
 \label{f scan 0.1}
 \end{figure*}
+
+
+%\label{other cases}
+
+%Here we show two other results with different scaning frequency from Figure~(\ref{large condi num}),
+%but keep every other parameters sames.
+Since the $\eta$ values determined from Eq.~(\ref{etai rule})
+\begin{align}
+\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
+\tag{\ref{etai rule}}
+\end{align}
+are not dependent on any scanning information,
+it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
+Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
+two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
+scanning frequency $f_{\text{scan}}$
+(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
+in Figure~(\ref{f scan 0.001}) it scans very slow
+and in Figure~(\ref{f scan 10}) it's very fast.
+In these two cases under $1/f$ noise model, 
+our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
+Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
+
+\begin{figure*}[htb!]
+\centering
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
+\includegraphics[width=\textwidth]{f_scan=0.001.pdf}
+\caption{In this case all parameters are the same as
+    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 0.001$,
+    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I'm mixed up about what is changing here.  If you change the scan frequency only, I don't see why the apodization should have to change.  Since this has the scan slower than the knee, this seems like a lot like fig 3, although the convergence is slower it seems.}
+}
+\label{f scan 0.001}
+\end{figure*}
+
+\begin{figure*}[htb!]
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
+%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
+\includegraphics[width=\textwidth]{f_scan=10.pdf}
+\caption{In this case all parameters are the same as
+    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 10$,
+    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I wonder what a scan faster than the knee would make.}
+}
+\label{f scan 10}
+\end{figure*}
+
+
 
 
 %\begin{figure*}[htb!]
@@ -479,7 +530,7 @@ part.  \kmh{I feel what this is missing is why the high-noise modes get stuck th
 If we write the difference between final and initial $\chi^2$ value as
 $\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}
 \dv{\eta} \chi^2(\hatm(\eta),\eta)$,
-and use Eq.(\ref{d chi2}).
+and use Eq.~(\ref{d chi2}).
 %\begin{align}
 %\dv{\eta} \chi^2(\hatm(\eta), \eta) 
 %&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta} 
@@ -498,7 +549,7 @@ To properly compare the performance cost of this method with respect to vanilla
 conjugate gradient method with simple preconditioner,
 we need to compare their computational cost at each iteration.
 The right hand side of parameterized map-making equation
-Eq.(\ref{map making eq eta})
+Eq.~(\ref{map making eq eta})
 %\begin{align}
 %\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
 %= \Pdagger \inv{N(\eta)} \vbd \tag{\ref{map making para}}
@@ -543,15 +594,15 @@ Therefore, overall introducing $\eta$ won't have extra computational cost.
 \kmh{some of this future prospects should move to discussion}
 As you may have noticed in the second and third Figure(\ref{f scan 0.1}),
 the perturbation parameter based on
-Eq.(\ref{etai rule}) is more than needed, especially for $1/f$ noise case.
-For the case $\kappa=10^{12}$, we notice that based on Eq.(\ref{etai rule})
+Eq.~(\ref{etai rule}) is more than needed, especially for $1/f$ noise case.
+For the case $\kappa=10^{12}$, we notice that based on Eq.~(\ref{etai rule})
 it gives us $n_{\eta}\approx40$, however from $\chi^2$
 result in the last Figure(\ref{f scan 0.1}) 
 $n_{\eta}\approx30$ or even $n_{\eta} \approx 15$ is good enough.
 Also, for the nearly-white-noise case, we could certainly choose $n_{\eta}=1$
 such that $\eta_1=1$ which corresponds to vanilla conjugate gradient method,
 based on $\chi^2$ result in first Figure(\ref{f scan 0.1}).
-However Eq.(\ref{etai rule}) gives us $n_{\eta} \approx 6$,
+However Eq.~(\ref{etai rule}) gives us $n_{\eta} \approx 6$,
 even though it does not make the final $\chi^2$ result much different at the
 end.
 
@@ -560,7 +611,7 @@ smaller $n_{\eta}$?
 Let's examine how we get $\eta_i$ series.
 Remember that we determine $\delta\eta$ value based on the upper bound of 
 $-\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$, in
-Eq.(\ref{eta upper bound}).
+Eq.~(\ref{eta upper bound}).
 For $\eta \neq 0$, the upper bound is
 %Here I rewrite it in a simplified form
 \begin{align}
@@ -605,7 +656,7 @@ and get larger $\delta\eta$ value.
 This should make $\eta$ goes to $1$ faster, and yields the fewer $\eta$ parameters 
 we need.
 
-Also notice that the $\eta$ values determined from Eq.(\ref{etai rule})
+Also notice that the $\eta$ values determined from Eq.~(\ref{etai rule})
 %\begin{align}
 %\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
 %\tag{\ref{etai rule}}
@@ -617,7 +668,7 @@ In Appendix \ref{other cases} we would show
 two examples with same parameters as in Figure(\ref{f scan 0.1}) except 
 scanning frequency $f_{\text{scan}}$.%, in Figure(\ref{large condi num 0.001}) it
 %scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
-%In these two cases our $\eta$ values based on Eq.(\ref{etai rule}) are better
+%In these two cases our $\eta$ values based on Eq.~(\ref{etai rule}) are better
 %than manually selected values.
 %Based on these two results we know,
 It turns out the $\eta$ values should somehow depends
@@ -657,7 +708,7 @@ scheme in the pointing matrix $P$.
 
 %\section{Conclusion}
 %Here we discussed a method to solve map making equation
-%Eq.(\ref{map making equation})
+%Eq.~(\ref{map making equation})
 %\begin{align}
 %\hatm = \PPinv{N} \Pdagger \inv{N} \vbd \tag{\ref{map making equation}}
 %\end{align}
@@ -680,7 +731,7 @@ scheme in the pointing matrix $P$.
 %current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
 %enough such that we change advance to next value $\eta_{i+1}$.
 
-Even though the perturbation parameter $\eta$ get from Eq.(\ref{etai rule}) are
+Even though the perturbation parameter $\eta$ get from Eq.~(\ref{etai rule}) are
 not the most optimal,
 it still performs much better than traditional conjugate gradient method under
 $1/f$ noise scenario without adding extra computational cost.
@@ -855,7 +906,7 @@ This gives
 \begin{equation}
 \eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}
 \end{equation}
-Here $N_f$ and $\Nbar_f$ are the eigenvalues of $N$ and $\Nbar$ under frequency
+Here $N_f$ and $\Nbar_f$ are the eigenvalues of $N$ and $\Nbar$ in the frequency
 domain.
 If the condition number of noise covariance matrix
 $\kappa(N) = \max(N_f)/\min(N_f) \gg 1$,
@@ -913,7 +964,7 @@ We would get
 %\footnote{Here we also assumed that
 %$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
 %which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
-%Since final result Eq.(\ref{etai rule}) is geometric series,
+%Since final result Eq.~(\ref{etai rule}) is geometric series,
 %only a few $\eta_m$ values won't satisfy this condition.
 %}
 %and then we get
@@ -1011,7 +1062,7 @@ $\delta\eta_m \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})=1$,
 \footnote{Here we also assumed that
 $\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
 which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
-Since final result Eq.(\ref{etai rule}) is geometric series,
+Since final result Eq.~(\ref{etai rule}) is geometric series,
 only a few $\eta_m$ values won't satisfy this condition.
 }
 and then we get
@@ -1021,52 +1072,6 @@ and then we get
 = \eta_m + \frac{\tau }{\max(\Nbar_f)}.
 \end{align}
 
-\vspace{5mm}
-\section{Other Cases} \label{other cases}
-
-%Here we show two other results with different scaning frequency from Figure.(\ref{large condi num}),
-%but keep every other parameters sames.
-Since the $\eta$ values determined from Eq.(\ref{etai rule})
-\begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
-\tag{\ref{etai rule}}
-\end{align}
-are not dependent on any scanning information,
-it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-Figure.(\ref{f scan 0.001}) and Figure.(\ref{f scan 10}) show
-two examples with same parameters as in Figure.(\ref{f scan 0.1}) except 
-scanning frequency $f_{\text{scan}}$
-(also we need to change $f_\text{apo}$ to fix condition number),
-in Figure.(\ref{f scan 0.001}) it scans very slow
-and in Figure.(\ref{f scan 10}) it's very fast.
-In these two cases under $1/f$ noise model, 
-our $\eta$ values based on Eq.(\ref{etai rule}) are better than manually selected values.
-Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
-
-\begin{figure*}[htb!]
-\centering
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
-\includegraphics[width=\textwidth]{f_scan=0.001.pdf}
-\caption{In this case all parameters are the same as
-    Figure.(\ref{f scan 0.1}) except $f_{\text{scan}} = 0.001$,
-    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I'm mixed up about what is changing here.  If you change the scan frequency only, I don't see why the apodization should have to change.  Since this has the scan slower than the knee, this seems like a lot like fig 3, although the convergence is slower it seems.}
-}
-\label{f scan 0.001}
-\end{figure*}
-
-\begin{figure*}[htb!]
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
-\includegraphics[width=\textwidth]{f_scan=10.pdf}
-\caption{In this case all parameters are the same as
-    Figure.(\ref{f scan 0.1}) except $f_{\text{scan}} = 10$,
-    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I wonder what a scan faster than the knee would make.}
-}
-\label{f scan 10}
-\end{figure*}
 
 
  
