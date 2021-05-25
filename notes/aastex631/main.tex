@@ -159,12 +159,6 @@ which leads to the same system of mapmaking equations.  (This is because $N(\eta
 \label{map making eq eta}
 \end{align}
 as the cooling is adjusted.  In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger mapmaking method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
-For some intermediate $\eta_i$, we use the conjugate gradient method to solve equation 
-$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
-\hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
-using $\hatm(\eta_{i-1})$ as the initial value.
-%The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
-\kmh{In this description, it is not totally clear whether you intend to update the eta after every iteration.}
 
 %Based on previous analysis, we know that what messenger field method really
 %does is parameterizing the map-making equation.
@@ -176,6 +170,14 @@ using $\hatm(\eta_{i-1})$ as the initial value.
 When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity matrix $I$, and solution is given by simple binned map
 $\vbm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
 which can be solved directly.  From this starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation.
+\textcolor{green}{
+For some intermediate $\eta_i$, we use the conjugate gradient method to solve equation 
+$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
+\hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
+using $\hatm(\eta_{i-1})$ as the initial value.
+}
+%The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
+\kmh{In this description, it is not totally clear whether you intend to update the eta after every iteration.}
 
 
 %We can parameterize the noise covariance matrix $N$ with a parameter $\eta$,
@@ -471,10 +473,12 @@ If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
 gradient method, then the entire conjugate gradient solver
 will focus most on minimizing the low noise part, such that $\chi^2$ would
 converge very fast at low noise region, but slowly on high noise part.
+\textcolor{green}{Since it focus on low noise part only, it may be stuck at some local minimum point.}
 However by introducing $\eta$ parameter, we let the solver first treat every
 frequency equally.
 Then as $\eta$ slowly increases, it gradually shifts focus from the highest noise to the lowest noise
 part.  \kmh{I feel what this is missing is why the high-noise modes get stuck though.}
+
 
 If we write the difference between final and initial $\chi^2$ value as
 $\chi^2(\hatm(1),1) - \chi^2(\hatm(0),0) = \int_0^1 \dd{\eta}

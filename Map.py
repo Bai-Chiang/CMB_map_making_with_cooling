@@ -1094,7 +1094,7 @@ class Map:
                     chi2_hist[stop_point:] = chi2
                     chi2_eta_hist[stop_point:] = chi2_eta
                     r_2norm_hist[stop_point:] = r_2norm
-                    lambs_iter[stop_point:] = lamb 
+                    etas_iter[stop_point:] = 1/lamb 
                     #i_snapshot += 1
                     #m_hist[i_snapshot:,:,:,:] = m
                     #r_hist[i_snapshot:,:,:,:] = r

@@ -6,10 +6,18 @@ import pickle
 num_iter = 100
 cache_dir = Path('cache').expanduser()
 seed = 0
-f_scan_list = [0.1,0.001,10]
+f_scan_list = [
+    0.1,
+    #0.001,
+    #10,
+]
 num_eta_arr = np.array([5,15,30],dtype=int)
 f_sample_list = [100,]
-f_knee_list = [10,]
+f_knee_list = [
+    0.001,
+    0.1,
+    1,
+]
 
 
 num_sample = int(2**20)
