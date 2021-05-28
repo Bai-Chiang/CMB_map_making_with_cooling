@@ -13,6 +13,7 @@ x_max = parameters_dic['x_max']
 y_max = parameters_dic['y_max']
 sig_amp = parameters_dic['sig_amp']
 noise_sigma2 = parameters_dic['noise_sigma2']
+noise_index = parameters_dic['noise_index']
 num_pix_x = parameters_dic['num_pix_x']
 num_pix_y = parameters_dic['num_pix_y']
 crosslink = parameters_dic['crosslink']
@@ -63,7 +64,8 @@ for f_scan in f_scan_list:
             f_scan, f_knee, f_apo, f_sample)
 
         _map.generate_noiseless_signal(sig_amp=sig_amp)
-        _map.generate_noise(f_knee, f_apo, noise_sigma2=noise_sigma2)
+        _map.generate_noise(f_knee, f_apo, 
+            noise_index=noise_index, noise_sigma2=noise_sigma2)
         _map.get_tod()
 
         data_dic['scan_info'] = scan_info
@@ -75,9 +77,9 @@ for f_scan in f_scan_list:
         # number is 0th element devided by last element
         condition_number = _map.N_f_diag[0] / _map.N_f_diag[-1]  
         condition_number_wo_f0 = _map.N_f_diag[1] / _map.N_f_diag[-1]
-        total_noise = noise_sigma2 * f_sample/2 \
-            + noise_sigma2 / f_apo * (f_knee**2 + f_apo**2) \
-            * np.arctan(f_sample/(f_apo*2))
+        #total_noise = noise_sigma2 * f_sample/2 \
+        #    + noise_sigma2 / f_apo * (f_knee**2 + f_apo**2) \
+        #    * np.arctan(f_sample/(f_apo*2))
         data_dic['condition_number'] = condition_number
         data_dic['condition_number_wo_f0'] = condition_number_wo_f0
         data_dic['noise_power_spectrum'] = _map.noise_power_spectrum

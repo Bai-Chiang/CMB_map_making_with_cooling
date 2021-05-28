@@ -171,10 +171,13 @@ When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity 
 $\vbm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
 which can be solved directly.  From this starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation.
 \textcolor{green}{
-For some intermediate $\eta_i$, we use the conjugate gradient method to solve equation 
+For each intermediate $\eta_i$, we treat it as a seperate conjugate gradient method to solve equation 
 $\qty(\Pdagger \inv{N(\eta_i)} P)\, 
 \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
-using $\hatm(\eta_{i-1})$ as the initial value.
+using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
+and move to next parameter $\eta_{i+1}$ when 
+$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
+\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq 0$,
 }
 %The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
 \kmh{In this description, it is not totally clear whether you intend to update the eta after every iteration.}
@@ -239,7 +242,9 @@ For example, if noise covariance matrix $N$ is almost white noise,
 then $\Nbar = N - \tau I \approx 0$,
 and we would have ${\tau}/{\max(\Nbar_f)} \gg 1$.
 This tell us that we don't need to use parameterized method at all, 
-because $\eta_0=0$ and $\eta_1= \eta_2 = \cdots= 1$.  This corresponds to the standard conjugate gradient method with simple binned map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
+because $\eta_0=0$ and $\eta_1= \eta_2 = \cdots= 1$.
+This corresponds to the standard conjugate gradient method with simple binned 
+map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
 
 
 
@@ -313,6 +318,14 @@ Finally, we get the simulated time ordered data $\vb{d} = \vb{s} + \vb{n}$ by
 adding up signal and noise.
 
 \kmh{Compare to the noise power spectrum of Papez. Remark how little 1/f is in their test.  What is the effect of changing the noise slope?}
+\textcolor{green}{
+In \citealt{2018A&A...620A..59P}, the noise power spectrum is apodized at $0.1f_\text{knee}$,
+which corresponds to $f_\text{apo} \approx 0.1 f_\text{knee}$
+For the case $f_\text{knee} = 10$ and $\kappa=100$,
+the apodization frequency $f_\text{apo} \approx 0.99 \approx 0.1 f_\text{knee}$.
+Therefore the blue line in Figure (\ref{power spectrum}), is close to the
+power spectrum used in \citealt{2018A&A...620A..59P}.
+}
 
 
 \section{Results} \label{sec:results}
@@ -416,7 +429,7 @@ For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manully.
 Instead of using Eq.~(\ref{etai rule}), we use
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
 to get all $\eta$ parameters.
-\kmh{In these figures you use $\chi^2_{\rm final}$ as the label, but I think ``min'' is better than ``final''.  You used ``min'' in Figure~(\ref{f scan 0.1 CG}).}
+%\kmh{In these figures you use $\chi^2_{\rm final}$ as the label, but I think ``min'' is better than ``final''.  You used ``min'' in Figure~(\ref{f scan 0.1 CG}).}
 }
 \label{f scan 0.1}
 \end{figure*}
@@ -436,37 +449,31 @@ it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
 Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
 two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
 scanning frequency $f_{\text{scan}}$
-(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
+%(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
 in Figure~(\ref{f scan 0.001}) it scans very slow
 and in Figure~(\ref{f scan 10}) it's very fast.
 In these two cases under $1/f$ noise model, 
 our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
 Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
 
-\begin{figure*}[htb!]
-\centering
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
-\includegraphics[width=\textwidth]{f_scan=0.001.pdf}
-\caption{In this case all parameters are the same as
-    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 0.001$,
-    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I'm mixed up about what is changing here.  If you change the scan frequency only, I don't see why the apodization should have to change.  Since this has the scan slower than the knee, this seems like a lot like fig 3, although the convergence is slower it seems.}
-}
-\label{f scan 0.001}
-\end{figure*}
-
-\begin{figure*}[htb!]
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
-\includegraphics[width=\textwidth]{f_scan=10.pdf}
-\caption{In this case all parameters are the same as
-    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 10$,
-    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I wonder what a scan faster than the knee would make.}
-}
-\label{f scan 10}
-\end{figure*}
+%\begin{figure*}[htb!]
+%\centering
+%\includegraphics[width=\textwidth]{f_scan=0.001.pdf}
+%\caption{In this case all parameters are the same as
+%    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 0.001$,
+%    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I'm mixed up about what is changing here.  If you change the scan frequency only, I don't see why the apodization should have to change.  Since this has the scan slower than the knee, this seems like a lot like fig 3, although the convergence is slower it seems.}
+%}
+%\label{f scan 0.001}
+%\end{figure*}
+%
+%\begin{figure*}[htb!]
+%\includegraphics[width=\textwidth]{f_scan=10.pdf}
+%\caption{In this case all parameters are the same as
+%    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 10$,
+%    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I wonder what a scan faster than the knee would make.}
+%}
+%\label{f scan 10}
+%\end{figure*}
 
 
 
@@ -524,7 +531,11 @@ If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
 gradient method, then the entire conjugate gradient solver
 will focus most on minimizing the low noise part, such that $\chi^2$ would
 converge very fast at low noise region, but slowly on high noise part.
-\textcolor{green}{Since it focus on low noise part only, it may be stuck at some local minimum point.}
+\textcolor{green}{
+Since it focus on low noise part only, it may be stuck at some local minimum point.
+To get to the global minimum, it need to adjust the low noise part, that would
+be difficult if it's stuck at an local minimum.
+}
 However by introducing $\eta$ parameter, we let the solver first treat every
 frequency equally.
 Then as $\eta$ slowly increases, it gradually shifts focus from the highest noise to the lowest noise
@@ -827,15 +838,15 @@ BQ and KH are supported by NSF award 1815887.
 We know that the initial inverse cooling parameter $\eta_0 = 0$.  
 What would be good value for the next parameter $\eta_1$?
 To simplify notation, we use $\Neta$ to denote $N(\eta) = \tau I +  \eta \bar N$.
+For some specific $\eta$ value, the minimum $\chi^2$ value is given by the optimized map
 %The parameterized estimated map
-%$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$
-%minimizes the parameterized
+$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$,
+which minimize
 %\begin{align}
 %\chi^2 (\vbm, \eta)
 %= \qty(\vbd - P \vbm)^{\dagger} \inv{\Neta} (\vbd - P\vbm).
 %\label{chi2 eta formula}
 %\end{align}
-For some specific $\eta$ value, the minimum $\chi^2$ value is given by the optimized map $\hatm(\eta)$, 
 \begin{align}
 \begin{aligned}[b]
 \chi^2 (\hatm(\eta), \eta)
@@ -867,46 +878,57 @@ $N$ is diagonal in the frequency domain.
 %$\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$,
 Let's first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
 such that $\eta_1 = \delta \eta$ is very small quantity.
-Then the relative decrease of $\chi^2(\hatm(0),0)$ from $\eta_0= 0$ to 
+Since $\hatm(\eta)$ minimize $\chi^2(\hatm(\eta),\eta)$, we have 
+$\pdv{\hatm} \chi^2(\hatm(\eta), \eta) = 0$,
+and using chain rule
+\begin{align}
+\dv{\eta} \chi^2(\hatm(\eta), \eta) = \pdv{\eta} \chi^2(\hatm(\eta), \eta) 
+= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta}
+    (\vbd - P\hatm(\eta)) \label{d chi2}
+\end{align}
+Then the fractional decrease of $\chi^2(\hatm(0),0)$ from $\eta_0= 0$ to 
 $\eta_1 = \delta \eta$ is
 \begin{align}
-\begin{aligned}[b]
 -\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
+= - \delta \eta \frac{\dv{\eta} \chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}
 &= \delta \eta 
 \frac{1}{\tau}
 \frac{\qty(\vbd - P\hatm(0))^{\dagger} \Nbar  (\vbd - P\hatm(0)) }
     {\qty\big(\vbd - P \hatm(0))^{\dagger} \qty\big(\vbd - P\hatm(0))}
 %\\
 %& \leq  \frac{\delta \eta}{\tau} \max(\Nbar_f)
-\label{eta upper bound}
-\end{aligned}
 \end{align}
-Here we put a minus sign in front of this expression
-such that it's non-negative.  \kmh{This statement is kind of non trivial...  I think you need to explain more the step $(\tau I + \delta \eta \bar N)^{-1} \approx \tau I - \delta \eta \bar N$. (I think that's right, even if you don't restrict to the frequency diagonal case.)}
-
-%where in first line we used the property $N_{\eta=0} = \tau I$,
-%and in second line we used the property that the positive semi-definite $\Nbar$ is diagonal in frequency 
-%domain and its maximum eigenvalue is $\max(\Nbar_f)$.
-%To prove this, notice that matrix $\Nbar$ is diagonalized in frequency space 
-%with eigenvalues $\Nbar_f\geq0$ and the corresponding eigenvectors $\vb{e}_f$
-%(these eigenvectors form a complete orthogonal basis).
-%Any vector could be decomposed into these frequency basis
-%$\vb{v} = \sum_f \alpha_f \vb{e}_f$, therefore we have
-%$\frac{\vb{v}^{\dagger} \Nbar \vb{v}}{\vb{v}^{\dagger} \vb{v}} 
-%= \frac{\sum_f \alpha_f^2\Nbar_f}{\sum_f \alpha_f^2}
-%\leq \max(\Nbar_f) $
-
-Ideally, we want
-$\delta \chi^2(\hatm(0),0) = \chi^2(\hatm(1), 1) - \chi^2(\hatm(0),0)$,
-such that it would get close to the final $\chi^2$ at next iteration.
+Here we put a minus sign in front of this expression such that it's 
+non-negative, and use $N_{\eta=0} = \tau I$ at the second equality.
+%\kmh{This statement is kind of non trivial...  I think you need to explain more the step $(\tau I + \delta \eta \bar N)^{-1} \approx \tau I - \delta \eta \bar N$. (I think that's right, even if you don't restrict to the frequency diagonal case.)}
+Since it's hard to analyze $\vbd - P\hatm$ under frequency domain,
+we treat it as an arbitary vector, then the least upper bound is given by
+\begin{align}
+-\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
+\leq \frac{\delta \eta} {\tau} \max(\Nbar_f)
+\end{align}
+where $\max(\Nbar_f)$ is the maxium eigenvalue of $\Nbar$.
 Here if we assume that initial $\chi^2$ value $\chi^2(\hatm(0),0)$ is much
 larger than final value $\chi^2(\hatm(1),1)$,
+$\chi^2(\hatm(0), 0) \gg \chi^2(\hatm(1),1)$,
 then we would expect
-$\qty|\delta\chi^2(\hatm(0),0)/\chi^2(\hatm(0),0)| \approx 1^-$,
-strictly smaller than 1.
-To make sure it will not start too fast, 
-we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$ \kmh{explain this reasoning a bit better}.
-This gives
+\begin{align}
+-\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}
+= 1 - \frac{\chi^2(\hatm(1),1)}{\chi^2(\hatm(0),0)}
+\approx 1^-
+\end{align}
+The upper bound is strictly smaller than 1.
+Ideally, if
+$\delta \chi^2(\hatm(0),0) = \chi^2(\hatm(1), 1) - \chi^2(\hatm(0),0)$,
+then it would get close to the final $\chi^2$ at next iteration,
+but we don't know final $\chi^2(\hatm(1),1)$.
+So we want $\qty|\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}|$ being as
+large as possible, so it could converge fast.
+But there is another constrain that the least upper bound cannot exceed 1.
+Therefore could choose $\delta \eta$, such that the least upper bound is equal to 1.
+%we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$ \kmh{explain this reasoning a bit better}.
+%This gives
+Then we find
 \begin{equation}
 \eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}
 \end{equation}
@@ -919,150 +941,49 @@ then $\eta_1 \approx \inv{\kappa} (N)$.
 What about the other parameters $\eta_m$ with $m > 1$?
 We could use a similar analysis,
 let $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m$,
-and set the upper bound of relative decrease equal to 1.
-See Appendix \ref{derive other etas} for detailed derivation.
-We would get
-%\begin{align}
-%\begin{aligned}[b]
-%&-\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
-%\\
-%=& \delta\eta_m
-%\frac{\qty(\vbd - P\hatm(\eta_m))^{\dagger}
-%    \inv{N_{\eta_m}} \Nbar \inv{N_{\eta_m}}
-%    (\vbd - P\hatm(\eta_m))
-%}
-%{\qty\big(\vbd - P \hatm(\eta_m))^{\dagger}
-%    \inv{N_{\eta_m}}
-%    \qty\big(\vbd - P\hatm(\eta_m))
-%}
-%\\
-%\leq & \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-%\label{eta upper bound}
-%\end{aligned}
-%\end{align}
-%The upper bound in the second line is a little bit tricky.
-%Both matrix $\Nbar$ and $\inv{N}_{\eta_m}$ 
-%can be simultaneously diagonalized in frequency space.
-%For each eigenvector $\vb{e}_f$,
-%the corresponding eigenvalue of the matrix 
-%$\inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m}$
-%is
-%$\lambda_f = \Nbar_f (\tau + \eta_m \Nbar_f)^{-2}$,
-%and the eigenvalue for matrix 
-%$\inv{N}_{\eta_m}$
-%is
-%$\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
-%Their eigenvalues are related by
-%$\lambda_f = \frac{\Nbar_f}{\tau + \eta_m \Nbar_f} \gamma_f$.
-%For any vector $\vb{v} = \sum_f \alpha_f \vb{e}_f$, we have
-%$\frac{\vb{v}^{\dagger} \inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m} \vb{v}}
-%{\vb{v}^{\dagger} \inv{N}_{\eta_m} \vb{v}}
-%= \frac{\sum_f \alpha_f^2 \lambda_f}{\sum_f \alpha_f^2 \gamma_f}
-%= \frac{\sum_f \alpha_f^2 \gamma_f \Nbar_f/(\tau + \eta_m \Nbar_f)}
-%{\sum_f \alpha_f^2 \gamma_f}
-%\leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-%$
-
-%Similarly, we could set the upper bound
-%$\delta\eta_m \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})=1$,
-%\footnote{Here we also assumed that
-%$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
-%which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
-%Since final result Eq.~(\ref{etai rule}) is geometric series,
-%only a few $\eta_m$ values won't satisfy this condition.
-%}
-%and then we get
-\begin{align}
-\delta \eta_m 
-= \min \qty(\frac{\tau + \eta_m \Nbar_f}{\Nbar_f})
-= \eta_m + \frac{\tau }{\max(\Nbar_f)}.
-\end{align}
-Therefore 
-\begin{align}
-\eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
-\end{align}
-As we can see, $\eta_1, \cdots, \eta_n$ increase like a geometric series. 
-%And written in the form $\eta_{m+1} + \frac{\tau }{\max(\Nbar_f)}
-%= 2 \qty( \eta_m + \frac{\tau}{\max(\Nbar_f)})$
-%it's easy to see that for $m \geq 1$,
-%$\eta_{m} + \frac{\tau }{\max(\Nbar_f)}$ forms a geometric series
-%\begin{align}
-%\eta_m +  \frac{\tau }{\max(\Nbar_f)}
-%%=\qty(\eta_1 + \frac{\tau }{\max(\Nbar_f)}) 2^{m-1}
-%=\frac{\tau}{\max(\Nbar_f)} 2^m
-%\end{align}
-%where we used $\eta_1 = \frac{\tau}{\max(\bar{N}_f)}$
-%Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
-%final expression for all $\eta_i$
-\begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) }
-\label{etai rule}
-\end{align}
-Here we need to truncate the series when $\eta_i > 1$.
-
-
-\section{Upper bound for $\eta$} \label{derive other etas}
-We want to find the upper bound for $-{\delta \chi^2(\hatm(\eta_m),\eta_m)}/{\chi^2(\hatm(\eta_m), \eta_m)}$.  \kmh{I think you need more details on the steps of this derivation.} 
-First let's calculate $\dv{\eta} \chi^2(\hatm(\eta), \eta)$
-\begin{align}
-\begin{aligned}[b]
-\dv{\eta} \chi^2(\hatm(\eta), \eta)  &= \pdv{\eta} \chi^2(\hatm(\eta), \eta) \\
-&= \pdv{\eta} \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{N(\eta)} 
-    \qty\big(\vbd - P\hatm(\eta))\\
-&= - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{N(\eta)} \Nbar \inv{N(\eta)} 
-    (\vbd - P\hatm(\eta))\\
-&= - \vb{r}^{\dagger}(\eta) \inv{N(\eta)} \Nbar \inv{N(\eta)} \vb{r}(\eta)
-\label{d chi2}.
-\end{aligned}
-\end{align}
-where the first line comes from, $\chi^2(\hatm(\eta),\eta)$ is minimum $\chi^2$
-value for certain $\eta$, therefore $\pdv{\vbm} \chi^2(\vbm, \eta) \Bigr|_{\vbm = \hatm(\eta)} = 0$.
-So the third line we only take partial derivative with respect to $\inv{N(\eta)}$.
-The last line we define $\vb{r}(\eta) =\vbd - P\hatm(\eta)$.
-
-The upper bound is given by
+and set the least upper bound of relative decrease equal to 1.
+%See Appendix \ref{derive other etas} for detailed derivation.
+%We would get
 \begin{align}
 \begin{aligned}[b]
 -\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
-&= \delta\eta_m
-\frac{\vb{r}^{\dagger}
-    \inv{N(\eta_m)} \Nbar \inv{N(\eta_m)}
-    \vb{r}
+=& \delta\eta_m
+\frac{\qty(\vbd - P\hatm(\eta_m))^{\dagger}
+    \inv{N_{\eta_m}} \Nbar \inv{N_{\eta_m}}
+    (\vbd - P\hatm(\eta_m))
 }
-{ \vb{r}^{\dagger}
-    \inv{N(\eta_m)}
-    \vb{r}
+{\qty\big(\vbd - P \hatm(\eta_m))^{\dagger}
+    \inv{N_{\eta_m}}
+    \qty\big(\vbd - P\hatm(\eta_m))
 }
 \\
-& \leq \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-%\label{eta upper bound}
+\leq & \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
 \end{aligned}
 \end{align}
-
-For the last line, both matrix $\Nbar$ and $\inv{N(\eta_m)}$ 
+The upper bound in the second line is a little bit tricky.
+Both matrix $\Nbar$ and $\inv{N}_{\eta_m}$ 
 can be simultaneously diagonalized in frequency space.
 For each eigenvector $\vb{e}_f$,
-the corresponding eigenvalues of the matrix 
-$\inv{N(\eta_m)} \Nbar \inv{N(\eta_m)}$
-are
+the corresponding eigenvalue of the matrix on the numerator
+$\inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m}$
+is
 $\lambda_f = \Nbar_f (\tau + \eta_m \Nbar_f)^{-2}$,
-and the eigenvalues for matrix 
-$\inv{N(\eta_m)}$
-are
+and the eigenvalue for matrix on the denominator
+$\inv{N}_{\eta_m}$
+is
 $\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
 Their eigenvalues are related by
 $\lambda_f = \frac{\Nbar_f}{\tau + \eta_m \Nbar_f} \gamma_f$.
-For vector $\vb{r} = \sum_f \alpha_f \vb{e}_f$, we have
-$\frac{\vb{r}^{\dagger} \inv{N(\eta_m)} \Nbar \inv{N(\eta_m)} \vb{r}}
-{\vb{r}^{\dagger} \inv{N(\eta_m)} \vb{r}}
+For any vector $\vb{v} = \sum_f \alpha_f \vb{e}_f$, we have
+$\frac{\vb{v}^{\dagger} \inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m} \vb{v}}
+{\vb{v}^{\dagger} \inv{N}_{\eta_m} \vb{v}}
 = \frac{\sum_f \alpha_f^2 \lambda_f}{\sum_f \alpha_f^2 \gamma_f}
 = \frac{\sum_f \alpha_f^2 \gamma_f \Nbar_f/(\tau + \eta_m \Nbar_f)}
 {\sum_f \alpha_f^2 \gamma_f}
 \leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-$.
+$
 
-If we set the upper bound
-$\delta\eta_m \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})=1$,
+Similarly, we could set the least upper bound equal to 1.
 \footnote{Here we also assumed that
 $\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
 which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
@@ -1075,6 +996,29 @@ and then we get
 = \min \qty(\frac{\tau + \eta_m \Nbar_f}{\Nbar_f})
 = \eta_m + \frac{\tau }{\max(\Nbar_f)}.
 \end{align}
+Therefore 
+\begin{align}
+\eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
+\end{align}
+As we can see, $\eta_1, \cdots, \eta_n$ increase like a geometric series. 
+If written in the form $\eta_{m+1} + \frac{\tau }{\max(\Nbar_f)}
+= 2 \qty( \eta_m + \frac{\tau}{\max(\Nbar_f)})$
+it's easy to see that for $m \geq 1$,
+$\eta_{m} + \frac{\tau }{\max(\Nbar_f)}$ forms a geometric series
+\begin{align}
+\eta_m +  \frac{\tau }{\max(\Nbar_f)}
+=\qty(\eta_1 + \frac{\tau }{\max(\Nbar_f)}) 2^{m-1}
+=\frac{\tau}{\max(\Nbar_f)} 2^m
+\end{align}
+where we used $\eta_1 = \frac{\tau}{\max(\bar{N}_f)}$.
+Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
+final expression for all $\eta_i$
+\begin{align}
+\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) }
+\label{etai rule}
+\end{align}
+Here we need to truncate the series when $\eta_i > 1$.
+
 
 
 

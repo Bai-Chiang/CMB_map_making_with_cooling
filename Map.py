@@ -290,8 +290,8 @@ class Map:
     def generate_noise(self,
             f_knee=1e-15,
             f_apo=1e-16,
-            noise_sigma2=1,
             noise_index=2
+            noise_sigma2=1,
             ):
         """
         generate noise based on noise power spectrum:
@@ -314,9 +314,12 @@ class Map:
         noise_info = [f_knee, f_apo, noise_sigma2, noise_index]
         noise_str = str(noise_info).encode()
         noise_hash = hashlib.md5(noise_str).hexdigest()
-        noise_dir = ('f_knee={:.5g} f_apo={:.5g} noise_sigma2={:.2g} '
-            'noise_index={:.2g} {}').format(
-            f_knee, f_apo, noise_sigma2, noise_index, noise_hash)
+        #noise_dir = ('f_knee={:.5g} f_apo={:.5g} noise_sigma2={:.2g} '
+        #    'noise_index={:.2g} {}').format(
+        #    f_knee, f_apo, noise_sigma2, noise_index, noise_hash)
+        noise_dir = ('f_knee={:.5g}/f_apo={:.5g}/noise_index={:.2g}/'
+            'noise_sigma2={:.2g} {}').format(
+            f_knee, f_apo, noise_index, noise_sigma2, noise_hash)
         self.map_dir = self.map_dir/noise_dir
         self.map_dir.mkdir(parents=True, exist_ok=True)
         noise_file = self.map_dir/'noise_data'
@@ -335,6 +338,11 @@ class Map:
                     (f_knee**noise_index + f_apo**noise_index)\
                     /(self.f**noise_index + f_apo**noise_index) 
                     )
+            # for 1/f noise, noise_power_spectrum[0] would be np.inf,
+            # make the zeroth element equal to the first one to get
+            # finite Χ² value.
+            if np.isinf(noise_power_spectrum[0]):
+                noise_power_spectrum[0] = noise_power_spectrum[1]
             N_f_diag = noise_power_spectrum/self.df
         self.N_f_diag = N_f_diag
         self.noise_power_spectrum = noise_power_spectrum

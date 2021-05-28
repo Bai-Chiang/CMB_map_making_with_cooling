@@ -7,7 +7,7 @@ from matplotlib.lines import Line2D
 from scipy import stats, interpolate
 import pickle
 from pathlib import Path, PurePath
-import tikzplotlib
+#import tikzplotlib
 
 from Map import Map
 
@@ -119,211 +119,17 @@ for data_dic in  data_list:
 
 
 
-
-    ## CG perturbation ln eta
-    #for num_eta, num_iter_eta in num_eta_iter_per_eta:
-    #    #sub_dic = {}
-    #    #sub_dic['num_eta'] = num_eta
-    #    #sub_dic['num_iter_lamb'] = num_iter_lamb
-    #    #sub_dic['description'] = \
-    #    #    data_dic[
-    #    #        'CG_PT_log_e_{:d}x{:d}_description'
-    #    #        .format(num_lamb, num_iter_lamb)
-    #    #        ]
-    #    #sub_dic['description_latex'] = \
-    #    #    data_dic[
-    #    #        'CG_PT_log_e_{:d}x{:d}_description_latex'
-    #    #        .format(num_lamb, num_iter_lamb)
-    #    #        ]
-    #    #description_list.append(sub_dic['description'])
-    #    #description_latex_list.append(sub_dic['description_latex'])
-    #    description_list.append(
-    #        data_dic[
-    #            'CG_PT_ln_{:d}x{:d}_description'
-    #            .format(num_eta, num_iter_eta)
-    #        ]
-    #    )
-    #    description_latex_list.append(
-    #        data_dic[
-    #            'CG_PT_ln_{:d}x{:d}_description_latex'
-    #            .format(num_eta, num_iter_eta)
-    #        ]
-    #    )
-    #    with open(data_dic['CG_PT_ln_{:d}x{:d}_file'
-    #            .format(num_eta, num_iter_eta)], 'rb') as _file:
-    #        CG_PT_result = pickle.load(_file)
-    #        results_list.append(CG_PT_result)
-    #    #CG_PT_dic_list.append(sub_dic)
-
-    # CG with optimal perturbative parameter
-    #opt_lambs = data_dic['opt_lambs']
-    #description_list.append(
-    #    data_dic[
-    #        'CG_PT_opt_{:d}x{:d}_description'
-    #        .format(len(opt_lambs), 1)
-    #    ]
-    #)
-    #description_latex_list.append(
-    #    data_dic[
-    #        'CG_PT_opt_{:d}x{:d}_description_latex'
-    #        .format(len(opt_lambs), 1)
-    #    ]
-    #)
-    #with open(data_dic['CG_PT_opt_{:d}x{:d}_file'
-    #        .format(len(opt_lambs), 1)], 'rb') as _file:
-    #    CG_PT_opt_result = pickle.load(_file)
-    #    results_list.append(CG_PT_opt_result)
-
-    #CG_PT_dic_list = []
-    #for num_lamb, num_iter_lamb in num_lamb_iter_per_lamb:
-    #    sub_dic = {}
-    #    sub_dic['num_lamb'] = num_lamb
-    #    sub_dic['num_iter_lamb'] = num_iter_lamb
-    #    sub_dic['description'] = \
-    #        data_dic[
-    #            'CG_PT_linear_{:d}x{:d}_description'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    sub_dic['description_latex'] = \
-    #        data_dic[
-    #            'CG_PT_linear_{:d}x{:d}_description_latex'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    description_list.append(sub_dic['description'])
-    #    description_latex_list.append(sub_dic['description_latex'])
-    #    with open(data_dic['CG_PT_linear_{:d}x{:d}_file'
-    #            .format(num_lamb, num_iter_lamb)], 'rb') as _file:
-    #        sub_dic['result'] = pickle.load(_file)
-    #        results_list.append(sub_dic['result'])
-    #    CG_PT_dic_list.append(sub_dic)
-
-    
-
-    # CG perturbation log_10 lambda
-    #for num_lamb, num_iter_lamb in num_lamb_iter_per_lamb:
-    #    sub_dic = {}
-    #    sub_dic['num_lamb'] = num_lamb
-    #    sub_dic['num_iter_lamb'] = num_iter_lamb
-    #    sub_dic['description'] = \
-    #        data_dic[
-    #            'CG_PT_log10_{:d}x{:d}_description'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    sub_dic['description_latex'] = \
-    #        data_dic[
-    #            'CG_PT_log10_{:d}x{:d}_description_latex'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    description_list.append(sub_dic['description'])
-    #    description_latex_list.append(sub_dic['description_latex'])
-    #    with open(data_dic['CG_PT_log10_{:d}x{:d}_file'
-    #            .format(num_lamb, num_iter_lamb)], 'rb') as _file:
-    #        sub_dic['result'] = pickle.load(_file)
-    #        results_list.append(sub_dic['result'])
-    #    CG_PT_dic_list.append(sub_dic)
-
-    #for num_lamb, num_iter_lamb in num_lamb_iter_per_lamb:
-    #    sub_dic = {}
-    #    sub_dic['num_lamb'] = num_lamb
-    #    sub_dic['num_iter_lamb'] = num_iter_lamb
-    #    sub_dic['description'] = \
-    #        data_dic[
-    #            'CG_PT_linear_chi2_eta_{:d}x{:d}_description'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    sub_dic['description_latex'] = \
-    #        data_dic[
-    #            'CG_PT_linear_chi2_eta_{:d}x{:d}_description_latex'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    description_list.append(sub_dic['description'])
-    #    description_latex_list.append(sub_dic['description_latex'])
-    #    with open(data_dic['CG_PT_linear_chi2_eta_{:d}x{:d}_file'
-    #            .format(num_lamb, num_iter_lamb)], 'rb') as _file:
-    #        sub_dic['result'] = pickle.load(_file)
-    #        results_list.append(sub_dic['result'])
-    #    CG_PT_dic_list.append(sub_dic)
-
-    #for num_lamb, num_iter_lamb in num_lamb_iter_per_lamb:
-    #    sub_dic = {}
-    #    sub_dic['num_lamb'] = num_lamb
-    #    sub_dic['num_iter_lamb'] = num_iter_lamb
-    #    sub_dic['description'] = \
-    #        data_dic[
-    #            'CG_PT_quadratic_chi2_eta_{:d}x{:d}_description'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    sub_dic['description_latex'] = \
-    #        data_dic[
-    #            'CG_PT_quadratic_chi2_eta_{:d}x{:d}_description_latex'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    description_list.append(sub_dic['description'])
-    #    description_latex_list.append(sub_dic['description_latex'])
-    #    with open(data_dic['CG_PT_quadratic_chi2_eta_{:d}x{:d}_file'
-    #            .format(num_lamb, num_iter_lamb)], 'rb') as _file:
-    #        sub_dic['result'] = pickle.load(_file)
-    #        results_list.append(sub_dic['result'])
-    #    CG_PT_dic_list.append(sub_dic)
-
-    #for num_lamb, num_iter_lamb in num_lamb_iter_per_lamb:
-    #    sub_dic = {}
-    #    sub_dic['num_lamb'] = num_lamb
-    #    sub_dic['num_iter_lamb'] = num_iter_lamb
-    #    sub_dic['description'] = \
-    #        data_dic[
-    #            'CG_PT_exp_chi2_eta_{:d}x{:d}_description'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    sub_dic['description_latex'] = \
-    #        data_dic[
-    #            'CG_PT_exp_chi2_eta_{:d}x{:d}_description_latex'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    description_list.append(sub_dic['description'])
-    #    description_latex_list.append(sub_dic['description_latex'])
-    #    with open(data_dic['CG_PT_exp_chi2_eta_{:d}x{:d}_file'
-    #            .format(num_lamb, num_iter_lamb)], 'rb') as _file:
-    #        sub_dic['result'] = pickle.load(_file)
-    #        results_list.append(sub_dic['result'])
-    #    CG_PT_dic_list.append(sub_dic)
-
-    #CG_MF_dic = {}
-    #for num_lamb, num_iter_lamb in num_lamb_iter_per_lamb:
-    #    sub_dic = {}
-    #    sub_dic['description'] = \
-    #        data_dic[
-    #            'CG_MF_{:d}x{:d}_description'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    sub_dic['description_latex'] = \
-    #        data_dic[
-    #            'CG_MF_{:d}x{:d}_description_latex'
-    #            .format(num_lamb, num_iter_lamb)
-    #            ]
-    #    description_list.append(sub_dic['description'])
-    #    description_latex_list.append(sub_dic['description_latex'])
-    #    with open(data_dic['CG_MF_{:d}x{:d}_file'
-    #            .format(num_lamb, num_iter_lamb)], 'rb') as _file:
-    #        sub_dic['result'] = pickle.load(_file)
-    #        results_list.append(sub_dic['result'])
-    #    #CG_MF_dic['{:d}x{:d}'.format(num_lamb, num_iter_lamb)] = sub_dic.copy()
-
-    #data_dic['results_list'] = results_list
-    #data_dic['description_list'] = description_list
-    #data_dic['description_latex_list'] = description_latex_list
-
-
     # power spectrum
     plt.figure(figsize=(12,9))
     plt.title('diag($N$)')
     plt.plot(f[1:], noise_power_spectrum[1:])
     plt.xlabel('$f$')
     plt.xscale('log')
+    plt.yscale('log')
     #plt.savefig(plot_dir/'power_spectrum.jpeg')
     plt.savefig(plot_dir/'power_spectrum.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'power_spectrum.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'power_spectrum.tex')
     plt.close()
 
 
@@ -379,8 +185,8 @@ for data_dic in  data_list:
     plt.grid()
     #plt.savefig(plot_dir/'r_2norm.jpeg')
     plt.savefig(plot_dir/'r_2norm.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'r_2norm.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'r_2norm.tex')
     plt.close()
     
 
@@ -397,8 +203,8 @@ for data_dic in  data_list:
     plt.grid()
     #plt.savefig(plot_dir/'chi2.jpeg')
     plt.savefig(plot_dir/'chi2.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'chi2.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'chi2.tex')
     plt.close()
 
     # plot Χ²(m,η) log scale
@@ -414,42 +220,26 @@ for data_dic in  data_list:
     plt.grid()
     #plt.savefig(plot_dir/'chi2.jpeg')
     plt.savefig(plot_dir/'chi2_eta.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'chi2_eta.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'chi2_eta.tex')
     plt.close()
 
-    # plot Χ² linear scale
-    #lines = [i['chi2_hist'] for i in results_list]
-    #plt.figure(figsize=(12,9))
-    #plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
-    #plt.xlabel('num of iteration')
-    #plt.ylabel('$\chi^2$') 
-    #for i in range(len(lines)):
-    #    plt.plot(lines[i], '-', label=description_latex_list[i])
-    #plt.legend()
-    #plt.grid()
-    ##plt.savefig(plot_dir/'chi2_linear.jpeg')
-    #plt.savefig(plot_dir/'chi2_linear.pdf')
-    ##tikzplotlib.clean_figure()
-    #tikzplotlib.save(plot_dir/'chi2_linear.tex')
-    #plt.close()
-
-    # plot Χ²/min - 1
-    lines = [i['chi2_hist'] for i in results_list]
-    #jhi2_final = data_dic['chi2_final'] = np.array(lines).min()
+    # plot (Χ²-min)/(ini-min)
+    chi2_hist_list = [i['chi2_hist'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
     plt.xlabel('num of iteration')
     plt.yscale('log')
-    plt.ylabel('$\chi^2/\chi^2_{final} - 1$') 
-    for i in range(len(lines)):
-        plt.plot(lines[i]/chi2_min - 1, '-', label=description_latex_list[i])
+    plt.ylabel(r'$\frac{\chi^2 - \chi^2_{min}}{\chi^2_{ini} - \chi^2_{min}}$') 
+    for i,chi2_hist in enumerate(chi2_hist_list):
+        line = (chi2_hist - chi2_min)/(chi2_hist[0] - chi2_min)
+        plt.plot(line, '-', label=description_latex_list[i])
     plt.legend()
     plt.grid()
     #plt.savefig(plot_dir/'chi2_final_value.jpeg')
     plt.savefig(plot_dir/'chi2_min_value.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'chi2_min_value.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'chi2_min_value.tex')
     plt.close()
 
 
@@ -490,55 +280,8 @@ for data_dic in  data_list:
     #    tikzplotlib.save(plot_dir/('chi2_f_{}.tex'.format(description_list[i])))
     #    plt.close()
 
-    ## |dΧ²/dλ| per freq mode
-    #bins = 20
-    #linewidth = 1
-    #lines = []
-    #for sub_dic in CG_PT_dic_list:
-    #    lines.append(sub_dic['result']['dchi2_f_hist'])
-    #lines_arr = np.array(lines)
-    #_min = lines_arr[lines_arr>0].min()
-    #_max = lines_arr[np.isfinite(lines_arr)].max()
-    #_f = f.copy()
-    #_f[0] = _f[1] # avoid -inf when take log
-    #colors = list(mcolors.TABLEAU_COLORS.keys())
-    #for i,line in enumerate(lines):
-    #    plt.figure(figsize=(12,9))
-    #    plt.title(scan_info_latex)
-    #    bin_means, bin_edges, binnumber = stats.binned_statistic(
-    #        np.log10(_f), line, statistic='mean', bins=bins)
-    #    bin_edges = 10**bin_edges
-    #    for j,n_step in enumerate(
-    #            CG_PT_dic_list[i]['result']['snapshots_index']):
-    #        plt.hlines(bin_means[j,:], bin_edges[:-1], bin_edges[1:],
-    #            color=colors[j%len(colors)], lw=linewidth,
-    #            label='step={:d}'.format(n_step))
-    #    #plt.plot(_f, line[-1,:], '-', lw=linewidth, color='grey', alpha=0.3,
-    #    #    zorder=-1)
-    #    plt.title('{}\n{}'.format(
-    #        scan_info_latex, CG_PT_dic_list[i]['description_latex']))
-    #    plt.yscale('log')
-    #    plt.ylabel(r'$\vert\frac{d\chi^2}{d\lambda}\vert$') 
-    #    print('_min={:.4e}\t_max={:.4e}'.format(_min, _max))
-    #    plt.ylim(_min, _max)
-    #    plt.xscale('log')
-    #    plt.xlabel('$f$')
-    #    plt.legend(loc='center left', bbox_to_anchor=(1.01,0.5))
-    #    plt.grid()
-    #    #plt.savefig(plot_dir/('dchi2_f_{}.jpeg'
-    #    #    .format(CG_PT_dic_list[i]['description'])),
-    #    #    bbox_inches='tight')
-    #    plt.savefig(plot_dir/('dchi2_f_{}.pdf'
-    #        .format(CG_PT_dic_list[i]['description'])),
-    #        bbox_inches='tight'
-    #    )
-    #    #tikzplotlib.clean_figure()
-    #    tikzplotlib.save(plot_dir/('dchi2_f_{}.tex'
-    #        .format(CG_PT_dic_list[i]['description'])),
-    #    )
-    #    plt.close()
 
-    # plot η 
+    # plot η vs iter
     lines = [i['etas_iter'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title(scan_info_latex)
@@ -552,63 +295,11 @@ for data_dic in  data_list:
     plt.legend()
     plt.grid()
     plt.savefig(plot_dir/'eta_iter.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'eta_iter.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'eta_iter.tex')
     plt.close()
 
-    # plot η(x)
-    #log_eta_linear_chi2_interp = data_dic['log_eta_linear_chi2_interp']
-    #x = np.linspace(0,1,10000)
-    #x[0] = 1e-10  # avoid -inf value for log function
-    #log_eta = log_eta_linear_chi2_interp(x)
-    #eta = np.exp(log_eta)
-    #plt.figure(figsize=(12,9))
-    #plt.title('{}\nlinear $\chi^2$'.format(scan_info_latex))
-    #plt.plot(x, eta)
-    #plt.yscale('log')
-    #plt.ylim(1e-20,1)
-    #plt.xlabel('$x$')
-    #plt.ylabel('$\eta(x)$') 
-    #plt.grid()
-    #plt.savefig(plot_dir/'eta_vs_x_linear_chi2.jpeg')
-    #plt.savefig(plot_dir/'eta_vs_x_linear_chi2.pdf')
-    #plt.close()
-
-    #log_eta_quadratic_chi2_interp = data_dic['log_eta_quadratic_chi2_interp']
-    #x = np.linspace(0,1,10000)
-    #x[0] = 1e-10  # avoid -inf value for log function
-    #log_eta = log_eta_quadratic_chi2_interp(x)
-    #eta = np.exp(log_eta)
-    #plt.figure(figsize=(12,9))
-    #plt.title('{}\nquadratic $\chi^2$'.format(scan_info_latex))
-    #plt.plot(x, eta)
-    #plt.yscale('log')
-    #plt.ylim(1e-20,1)
-    #plt.xlabel('$x$')
-    #plt.ylabel('$\eta(x)$') 
-    #plt.grid()
-    #plt.savefig(plot_dir/'eta_vs_x_quadratic_chi2.jpeg')
-    #plt.savefig(plot_dir/'eta_vs_x_quadratic_chi2.pdf')
-    #plt.close()
-
-    #log_eta_exp_chi2_interp = data_dic['log_eta_exp_chi2_interp']
-    #x = np.linspace(0,1,10000)
-    #x[0] = 1e-10  # avoid -inf value for log function
-    #log_eta = log_eta_exp_chi2_interp(x)
-    #eta = np.exp(log_eta)
-    #plt.figure(figsize=(12,9))
-    #plt.title('{}\nexp $\chi^2$'.format(scan_info_latex))
-    #plt.plot(x, eta)
-    #plt.yscale('log')
-    #plt.ylim(1e-20,1)
-    #plt.xlabel('$x$')
-    #plt.ylabel('$\eta(x)$') 
-    #plt.grid()
-    #plt.savefig(plot_dir/'eta_vs_x_exp_chi2.jpeg')
-    #plt.savefig(plot_dir/'eta_vs_x_exp_chi2.pdf')
-    #plt.close()
-
-    # plot Χ²(η) 
+    # plot Χ²(m(η),η) 
     (eta_arr, chi2_arr) = data_dic['chi2_vs_eta']
     fig,ax = plt.subplots(figsize=(12,9))
     plt.title(scan_info_latex)
@@ -628,8 +319,8 @@ for data_dic in  data_list:
     #ax.grid(axis='y', which='minor')
     ax.set_xlim(eta_arr.min(),1)
     plt.savefig(plot_dir/'chi2_vs_eta.pdf')
-    tikzplotlib.clean_figure()
-    tikzplotlib.save(plot_dir/'chi2_vs_eta.tex')
+    #tikzplotlib.clean_figure()
+    #tikzplotlib.save(plot_dir/'chi2_vs_eta.tex')
     plt.close()
 
 
@@ -711,7 +402,7 @@ for i,[description,description_latex] in enumerate(zip(description_list,
     plt.savefig(figs_dir/(description+'.pdf'), 
         bbox_inches='tight')
     #tikzplotlib.clean_figure()
-    tikzplotlib.save(figs_dir/(description+'.tex') )
+    #tikzplotlib.save(figs_dir/(description+'.tex') )
     plt.close()
 
 

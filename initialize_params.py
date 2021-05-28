@@ -8,8 +8,6 @@ cache_dir = Path('cache').expanduser()
 seed = 0
 f_scan_list = [
     0.1,
-    #0.001,
-    #10,
 ]
 num_eta_arr = np.array([5,15,30],dtype=int)
 f_sample_list = [100,]
@@ -17,6 +15,9 @@ f_knee_list = [
     0.001,
     0.1,
     1,
+    10,
+    100,
+    1000,
 ]
 
 
@@ -28,6 +29,7 @@ condition_number_arr = np.array([1e2,1e6,1e12])
 x_max = y_max = 1*np.pi/180
 sig_amp = 100
 noise_sigma2 = 10
+noise_index = 2
 num_pix_x = num_pix_y = 512
 crosslink=True
 num_snapshots = 5
@@ -62,8 +64,8 @@ for k in condition_number_arr:
                 f_apo2 = np.sqrt(f_apo2_2)
                 if f_apo2 < f_knee:
                     f_sample_knee_apo_list.append([f_sample, f_knee, f_apo2])
-            # add a case when fapo << df
-            df = 1/(num_sample/f_sample)
+            # add 1/f noise, fapo = 0
+            f_sample_knee_apo_list.append([f_sample, f_knee, 0.0])
 f_sample_knee_apo_arr = np.array(f_sample_knee_apo_list)
 
 
@@ -94,6 +96,7 @@ parameters_dic = {
     'y_max':y_max,
     'sig_amp':sig_amp,
     'noise_sigma2':noise_sigma2,
+    'noise_index':noise_index,
     'num_pix_x':num_pix_x,
     'num_pix_y':num_pix_y,
     'crosslink':crosslink,
