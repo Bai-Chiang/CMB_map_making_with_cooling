@@ -89,12 +89,6 @@ for f_scan in f_scan_list:
         # get etas that makes chi2 decrease
         data_dic['chi2_vs_eta'] = _map.get_chi2_vs_eta()
         data_dic['chi2_min'] = _map.chi2_min
-        #log_eta_linear_chi2_interp = _map.get_log_eta_linear_chi2()
-        #data_dic['log_eta_linear_chi2_interp'] = log_eta_linear_chi2_interp
-        #log_eta_quadratic_chi2_interp = _map.get_log_eta_quadratic_chi2()
-        #data_dic['log_eta_quadratic_chi2_interp'] = log_eta_quadratic_chi2_interp
-        #log_eta_exp_chi2_interp = _map.get_log_eta_exp_chi2()
-        #data_dic['log_eta_exp_chi2_interp'] = log_eta_exp_chi2_interp
 
         # CG with simple preconditioner
         print('CG simple preconditioner, max iter = {:d}'.format(num_iter))
@@ -111,37 +105,6 @@ for f_scan in f_scan_list:
         data_dic['CG_SP_description'] = CG_SP_description
         data_dic['CG_SP_description_latex'] = CG_SP_description_latex
         data_dic['CG_SP_file'] = CG_SP_file
-
-
-        # Perturbative optimal precondionter 
-        #eta1 = _map.N_f_diag.min()/(_map.N_f_diag.max()-_map.N_f_diag.min())
-        #_i = np.arange(int(np.floor(np.log2(1/eta1 + 1)))) + 1
-        #opt_lambs = eta1*( 2**(_i) - 1 )
-        #opt_lambs = np.append(opt_lambs, 1)
-        #data_dic['opt_lambs'] = opt_lambs
-        #print('{:d}x{:d} CG opt perturbation '.format(
-        #    len(opt_lambs), 1,))
-        #CG_PT_description = ('CG with opt eta {:d}x{:d} '
-        #    'preconditioner=PTP').format(len(opt_lambs), 1 )
-        #CG_PT_description_latex = ('CG with opt $\eta$ '
-        #    '{:d}x{:d} preconditioner=$P^T P$').format(
-        #    len(opt_lambs), 1, )
-        #CG_PT_file,_ = _map.conjugate_gradient_solver_perturbative_noise(
-        #    opt_lambs,
-        #    1,
-        #    num_iter,
-        #    preconditioner_inv=_map.PTP_preconditioner, 
-        #    preconditioner_description='PTP',
-        #    num_snapshots=num_snapshots,
-        #    )
-        #data_dic['CG_PT_opt_{:d}x{:d}_description'
-        #    .format(len(opt_lambs), 1)]\
-        #    = CG_PT_description
-        #data_dic['CG_PT_opt_{:d}x{:d}_description_latex'
-        #    .format(len(opt_lambs), 1)]\
-        #    = CG_PT_description_latex
-        #data_dic['CG_PT_opt_{:d}x{:d}_file'.format(
-        #    len(opt_lambs), 1)] = CG_PT_file
 
 
         # perturbative auto eta
@@ -191,216 +154,32 @@ for f_scan in f_scan_list:
             data_dic['CG_PT_manual_ln_{:d}_eta_file'.format(
                 num_eta)] = CG_PT_file
 
-        # MF iteration
-        for num_eta in num_eta_arr:
-            tau = np.min(_map.N_f_diag)
-            Nbar_f = _map.N_f_diag - tau
-            eta_min = tau/Nbar_f.max()
-            etas=np.logspace(
-                np.log(eta_min), 0, num=num_eta, base=np.e
-            )
-            print('MF ln {:d}x1 eta'.format(num_eta))
-            MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
-            MF_description_latex = (r'MF $\ln$ scale, '
-                r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
-            MF_file,_ =\
-                _map.messenger_field_solver(
-                    lambs=1/etas,
-                    num_iter_per_lamb=1,
-                    num_iter=num_iter,
-                )
-            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
-                = MF_description
-            data_dic['MF_ln_{:d}_eta_description_latex'
-                .format(num_eta)]\
-                = MF_description_latex
-            data_dic['MF_ln_{:d}_eta_file'.format(
-                num_eta)] = MF_file
-
-        #for num_eta, num_iter_eta in num_eta_iter_per_eta:
-
-        #    # CG perturbation ln eta
-        #    etas = np.logspace(
-        #        np.log(
-        #             _map.N_f_diag.min()
-        #             /(_map.N_f_diag.max()-_map.N_f_diag.min())
-        #        ),
-        #        0, num=num_eta, base=np.e,)
-        #    print('{:d}x{:d} CG ln perturbation '.format(
-        #        num_eta, num_iter_eta, ))
-        #    CG_PT_description = ('CG with ln eta {:d}x{:d} '
-        #        'preconditioner=PTP').format(num_eta, num_iter_eta, )
-        #    CG_PT_description_latex = ('CG with $\ln$ $\eta$ '
-        #        '{:d}x{:d} preconditioner=$P^T P$').format(
-        #        num_eta, num_iter_eta, )
-        #    CG_PT_file,_ = _map.conjugate_gradient_solver_perturbative_manual_eta(
-        #        etas,
-        #        num_iter_eta,
-        #        num_iter,
-        #        preconditioner_inv=_map.PTP_preconditioner, 
-        #        preconditioner_description='PTP',
-        #        num_snapshots=num_snapshots,
+        ## MF iteration
+        #for num_eta in num_eta_arr:
+        #    tau = np.min(_map.N_f_diag)
+        #    Nbar_f = _map.N_f_diag - tau
+        #    eta_min = tau/Nbar_f.max()
+        #    etas=np.logspace(
+        #        np.log(eta_min), 0, num=num_eta, base=np.e
+        #    )
+        #    print('MF ln {:d}x1 eta'.format(num_eta))
+        #    MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
+        #    MF_description_latex = (r'MF $\ln$ scale, '
+        #        r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
+        #    MF_file,_ =\
+        #        _map.messenger_field_solver(
+        #            lambs=1/etas,
+        #            num_iter_per_lamb=1,
+        #            num_iter=num_iter,
         #        )
-        #    data_dic['CG_PT_ln_{:d}x{:d}_description'
-        #        .format(num_eta, num_iter_eta)]\
-        #        = CG_PT_description
-        #    data_dic['CG_PT_ln_{:d}x{:d}_description_latex'
-        #        .format(num_eta, num_iter_eta)]\
-        #        = CG_PT_description_latex
-        #    data_dic['CG_PT_ln_{:d}x{:d}_file'.format(
-        #        num_eta, num_iter_eta)] = CG_PT_file
+        #    data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
+        #        = MF_description
+        #    data_dic['MF_ln_{:d}_eta_description_latex'
+        #        .format(num_eta)]\
+        #        = MF_description_latex
+        #    data_dic['MF_ln_{:d}_eta_file'.format(
+        #        num_eta)] = MF_file
 
-
-
-            # CG perturbation log10 lambda
-            #lambs = np.logspace(
-            #    np.log10(
-            #         _map.N_f_diag.min()
-            #         /(_map.N_f_diag.max()-_map.N_f_diag.min())
-            #    ),
-            #    0, num=num_lamb, base=10)
-            #print('{:d}x{:d} CG log10 perturbation '.format(
-            #    num_lamb, num_iter_lamb, ))
-            #CG_PT_description = ('CG with log10 eta {:d}x{:d} '
-            #    'preconditioner=PTP').format(num_lamb, num_iter_lamb, )
-            #CG_PT_description_latex = ('CG with $\log_{{10}}$ $\eta$ '
-            #    '{:d}x{:d} preconditioner=$P^T P$').format(
-            #    num_lamb, num_iter_lamb, )
-            #CG_PT_file,_ = _map.conjugate_gradient_solver_perturbative_noise(
-            #    lambs,
-            #    num_iter_lamb,
-            #    num_iter,
-            #    preconditioner_inv=_map.PTP_preconditioner, 
-            #    preconditioner_description='PTP',
-            #    num_snapshots=num_snapshots,
-            #    )
-            #data_dic['CG_PT_log10_{:d}x{:d}_description'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description
-            #data_dic['CG_PT_log10_{:d}x{:d}_description_latex'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description_latex
-            #data_dic['CG_PT_log10_{:d}x{:d}_file'.format(
-            #    num_lamb, num_iter_lamb)] = CG_PT_file
-
-
-            ## CG with MF cooling
-            #lambs = np.logspace(
-            #    np.log(_map.N_f_diag.max()/_map.N_f_diag.min()), 0,
-            #    num=num_lamb, base=np.e)
-            #lambs = np.concatenate([
-            #    _map.N_f_diag.max()/_map.N_f_diag.min()*np.ones(3),
-            #    lambs
-            #    ])
-            #lambs = np.linspace(_map.N_f_diag.max()/_map.N_f_diag.min(), 1,
-            #    num_lamb)
-            #print('{:d}x{:d} CG messenger field cooling'
-            #    .format(num_lamb, num_iter_lamb))
-            #CG_MF_description = ('CG with MF cooling {:d}x{:d} '
-            #    'preconditioner=PTP λ0={:.5g}').format(
-            #    num_lamb, num_iter_lamb, lambs[0])
-            #CG_MF_description_latex = ('CG with MF cooling {:d}x{:d} '
-            #    'preconditioner=$P^T P$ $\lambda_0={:.5g}$').format(
-            #    num_lamb, num_iter_lamb, lambs[0])
-            #CG_MF_file,_ = _map.conjugate_gradient_solve_map_cooling(
-            #    lambs,
-            #    num_iter_lamb,
-            #    num_iter,
-            #    preconditioner_inv=_map.PTP_preconditioner,
-            #    preconditioner_description='PTP',
-            #    num_snapshots=num_snapshots, 
-            #    )
-            #data_dic['CG_MF_{:d}x{:d}_description'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_MF_description
-            #data_dic['CG_MF_{:d}x{:d}_description_latex'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_MF_description_latex
-            #data_dic['CG_MF_{:d}x{:d}_file'.format(num_lamb, num_iter_lamb)]\
-            #    = CG_MF_file
-
-
-            ## CG with chi2 decrease linearly
-            #x = np.linspace(0,1,num=num_lamb+1)[1:]
-            #eta_arr = np.exp(log_eta_linear_chi2_interp(x))
-            #print('{:d}x{:d} CG linear chi2'.format(
-            #    num_lamb, num_iter_lamb, ))
-            #CG_PT_description = ('CG linear chi2 {:d}x{:d} '
-            #    'preconditioner=PTP').format(num_lamb, num_iter_lamb, )
-            #CG_PT_description_latex = ('CG linear $\chi^2$ $\eta$ '
-            #    '{:d}x{:d} preconditioner=$P^T P$').format(
-            #    num_lamb, num_iter_lamb, )
-            #CG_PT_file,_ = _map.conjugate_gradient_solver_perturbative_noise(
-            #    eta_arr,
-            #    num_iter_lamb,
-            #    num_iter,
-            #    preconditioner_inv=_map.PTP_preconditioner, 
-            #    preconditioner_description='PTP',
-            #    num_snapshots=num_snapshots,
-            #    )
-            #data_dic['CG_PT_linear_chi2_eta_{:d}x{:d}_description'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description
-            #data_dic['CG_PT_linear_chi2_eta_{:d}x{:d}_description_latex'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description_latex
-            #data_dic['CG_PT_linear_chi2_eta_{:d}x{:d}_file'.format(
-            #    num_lamb, num_iter_lamb)] = CG_PT_file
-
-
-            ## CG with chi2 decrease quadratically
-            #x = np.linspace(0,1,num=num_lamb+1)[1:]
-            #eta_arr = np.exp(log_eta_quadratic_chi2_interp(x))
-            #print('{:d}x{:d} CG quadratic chi2'.format(
-            #    num_lamb, num_iter_lamb, ))
-            #CG_PT_description = ('CG quadratic chi2 {:d}x{:d} '
-            #    'preconditioner=PTP').format(num_lamb, num_iter_lamb, )
-            #CG_PT_description_latex = ('CG quadratic $\chi^2$ $\eta$ '
-            #    '{:d}x{:d} preconditioner=$P^T P$').format(
-            #    num_lamb, num_iter_lamb, )
-            #CG_PT_file,_ = _map.conjugate_gradient_solver_perturbative_noise(
-            #    eta_arr,
-            #    num_iter_lamb,
-            #    num_iter,
-            #    preconditioner_inv=_map.PTP_preconditioner, 
-            #    preconditioner_description='PTP',
-            #    num_snapshots=num_snapshots,
-            #    )
-            #data_dic['CG_PT_quadratic_chi2_eta_{:d}x{:d}_description'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description
-            #data_dic['CG_PT_quadratic_chi2_eta_{:d}x{:d}_description_latex'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description_latex
-            #data_dic['CG_PT_quadratic_chi2_eta_{:d}x{:d}_file'.format(
-            #    num_lamb, num_iter_lamb)] = CG_PT_file
-
-            ## CG with chi2 decrease exponentially
-            #x = np.linspace(0,1,num=num_lamb+1)[1:]
-            #eta_arr = np.exp(log_eta_exp_chi2_interp(x))
-            #print('{:d}x{:d} CG exp chi2'.format(
-            #    num_lamb, num_iter_lamb, ))
-            #CG_PT_description = ('CG exp chi2 {:d}x{:d} '
-            #    'preconditioner=PTP').format(num_lamb, num_iter_lamb, )
-            #CG_PT_description_latex = ('CG exp $\chi^2$ $\eta$ '
-            #    '{:d}x{:d} preconditioner=$P^T P$').format(
-            #    num_lamb, num_iter_lamb, )
-            #CG_PT_file,_ = _map.conjugate_gradient_solver_perturbative_noise(
-            #    eta_arr,
-            #    num_iter_lamb,
-            #    num_iter,
-            #    preconditioner_inv=_map.PTP_preconditioner, 
-            #    preconditioner_description='PTP',
-            #    num_snapshots=num_snapshots,
-            #    )
-            #data_dic['CG_PT_exp_chi2_eta_{:d}x{:d}_description'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description
-            #data_dic['CG_PT_exp_chi2_eta_{:d}x{:d}_description_latex'
-            #    .format(num_lamb, num_iter_lamb)]\
-            #    = CG_PT_description_latex
-            #data_dic['CG_PT_exp_chi2_eta_{:d}x{:d}_file'.format(
-            #    num_lamb, num_iter_lamb)] = CG_PT_file
 
         data_list_rank.append(data_dic)
 

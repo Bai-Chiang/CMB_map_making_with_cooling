@@ -23,13 +23,17 @@ f_knee_list = [
 
 num_sample = int(2**20)
 #condition_number_arr = np.logspace(0,20,11)[1:]
-condition_number_arr = np.array([1e2,1e6,1e12])
+condition_number_arr = np.array([
+    1e2,
+    1e6,
+    1e12,
+])
 
 
 x_max = y_max = 1*np.pi/180
 sig_amp = 100
 noise_sigma2 = 10
-noise_index = 2
+noise_index = 1
 num_pix_x = num_pix_y = 512
 crosslink=True
 num_snapshots = 5

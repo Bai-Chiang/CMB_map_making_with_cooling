@@ -235,6 +235,7 @@ then we can precompute the right-hand side $\Pdagger \inv{N(\eta)} \vbd$ for eac
 In the appendix, we show that a generic good choice for the $\eta$ parameters are the geometric series
 \begin{align}
 \eta_i =\min \qty\bigg{ \qty(2^i -1)\frac{\tau}{\max(\Nbar_f)},\; 1 },
+\label{etai rule}
 \end{align}
 where $\bar N_f$ is the frequency representation of the non-uniform part of the covariance.  This is the main result.  It tells us not only how to choose parameters $\eta_i$,
 but also when we should stop the perturbation, and set $\eta = 1$.
@@ -604,8 +605,8 @@ Therefore, overall introducing $\eta$ won't have extra computational cost.
 
 
 
+\subsection{Future Prospects}
 
-\section{Conclusions} \label{sec:conclusions} 
 \kmh{some of this future prospects should move to discussion}
 As you may have noticed in the second and third Figure(\ref{f scan 0.1}),
 the perturbation parameter based on
@@ -695,6 +696,7 @@ $\vb{r}_{\eta}$ % = \vbd - P\hatm = \mathcal{P}_{\eta} \vbd$
 as an arbitrary vector, such that we lose all information related to scanning 
 scheme in the pointing matrix $P$.
 
+\section{Conclusions} \label{sec:conclusions} 
 
 \kmh{We need some discussion of the things that haven't yet been demonstrated with the PCG, like multiple messenger fields.  Has the Kodi-Ramanah dual messenger field scheme been demonstrated in a PCG scheme by Papez?}
 
@@ -1015,7 +1017,6 @@ Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
 final expression for all $\eta_i$
 \begin{align}
 \eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) }
-\label{etai rule}
 \end{align}
 Here we need to truncate the series when $\eta_i > 1$.
 
