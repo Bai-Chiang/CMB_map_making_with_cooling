@@ -712,7 +712,8 @@ class Map:
         return self._PTP_inv(m)
 
     def get_chi2_vs_eta(self, 
-            num_eta=500,
+            num_eta=100,
+            force_recalculate=False,
             ):
         """
         get function of Χ²(η)
@@ -732,8 +733,9 @@ class Map:
                     preconditioner_inv=self.PTP_preconditioner,
                     preconditioner_description='PTP',
                     next_eta_ratio=1e-3,
-                    etas=etas
-                )
+                    etas=etas,
+                    force_recalculate=force_recalculate,
+            )
             chi2_result = infinitesimal_step_result['chi2_eta_hist']
             etas_result = infinitesimal_step_result['etas_iter']
             final_eta_eq_1 = (etas_result[-1] == 1)
@@ -843,6 +845,7 @@ class Map:
             preconditioner_description,
             num_snapshots=2,
             #stop_ratio=0,
+            force_recalculate=False,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -866,6 +869,9 @@ class Map:
                 --- the inverse of preconditioner
             preconditioner_description
                 --- description of preconditioner
+            force_recalculate
+                --- bool
+                --- if True, recalculate even if there is an old result
             #stop_ratio
             #    --- float
             #    --- when the 2-norm of the residual ratio 
@@ -927,6 +933,8 @@ class Map:
         try:
             with open(CG_file, 'rb') as _file:
                 CG_results = pickle.load(_file)
+            if force_recalculate:
+                raise FileNotFoundError
         except FileNotFoundError:
 
             m_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
@@ -985,7 +993,7 @@ class Map:
                         freq_mode=True)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'.format(
                     i_iter, chi2, ratio_2norm))
-                if (ratio_2norm < 1e-10/(num_pix_x*num_pix_y)
+                if (ratio_2norm/(num_pix_x*num_pix-y) < 1e-5
                         and i_iter != num_iter):
                     # stop calculation if norm per pixel is smaller than 1e-5
                     stop_point = i_iter
@@ -1019,6 +1027,7 @@ class Map:
             #num_snapshots=2,
             #stop_ratio=0,
             #next_lamb_ratio = 1e-2,
+            force_recalculate=False,
             ):
         """
         messenger field solve map based on Huffenberger 2018: 
@@ -1037,6 +1046,9 @@ class Map:
             num_iter
                 --- int
                 --- number of iteration
+            force_recalculate
+                --- bool
+                --- if True, recalculate even if there is an old result
         return:
             MF_file
                 --- pathlib.Path
@@ -1079,6 +1091,8 @@ class Map:
         try:
             with open(MF_file, 'rb') as _file:
                 MF_results = pickle.load(_file)
+            if force_recalculate:
+                raise FileNotFoundError
         except FileNotFoundError:
             num_pix_x = self.num_pix_x
             num_pix_y = self.num_pix_y
@@ -1141,9 +1155,9 @@ class Map:
                 #        freq_mode=True)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'\
                     .format(i_iter, chi2, ratio_2norm))
-                if (ratio_2norm/(num_pix_x*num_pix_y) < 1e-10
+                if (ratio_2norm/(num_pix_x*num_pix_y) < 1e-5
                         and i_iter != num_iter):
-                    # stop calculation if norm per pixel is smaller than 1e-10
+                    # stop calculation if norm per pixel is smaller than 1e-5
                     stop_point = i_iter
                     chi2_hist[stop_point:] = chi2
                     chi2_eta_hist[stop_point:] = chi2_eta
@@ -1183,6 +1197,7 @@ class Map:
             etas=None,
             #num_snapshots=2,
             #stop_ratio=0,
+            force_recalculate=False,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -1222,6 +1237,9 @@ class Map:
             etas
                 --- np.array
                 --- optional eta values, etas[-1] = 1
+            force_recalculate
+                --- bool
+                --- if True, recalculate even if there is an old result
             #num_snapshots
             #    --- int >= 2
             #    --- number of snapshots of map, r, Χ² per freq mode etc.
@@ -1294,6 +1312,8 @@ class Map:
         try:
             with open(CG_file, 'rb') as _file:
                 CG_results = pickle.load(_file)
+            if force_recalculate:
+                raise FileNotFoundError
         except FileNotFoundError:
             # m_hist r_hist only store initial and final result
             m_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
@@ -1385,7 +1405,7 @@ class Map:
                         * np.sqrt( 
                             self.noise_sigma2/self.dt * total_pix/self.num_t
                         )
-                        and i_eta < len(etas) - 1
+                        and eta < 1
                     ):
                     # residual norm per pixel (r/#pix) smaller than
                     # next_eta_ratio * std per pixel.
@@ -1402,9 +1422,9 @@ class Map:
                     p = z.copy()
                     chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
 
-                if (r_2norm/total_pix < 1e-10
+                elif (r_2norm/total_pix < 1e-5
                         and eta == 1 ):
-                    # stop calculation if norm per pixel is smaller than 1e-10
+                    # stop calculation if norm per pixel is smaller than 1e-5
                     stop_point = i_iter
                     chi2_hist[stop_point:] = chi2
                     chi2_eta_hist[stop_point:] = chi2_eta
@@ -1428,6 +1448,7 @@ class Map:
             #CG_results['snapshots_index'] = snapshots_index
             #CG_results['stop_point'] = stop_point
             CG_results['etas_iter'] = etas_iter
+            print(etas_iter)
             CG_results['etas'] = etas
             with open(CG_file, 'wb') as _file:
                 pickle.dump(CG_results, _file)
