@@ -291,8 +291,10 @@ P(f) = \sigma^2 \qty(1+ \frac{f_{\text{knee}}^{\alpha}+f_{\text{apo}}^{\alpha}}
 Here we fixed $\sigma^2 = 10$ $\mu$K$^2$, $\alpha = 2$ and $f_{\text{knee}} = 10$ Hz,
 and change $f_{\text{apo}}$ to compare the performance under different noise
 models.
+\citet{2013ApJ...762...10D} measured the slopes of the atmospheric noise in the Atacama under different water vapor conditions, finding $\alpha = 2.7$ to $2.9$.
+
 Note that as $f_{\text{apo}} \rightarrow 0 $,
-$P(f) \rightarrow \sigma^2\qty(1 + (f/f_{\text{knee}})^{-1} )$, 
+$P(f) \rightarrow \sigma^2\qty(1 + (f/f_{\text{knee}})^{-\alpha} )$, 
 it becomes a $1/f$ noise model.
 The noise covariance matrix 
 \begin{equation}
@@ -318,7 +320,7 @@ The corresponding power spectrum are shown in Figure(\ref{power spectrum}).
 Finally, we get the simulated time ordered data $\vb{d} = \vb{s} + \vb{n}$ by
 adding up signal and noise.
 
-\kmh{Compare to the noise power spectrum of Papez. Remark how little 1/f is in their test.  What is the effect of changing the noise slope?}
+\kmh{Compare to the noise power spectrum of Papez. Remark how little 1/f is in their test.  What is the effect of changing the noise slope? Papez uses $\alpha =1$ and their condition number  is about 12.}
 \textcolor{green}{
 In \citealt{2018A&A...620A..59P}, the noise power spectrum is apodized at $0.1f_\text{knee}$,
 which corresponds to $f_\text{apo} \approx 0.1 f_\text{knee}$
