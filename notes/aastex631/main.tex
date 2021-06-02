@@ -843,7 +843,7 @@ To simplify notation, we use $\Neta$ to denote $N(\eta) = \tau I +  \eta \bar N$
 For some specific $\eta$ value, the minimum $\chi^2$ value is given by the optimized map
 %The parameterized estimated map
 $\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$,
-which minimize
+which minimizes
 %\begin{align}
 %\chi^2 (\vbm, \eta)
 %= \qty(\vbd - P \vbm)^{\dagger} \inv{\Neta} (\vbd - P\vbm).
@@ -853,11 +853,11 @@ which minimize
 \begin{aligned}[b]
 \chi^2 (\hatm(\eta), \eta)
 &= \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{\Neta} 
-    \qty\big(\vbd - P\hatm(\eta))
+    \qty\big(\vbd - P\hatm(\eta)).
 \end{aligned}
 \end{align}
-We restrict to the case  that the noise covariance matrix
-$N$ is diagonal in the frequency domain.
+We restrict to the case that the noise covariance matrix
+$N$ is diagonal in the frequency domain, and represent the frequency-domain eigenvalues as $N_f$.
 
 %Now let us see how $\chi^2(\hatm(\eta),\eta)$ changes as we change $\eta$.
 %The relative decrease of $\chi^2(\hatm(\eta), \eta)$ at $\eta$ is defined as
@@ -878,9 +878,9 @@ $N$ is diagonal in the frequency domain.
 %\end{align}
 %Here we put a minus sign in front of
 %$\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$,
-Let's first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
-such that $\eta_1 = \delta \eta$ is very small quantity.
-Since $\hatm(\eta)$ minimize $\chi^2(\hatm(\eta),\eta)$, we have 
+Let us first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
+such that $\eta_1 = \delta \eta$ is very small quantity, $\delta \eta \ll 1$.
+Since $\hatm(\eta)$ minimizes $\chi^2(\hatm(\eta),\eta)$, we have 
 $\pdv{\hatm} \chi^2(\hatm(\eta), \eta) = 0$,
 and using chain rule
 \begin{align}
@@ -903,7 +903,7 @@ $\eta_1 = \delta \eta$ is
 Here we put a minus sign in front of this expression such that it's 
 non-negative, and use $N_{\eta=0} = \tau I$ at the second equality.
 %\kmh{This statement is kind of non trivial...  I think you need to explain more the step $(\tau I + \delta \eta \bar N)^{-1} \approx \tau I - \delta \eta \bar N$. (I think that's right, even if you don't restrict to the frequency diagonal case.)}
-Since it's hard to analyze $\vbd - P\hatm$ under frequency domain,
+Since it is hard to analyze $\vbd - P\hatm$ under frequency domain,
 we treat it as an arbitary vector, then the least upper bound is given by
 \begin{align}
 -\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
@@ -923,16 +923,15 @@ The upper bound is strictly smaller than 1.
 Ideally, if
 $\delta \chi^2(\hatm(0),0) = \chi^2(\hatm(1), 1) - \chi^2(\hatm(0),0)$,
 then it would get close to the final $\chi^2$ at next iteration,
-but we don't know final $\chi^2(\hatm(1),1)$.
-So we want $\qty|\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}|$ being as
-large as possible, so it could converge fast.
-But there is another constrain that the least upper bound cannot exceed 1.
-Therefore could choose $\delta \eta$, such that the least upper bound is equal to 1.
+but we do not know the final $\chi^2(\hatm(1),1)$.
+So we want $\qty|\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}|$ to be as
+large as possible, so it could converge fast, but subject to another constraint that the least upper bound cannot exceed 1.
+Therefore we can choose $\delta \eta$ such that the least upper bound is equal to 1.
 %we could set its upper bound equal to 1, $\delta \eta \max(\Nbar_f) / \tau = 1$ \kmh{explain this reasoning a bit better}.
 %This gives
-Then we find
+Thus we choose
 \begin{equation}
-\eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}
+\eta_1 \equiv \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}.
 \end{equation}
 Here $N_f$ and $\Nbar_f$ are the eigenvalues of $N$ and $\Nbar$ in the frequency
 domain.
@@ -941,8 +940,8 @@ $\kappa(N) = \max(N_f)/\min(N_f) \gg 1$,
 then $\eta_1 \approx \inv{\kappa} (N)$.
 
 What about the other parameters $\eta_m$ with $m > 1$?
-We could use a similar analysis,
-let $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m$,
+We use a similar analysis,
+letting $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m \ll 1$,
 and set the least upper bound of relative decrease equal to 1.
 %See Appendix \ref{derive other etas} for detailed derivation.
 %We would get
@@ -975,24 +974,19 @@ $\inv{N}_{\eta_m}$
 is
 $\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
 Their eigenvalues are related by
-$\lambda_f = \frac{\Nbar_f}{\tau + \eta_m \Nbar_f} \gamma_f$.
+$\lambda_f = [{\Nbar_f}/{(\tau + \eta_m \Nbar_f)}] \gamma_f$.
 For any vector $\vb{v} = \sum_f \alpha_f \vb{e}_f$, we have
-$\frac{\vb{v}^{\dagger} \inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m} \vb{v}}
+\begin{equation}
+  \frac{\vb{v}^{\dagger} \inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m} \vb{v}}
 {\vb{v}^{\dagger} \inv{N}_{\eta_m} \vb{v}}
 = \frac{\sum_f \alpha_f^2 \lambda_f}{\sum_f \alpha_f^2 \gamma_f}
 = \frac{\sum_f \alpha_f^2 \gamma_f \Nbar_f/(\tau + \eta_m \Nbar_f)}
 {\sum_f \alpha_f^2 \gamma_f}
-\leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-$
+\leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f}).
+\end{equation}
 
 Similarly, we could set the least upper bound equal to 1.
-\footnote{Here we also assumed that
-$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
-which we expect it to be satisfied for $0 \simeq \eta_m \ll 1$. 
-Since final result Eq.~(\ref{etai rule}) is geometric series,
-only a few $\eta_m$ values won't satisfy this condition.
-}
-and then we get
+Then we get
 \begin{align}
 \delta \eta_m 
 = \min \qty(\frac{\tau + \eta_m \Nbar_f}{\Nbar_f})
@@ -1002,23 +996,32 @@ Therefore
 \begin{align}
 \eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
 \end{align}
-As we can see, $\eta_1, \cdots, \eta_n$ increase like a geometric series. 
-If written in the form $\eta_{m+1} + \frac{\tau }{\max(\Nbar_f)}
-= 2 \qty( \eta_m + \frac{\tau}{\max(\Nbar_f)})$
+The final term ${\tau }/{\max (\Nbar_f)} = \eta_1$ becomes subdominant after a few terms, and we see that the $\eta_m$ increase like a geometric series. 
+%\footnote{
+Here we assumed that
+$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
+which we expect it to be satisfied for our assumed $ \eta_m \ll 1$. 
+Since the final result %Eq.~(\ref{etai rule})
+is geometric series,
+only the last few $\eta_m$ values fail to be much smaller than 1.
+%}
+
+If written in the form $\eta_{m+1} + {\tau }/{\max(\Nbar_f)}
+= 2 \qty( \eta_m + {\tau}/{\max(\Nbar_f)})$
 it's easy to see that for $m \geq 1$,
-$\eta_{m} + \frac{\tau }{\max(\Nbar_f)}$ forms a geometric series
+$\eta_{m} + {\tau }/{\max(\Nbar_f)}$ forms a geometric series
 \begin{align}
 \eta_m +  \frac{\tau }{\max(\Nbar_f)}
 =\qty(\eta_1 + \frac{\tau }{\max(\Nbar_f)}) 2^{m-1}
 =\frac{\tau}{\max(\Nbar_f)} 2^m
 \end{align}
-where we used $\eta_1 = \frac{\tau}{\max(\bar{N}_f)}$.
+where we used $\eta_1 = {\tau}/{\max(\bar{N}_f)}$.
 Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
-final expression for all $\eta_i$
+final expression for all $\eta_m$
 \begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) }
+\eta_m =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^m -1) }
 \end{align}
-Here we need to truncate the series when $\eta_i > 1$.
+Here we need to truncate the series when $\eta_m > 1$.
 
 
 
