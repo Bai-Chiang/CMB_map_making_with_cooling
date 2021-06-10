@@ -23,7 +23,7 @@ noise_sigma2 = parameters_dic['noise_sigma2']
 num_pix_x = parameters_dic['num_pix_x']
 num_pix_y = parameters_dic['num_pix_y']
 crosslink = parameters_dic['crosslink']
-num_snapshots = parameters_dic['num_snapshots']
+#num_snapshots = parameters_dic['num_snapshots']
 #max_iter = parameters_dic['max_iter']
 num_iter = max_iter = parameters_dic['num_iter']
 results_dir = parameters_dic['results_dir']
@@ -31,7 +31,7 @@ figs_dir = parameters_dic['figs_dir']
 cache_dir = parameters_dic['cache_dir']
 seed = parameters_dic['seed']
 f_scan_list = parameters_dic['f_scan_list']
-condition_number_arr = parameters_dic['condition_number_arr']
+#condition_number_arr = parameters_dic['condition_number_arr']
 #num_eta_iter_per_eta = parameters_dic['num_eta_iter_per_eta']
 num_eta_arr = parameters_dic['num_eta_arr']
 f_sample_knee_apo_arr = parameters_dic['f_sample_knee_apo_arr']
@@ -207,22 +207,22 @@ for data_dic in  data_list:
     #tikzplotlib.save(plot_dir/'chi2.tex')
     plt.close()
 
-    # plot Χ²(m,η) log scale
-    lines = [i['chi2_eta_hist'] for i in results_list]
-    plt.figure(figsize=(12,9))
-    plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
-    plt.xlabel('num of iteration')
-    plt.yscale('log')
-    plt.ylabel('$\chi^2(m,\eta)$') 
-    for i in range(len(lines)):
-        plt.plot(lines[i], '-', label=description_latex_list[i])
-    plt.legend()
-    plt.grid()
-    #plt.savefig(plot_dir/'chi2.jpeg')
-    plt.savefig(plot_dir/'chi2_eta.pdf')
-    #tikzplotlib.clean_figure()
-    #tikzplotlib.save(plot_dir/'chi2_eta.tex')
-    plt.close()
+    ## plot Χ²(m,η) log scale
+    #lines = [i['chi2_eta_hist'] for i in results_list]
+    #plt.figure(figsize=(12,9))
+    #plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
+    #plt.xlabel('num of iteration')
+    #plt.yscale('log')
+    #plt.ylabel('$\chi^2(m,\eta)$') 
+    #for i in range(len(lines)):
+    #    plt.plot(lines[i], '-', label=description_latex_list[i])
+    #plt.legend()
+    #plt.grid()
+    ##plt.savefig(plot_dir/'chi2.jpeg')
+    #plt.savefig(plot_dir/'chi2_eta.pdf')
+    ##tikzplotlib.clean_figure()
+    ##tikzplotlib.save(plot_dir/'chi2_eta.tex')
+    #plt.close()
 
     # plot (Χ²-min)/(ini-min)
     chi2_hist_list = [i['chi2_hist'] for i in results_list]
@@ -415,7 +415,7 @@ for i,[description,description_latex] in enumerate(zip(description_list,
     ax.xaxis.set_minor_locator(matplotlib.ticker.LogLocator(
         base=10, subs='all', numticks=25))
     ax.set_xlabel('condition number')
-    ax.set_xlim(1, condition_number_arr.max()*1.2)
+    #ax.set_xlim(1, condition_number_arr.max()*1.2)
     plt.ylim(-1, max_iter+1)
     plt.grid(True)
     plt.legend(handles=legend_elements, 

@@ -171,7 +171,7 @@ When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity 
 $\vbm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
 which can be solved directly.  From this starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation.
 \textcolor{green}{
-For each intermediate $\eta_i$, we treat it as a seperate conjugate gradient method to solve equation 
+For each intermediate $\eta_i$, we treat it as a separate conjugate gradient method to solve equation 
 $\qty(\Pdagger \inv{N(\eta_i)} P)\, 
 \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
 using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
@@ -288,7 +288,7 @@ The noise power spectrum is given by
 P(f) = \sigma^2 \qty(1+ \frac{f_{\text{knee}}^{\alpha}+f_{\text{apo}}^{\alpha}}
     {f^{\alpha}+f_{\text{apo}}^{\alpha}}) \label{noise power spectrum}
 \end{align}
-Here we fixed $\sigma^2 = 10$ $\mu$K$^2$, $\alpha = 2$ and $f_{\text{knee}} = 10$ Hz,
+Here we fixed $\sigma^2 = 10$ $\mu$K$^2$, $\alpha=3$, and $f_{\text{knee}} = 10$ Hz,
 and change $f_{\text{apo}}$ to compare the performance under different noise
 models.
 \citet{2013ApJ...762...10D} measured the slopes of the atmospheric noise in the Atacama under different water vapor conditions, finding $\alpha = 2.7$ to $2.9$.
@@ -302,17 +302,18 @@ N_{ff'} = P(f) \frac{\delta_{ff'}}{\Delta_f}
 \label{noise covariance matrix}
 \end{equation}
 is a diagonal matrix in frequency space, where $\Delta_f$ is equal to reciprocal
-of total scanning time $T$.
-In our calculations we choose the $f_\text{apo}$ such that the condition
-numbers $\kappa$ are $10^2$, $10^6$, and $10^{12}$.
-The corresponding power spectrum are shown in Figure(\ref{power spectrum}).
+of total scanning time $T \approx 1.05\times 10^{4}$ seconds.
+In our calculations we choose different combination of $f_\text{knee}$ and $f_\text{apo}$,
+some of the power spectrum are shown in Figure(\ref{power spectrum}).
 \begin{figure}[htb!]
 \includegraphics[width=\linewidth]{P_f.pdf}
-\caption{The noise power spectum based on Eq.~(\ref{noise power spectrum}) with 
-    $\sigma^2 = 10$ $\mu$K$^2$, $\alpha = 2$ and $f_{\text{knee}} = 10$ Hz.
-    And fixing the condition number $\kappa$ of noise covariance
-    matrix Eq.~(\ref{noise covariance matrix}) by choosing $f_\text{apo}$.
-    \kmh{show the scanning freqency with a vertical (dashed?) line.  Can use axvline().}
+\caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
+    $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
+    Two knee frequencies $f_\text{knee}=10$ (solid lines) 
+    and $f_\text{knee}=0.1$ (dashed lines).
+    For each knee frequency, we have $f_\text{apo}=0$, $0.1f_\text{knee}$ and
+    $0.01f_\text{knee}$.
+    The vertical line shows our scanning frequency.
 }
 \label{power spectrum}
 \end{figure}
@@ -320,22 +321,16 @@ The corresponding power spectrum are shown in Figure(\ref{power spectrum}).
 Finally, we get the simulated time ordered data $\vb{d} = \vb{s} + \vb{n}$ by
 adding up signal and noise.
 
-\kmh{Compare to the noise power spectrum of Papez. Remark how little 1/f is in their test.  What is the effect of changing the noise slope? Papez uses $\alpha =1$ and their condition number  is about 12.}
-\textcolor{green}{
-In \citealt{2018A&A...620A..59P}, the noise power spectrum is apodized at $0.1f_\text{knee}$,
-which corresponds to $f_\text{apo} \approx 0.1 f_\text{knee}$
-For the case $f_\text{knee} = 10$ and $\kappa=100$,
-the apodization frequency $f_\text{apo} \approx 0.99 \approx 0.1 f_\text{knee}$.
-Therefore the blue line in Figure (\ref{power spectrum}), is close to the
-power spectrum used in \citealt{2018A&A...620A..59P}.
-}
 
 
 \section{Results} \label{sec:results}
 First let's compare the results with vanilla conjugate gradient method with
 simple preconditioner $\Pdagger P$.
-The results are showed in Figure~(\ref{f scan 0.1 CG}) for different kinds
-of noise power spectra.
+%The results are showed in Figure~(\ref{1/f noise chi2}) and Figure~(\ref{apo noise chi2})
+%for different kinds of noise power spectra.
+Figure~(\ref{1/f noise chi2}) shows the results for 1/f noise model ($f_\text{apo}=0$)
+with different knee frequency. 
+In Figure~(\ref{apo noise chi2}) we fixed $f_\text{knee}=10$ Hz, and change $f_\text{apo}$.
 Here note that $\chi^2$ in all figures are calculated based on
 Eq.~(\ref{chi2 formula})
 %\begin{align}
@@ -344,164 +339,66 @@ Eq.~(\ref{chi2 formula})
 %\end{align}
 not $\chi^2(\vbm, \eta)$ in Eq.~(\ref{chi2 eta formula}).
 The $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
-method with more intermediate $\eta$ values, and more iterations after
-$\eta=1$.
+method with 100 $\eta$ values, and it stops when the norm of residual 
+$\norm{\vb{r}} = \norm{\Pdagger \inv{N}\vbd - (\Pdagger\inv{N}P) \vbm}$
+per pixel is smaller than $10^{-10}$, or after 1000 iterations.
 
-As we can see in the left graph in Figure(\ref{f scan 0.1 CG}),
-when the condition number of noise covariance matrix $\kappa(N)$ is small,
-the performance between different these two methods are small.
-The vanilla conjugate gradient method converge faster, because its perturbation
-parameter goes to $1$ at the first iteration, however for the perturbation method its
-$\eta$ value will slowly reach $1$ in about ten iterations.
+As we can see in Figure~(\ref{1/f noise chi2}) and the first graph in 
+Figure~(\ref{apo noise chi2}),
+for $1/f$ noise model, when $f_\text{knee} \gtrsim 10 f_\text{scan}$
+the parameterized method starts showing advantage over vanilla conjugate gradient method.
+%when the condition number of noise covariance matrix $\kappa(N)$ is small,
+%the performance between different these two methods are small.
+%The vanilla conjugate gradient method converge faster, because its perturbation
+%parameter goes to $1$ at the first iteration, however for the perturbation method its
+%$\eta$ value will slowly reach $1$ in about ten iterations.
 %as we can see in
 %the third graph in Figure(\ref{small condi num CG}).
+From Figure~(\ref{apo noise chi2}) we can see that as we increase $f_\text{apo}$
+while fix $f_\text{knee}$, these two methods performs similar.
+
+If we look at the power spectrum in Figure~(\ref{power spectrum}),
+when $f_\text{knee}$ is small or $f_\text{apo}$ is large there are not many
+large scale low frequency noise.
+So introducing $\eta$ parameter could improve perform when there are large low noise
+contribution.
+
 
 \begin{figure*}[htb!]
 \centering
-\includegraphics[width=\textwidth]{f_scan=0.1_CG.pdf}
+\includegraphics[width=\textwidth]{pink_noise_chi2.pdf}
 \caption{These three figures show the 
-$\frac{\chi^2(\vbm) - \chi^2_\text{ini}}{\chi^2_\text{min} - \chi^2_\text{ini}}$
+$\frac{\chi^2(\vbm) - \chi^2_\text{min}}{\chi^2_\text{ini} - \chi^2_\text{min}}$
 changes for each iteration under different noise covariance matrix with
-condition number being $10^2$, $10^6$, and $10^{12}$.
+fixed $f_\text{apo}=0$ and $f_\text{knee}$ being $0.1$, $0.5$, and $1.0$.
 }
-\label{f scan 0.1 CG}
+\label{1/f noise chi2}
 \end{figure*}
-
-Notice that as we increase $\kappa(N)$, or equivalently decrease
-$f_{\text{apo}}$, the perturbation parameter $\eta$ starts showing its 
-benefits, as showed in the second and third graph in Figure(\ref{f scan 0.1 CG}).
-It outperforms the vanilla conjugate gradient method when 
-$f_{\text{apo}} \approx 0$ and the noise power spectrum becomes the $1/f$ noise model,
-which usually is the intrinsic noise of instruments (\cite{1997PhRvD..56.4514T}).
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/chi2_CG.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/eta_CG.pdf}
-%\caption{The figure shows results for $f_{\text{apo}}\approx 9.8\times10^{-3}$ 
-%    and $\kappa(N) = 10^6$.
-%}
-%\label{medium condi num CG}
-%\end{figure*}
-%
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/P_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/chi2_CG.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/eta_CG.pdf}
-%\caption{The figure shows results for $f_{\text{apo}}\approx 9.8\times10^{-6}$ 
-%    and $\kappa(N) = 10^{12}$.
-%}
-%\label{large condi num CG}
-%\end{figure*}
-
-%In the conjugate gradient method with messenger cooling parameter $\lambda$, 
-%the number of cooling parameters we need is an extra free parameter.
-%After the number of $\lambda$ is determined, we construct a geometric series
-%with fixed initial and final value, which uses \texttt{logspace}
-%function in \texttt{numpy}.
-%Since I  show in Eq.~(\ref{lambda eta equiv}) that the messenger field
-%cooling parameter $\lambda$ is equivalent to $1/\eta$, I use $\eta$ for further analysis.
-
-Now let us compare the performance difference between choosing $\eta$
-parameters based on Eq.~(\ref{etai rule})
-and manually fixing number of $\eta$ parameters $n_{\eta}$ manually.
-We manually choose the $\eta_i$ values using function
-\texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
-The results are showed in Figure(\ref{f scan 0.1}).
-
-When $\kappa(N)$ is small, and Eq.~(\ref{etai rule}) tells us that only a few
-$\eta$ parameters are good enough, see the orange line in the first Figure(\ref{f scan 0.1}),
-where we have $\sim 10$ $\eta$ levels.
-If unfortunately we choose $n_{\eta}$ being large value, like $15$ or $30$,
-then it will ends up converge slowly, because it needs at least $15$ or $30$
-iterations to reach $\eta=1$, at least one iteration per $\eta$ level.
-
-On the other hand if $\kappa(N)$ is very large and the power spectrum is $1/f$
-noise, we need more $\eta$ parameters.
-If $n_{\eta}$ is too small, for example $n_{\eta}=5$ the green line in
-last Figure(\ref{f scan 0.1}), it may be better than the vanilla conjugate
-gradient method, but it is still far from optimal.
-
 
 \begin{figure*}[htb!]
 \centering
-\includegraphics[width=\textwidth]{f_scan=0.1.pdf}
-\caption{The blue line and the orange line are the same as Figure~(\ref{f scan 0.1 CG}).
-For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manully.
-Instead of using Eq.~(\ref{etai rule}), we use
-\texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
-to get all $\eta$ parameters.
-%\kmh{In these figures you use $\chi^2_{\rm final}$ as the label, but I think ``min'' is better than ``final''.  You used ``min'' in Figure~(\ref{f scan 0.1 CG}).}
+\includegraphics[width=\textwidth]{apodized_noise_chi2.pdf}
+\caption{These three figures show the 
+$\frac{\chi^2(\vbm) - \chi^2_\text{min}}{\chi^2_\text{ini} - \chi^2_\text{min}}$
+changes for each iteration under different noise covariance matrix with
+fixed $f_\text{knee}=10$ and $f_\text{apo}$ being $0$, $0.1$, and $1.0$.
 }
-\label{f scan 0.1}
+\label{apo noise chi2}
 \end{figure*}
 
-
-%\label{other cases}
-
-%Here we show two other results with different scaning frequency from Figure~(\ref{large condi num}),
-%but keep every other parameters sames.
-Since the $\eta$ values determined from Eq.~(\ref{etai rule})
-\begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
-\tag{\ref{etai rule}}
-\end{align}
-are not dependent on any scanning information,
-it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
-two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
-scanning frequency $f_{\text{scan}}$
-%(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
-in Figure~(\ref{f scan 0.001}) it scans very slow
-and in Figure~(\ref{f scan 10}) it's very fast.
-In these two cases under $1/f$ noise model, 
-our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
-Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
-
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=\textwidth]{f_scan=0.001.pdf}
-%\caption{In this case all parameters are the same as
-%    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 0.001$,
-%    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I'm mixed up about what is changing here.  If you change the scan frequency only, I don't see why the apodization should have to change.  Since this has the scan slower than the knee, this seems like a lot like fig 3, although the convergence is slower it seems.}
-%}
-%\label{f scan 0.001}
-%\end{figure*}
-%
-%\begin{figure*}[htb!]
-%\includegraphics[width=\textwidth]{f_scan=10.pdf}
-%\caption{In this case all parameters are the same as
-%    Figure~(\ref{f scan 0.1}) except $f_{\text{scan}} = 10$,
-%    and corresponding $f_\text{apo}$ to fix the condition number. \kmh{I wonder what a scan faster than the knee would make.}
-%}
-%\label{f scan 10}
-%\end{figure*}
+We also tried different $\alpha$ values. For $\alpha=2$, the conclusion is the
+same as $\alpha=3$. When $\alpha=1$, there are not many low frequency noise, 
+the vanilla conjugate gradient is preferred, except some cases with very large
+knee frequency like $f_\text{knee} = 100$ Hz and $f_\text{apo}=0$ would favor
+parameterized method.
+In \citealt{2018A&A...620A..59P}, the $\alpha = 1$ and  the noise power spectrum is apodized at $0.1f_\text{knee}$,
+which corresponds to $f_\text{apo} \approx 0.1 f_\text{knee}$,
+and their knee frequency is the same as scanning frequency, so $f_\text{knee}=f_\text{scan}=0.1$ 
+in our cases.
+In their case there are not many low frequency noise,
+and we confirm that vanilla conjugate gradient method would converge faster.
 
 
-
-
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/P_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/medium_condition_num/eta.pdf}
-%\caption{Same as Figure(\ref{medium condi num CG}) with extra manually chosen 
-%    $n_{\eta}$ results.
-%}
-%\label{medium condi num}
-%\end{figure*}
-%
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{0.1/large_condition_num/eta.pdf}
-%\caption{Same as Figure(\ref{large condi num CG}) with extra manually chosen 
-%    $n_{\eta}$ results.
-%}
-%\label{large condi num}
-%\end{figure*}
 
 \section{Discussion} \label{sec:discussion}
 
@@ -606,6 +503,63 @@ so this won't add extra cost compare to vanilla conjugate gradient method.
 Therefore, overall introducing $\eta$ won't have extra computational cost.
 
 
+\subsection{Other $\eta$ Choices}
+Now let us compare the performance difference between choosing $\eta$
+parameters based on Eq.~(\ref{etai rule})
+and manually fixing number of $\eta$ parameters $n_{\eta}$ manually.
+We manually choose the $\eta_i$ values using function
+\texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
+The results are showed in Figure~(\ref{chi2 neta}).
+
+%When $\kappa(N)$ is small, and Eq.~(\ref{etai rule}) tells us that only a few
+%$\eta$ parameters are good enough, see the orange line in the first Figure(\ref{f scan 0.1}),
+%where we have $\sim 10$ $\eta$ levels.
+%If unfortunately we choose $n_{\eta}$ being large value, like $15$ or $30$,
+%then it will ends up converge slowly, because it needs at least $15$ or $30$
+%iterations to reach $\eta=1$, at least one iteration per $\eta$ level.
+%
+%On the other hand if $\kappa(N)$ is very large and the power spectrum is $1/f$
+%noise, we need more $\eta$ parameters.
+%If $n_{\eta}$ is too small, for example $n_{\eta}=5$ the green line in
+%last Figure(\ref{f scan 0.1}), it may be better than the vanilla conjugate
+%gradient method, but it is still far from optimal.
+
+\begin{figure*}[htb!]
+\centering
+\includegraphics[width=\textwidth]{chi2_neta.pdf}
+\caption{The blue line and the orange line are 
+vanilla conjugate gradient method and parameterized conjugate gradient method.
+For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manually.
+Instead of using Eq.~(\ref{etai rule}), we use
+\texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}
+to get all $\eta$ parameters.
+}
+\label{chi2 neta}
+\end{figure*}
+
+
+
+%\label{other cases}
+
+%Here we show two other results with different scaning frequency from Figure~(\ref{large condi num}),
+%but keep every other parameters sames.
+Since the $\eta$ values determined from Eq.~(\ref{etai rule})
+\begin{align}
+\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
+\tag{\ref{etai rule}}
+\end{align}
+are not dependent on any scanning information,
+it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
+Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
+two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
+scanning frequency $f_{\text{scan}}$
+%(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
+in Figure~(\ref{f scan 0.001}) it scans very slow
+and in Figure~(\ref{f scan 10}) it's very fast.
+In these two cases under $1/f$ noise model, 
+our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
+Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
+
 
 \subsection{Future Prospects}
 
@@ -698,6 +652,24 @@ $\vb{r}_{\eta}$ % = \vbd - P\hatm = \mathcal{P}_{\eta} \vbd$
 as an arbitrary vector, such that we lose all information related to scanning 
 scheme in the pointing matrix $P$.
 
+Even though the perturbation parameter $\eta$ get from Eq.~(\ref{etai rule}) are
+not the most optimal,
+it still performs much better than traditional conjugate gradient method under
+$1/f$ noise scenario without adding extra computational cost.
+The only extra free parameter added is to determine whether the error at
+current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
+enough such that we advance to next value $\eta_{i+1}$.
+%Since it only takes in to account the noise information in $N$,
+%but ignored all scanning information contained in pointing matrix $P$, because
+%we are unable to analyze the structure of
+%$\vb{r}_{\eta} = \vbd - P\hatm(\eta) = \mathcal{P}_{\eta} \vbd$ in frequency
+%space.
+
+
+Also this analysis of $\eta$ value also explains why cooling parameters
+$\lambda=1/\eta$ in messenger field are chosen to be geometric series or
+\texttt{logspace} used in \cite{Huffenberger_2018}.
+
 \section{Conclusions} \label{sec:conclusions} 
 
 \kmh{We need some discussion of the things that haven't yet been demonstrated with the PCG, like multiple messenger fields.  Has the Kodi-Ramanah dual messenger field scheme been demonstrated in a PCG scheme by Papez?}
@@ -750,23 +722,10 @@ scheme in the pointing matrix $P$.
 %current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
 %enough such that we change advance to next value $\eta_{i+1}$.
 
-Even though the perturbation parameter $\eta$ get from Eq.~(\ref{etai rule}) are
-not the most optimal,
-it still performs much better than traditional conjugate gradient method under
-$1/f$ noise scenario without adding extra computational cost.
-The only extra free parameter added is to determine whether the error at
-current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
-enough such that we advance to next value $\eta_{i+1}$.
-%Since it only takes in to account the noise information in $N$,
-%but ignored all scanning information contained in pointing matrix $P$, because
-%we are unable to analyze the structure of
-%$\vb{r}_{\eta} = \vbd - P\hatm(\eta) = \mathcal{P}_{\eta} \vbd$ in frequency
-%space.
+%\textcolor{green}{
+%}
 
 
-Also this analysis of $\eta$ value also explains why cooling parameters
-$\lambda=1/\eta$ in messenger field are chosen to be geometric series or
-\texttt{logspace} used in \cite{Huffenberger_2018}.
 
 All of the calculation are using simple preconditioner $\Pdagger P$, but 
 the entire analysis is independent of preconditioner.
@@ -856,6 +815,7 @@ which minimizes
 \chi^2 (\hatm(\eta), \eta)
 &= \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{\Neta} 
     \qty\big(\vbd - P\hatm(\eta)).
+\label{chi2 eta formula}
 \end{aligned}
 \end{align}
 We restrict to the case that the noise covariance matrix
@@ -906,12 +866,12 @@ Here we put a minus sign in front of this expression such that it's
 non-negative, and use $N_{\eta=0} = \tau I$ at the second equality.
 %\kmh{This statement is kind of non trivial...  I think you need to explain more the step $(\tau I + \delta \eta \bar N)^{-1} \approx \tau I - \delta \eta \bar N$. (I think that's right, even if you don't restrict to the frequency diagonal case.)}
 Since it is hard to analyze $\vbd - P\hatm$ under frequency domain,
-we treat it as an arbitary vector, then the least upper bound is given by
+we treat it as an arbitrary vector, then the least upper bound is given by
 \begin{align}
 -\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
 \leq \frac{\delta \eta} {\tau} \max(\Nbar_f)
 \end{align}
-where $\max(\Nbar_f)$ is the maxium eigenvalue of $\Nbar$.
+where $\max(\Nbar_f)$ is the maximum eigenvalue of $\Nbar$.
 Here if we assume that initial $\chi^2$ value $\chi^2(\hatm(0),0)$ is much
 larger than final value $\chi^2(\hatm(1),1)$,
 $\chi^2(\hatm(0), 0) \gg \chi^2(\hatm(1),1)$,

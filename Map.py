@@ -40,7 +40,8 @@ class Map:
             num_pix_x,
             num_pix_y,
             seed=0,
-            cache_dir='.cache'
+            cache_dir='.cache',
+            force_recalculate=False,
             ):
         """
         args:
@@ -57,6 +58,9 @@ class Map:
             cache_dir
                 --- string
                 --- cache file directory
+            force_recalculate
+                --- bool
+                --- if True, recalculate everything
         """
         assert isinstance(num_pix_x, int)
         assert isinstance(num_pix_y, int)
@@ -66,6 +70,7 @@ class Map:
         self.x_max = x_max
         self.y_max = y_max
         self.seed = seed
+        self.force_recalculate = force_recalculate
         self.map_dir = Path(cache_dir)/('seed={:d} pix=({:d},{:d}) '
             'x_max={:.3g} y_max={:.3g}').format(
             seed, num_pix_x, num_pix_y, x_max, y_max)
@@ -221,10 +226,13 @@ class Map:
         signal_file = self.map_dir/'signal_data'
 
         try:
-            with open(signal_file, 'rb') as _file:
-                signal_data = pickle.load(_file)
-            self.noiseless_signal = signal_data['noiseless_signal']
-            self.noiseless_map = signal_data['noiseless_map']
+            if self.force_recalculate:
+                raise FileNotFoundError
+            else:
+                with open(signal_file, 'rb') as _file:
+                    signal_data = pickle.load(_file)
+                self.noiseless_signal = signal_data['noiseless_signal']
+                self.noiseless_map = signal_data['noiseless_map']
         
         except FileNotFoundError:
             
@@ -393,8 +401,11 @@ class Map:
         self.N_f_diag = N_f_diag
         self.noise_power_spectrum = noise_power_spectrum
         try:
-            with open(noise_file, 'rb') as _file:
-                self.noise = pickle.load(_file)
+            if self.force_recalculate:
+                raise FileNotFoundError
+            else:
+                with open(noise_file, 'rb') as _file:
+                    self.noise = pickle.load(_file)
         except FileNotFoundError:
             random.seed(self.seed)
             g_real = random.normal(size=(self.num_data,self.num_f))/np.sqrt(2)
@@ -713,7 +724,7 @@ class Map:
 
     def get_chi2_vs_eta(self, 
             num_eta=100,
-            force_recalculate=False,
+            max_iter=1000,
             ):
         """
         get function of Χ²(η)
@@ -724,23 +735,17 @@ class Map:
         etas=np.logspace(
             np.log10(eta_min), 0, num=num_eta, base=10
         )
-        num_iter=10000
-        final_eta_eq_1 = False
-        while not final_eta_eq_1:
-            _,infinitesimal_step_result = \
-                self.conjugate_gradient_solver_perturbative_eta(
-                    num_iter=num_iter,
-                    preconditioner_inv=self.PTP_preconditioner,
-                    preconditioner_description='PTP',
-                    next_eta_ratio=1e-3,
-                    etas=etas,
-                    force_recalculate=force_recalculate,
-            )
-            chi2_result = infinitesimal_step_result['chi2_eta_hist']
-            etas_result = infinitesimal_step_result['etas_iter']
-            final_eta_eq_1 = (etas_result[-1] == 1)
-            self.chi2_min = infinitesimal_step_result['chi2_hist'].min()
-            num_iter *= 2
+        _,infinitesimal_step_result = \
+            self.conjugate_gradient_solver_perturbative_eta(
+                num_iter=max_iter,
+                preconditioner_inv=self.PTP_preconditioner,
+                preconditioner_description='PTP',
+                next_eta_ratio=1e-5,
+                etas=etas,
+        )
+        chi2_result = infinitesimal_step_result['chi2_eta_hist']
+        etas_result = infinitesimal_step_result['etas_iter']
+        self.chi2_min = infinitesimal_step_result['chi2_hist'].min()
         chi2_list = []
         for eta in etas:
             chi2_list.append(
@@ -843,9 +848,8 @@ class Map:
             num_iter,
             preconditioner_inv, 
             preconditioner_description,
-            num_snapshots=2,
+            #num_snapshots=2,
             #stop_ratio=0,
-            force_recalculate=False,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -869,9 +873,6 @@ class Map:
                 --- the inverse of preconditioner
             preconditioner_description
                 --- description of preconditioner
-            force_recalculate
-                --- bool
-                --- if True, recalculate even if there is an old result
             #stop_ratio
             #    --- float
             #    --- when the 2-norm of the residual ratio 
@@ -896,13 +897,13 @@ class Map:
                         ]
         """
         assert isinstance(num_iter, int)
-        assert isinstance(num_snapshots, int) and num_snapshots >= 2
+        #assert isinstance(num_snapshots, int) and num_snapshots >= 2
         num_pix_x = self.num_pix_x
         num_pix_y = self.num_pix_y
         if not preconditioner_inv:
             CG_info = str([
                 num_iter,
-                num_snapshots,
+                #num_snapshots,
                 preconditioner_inv,
                 #stop_ratio,
                 ]).encode()
@@ -913,7 +914,7 @@ class Map:
             random.seed(self.seed)
             CG_info = str([
                 num_iter,
-                num_snapshots,
+                #num_snapshots,
                 preconditioner_description,
                 #stop_ratio,
                 preconditioner_inv(
@@ -922,31 +923,35 @@ class Map:
                 ]).encode()
         CG_hash = hashlib.md5(CG_info).hexdigest()
         CG_file_name = ('CG num_iter={:d} preconditioner={} '
-            'num_snapshots={:d} {}').format(
+            '{}').format(
             num_iter,
             preconditioner_description,
             #stop_ratio,
-            num_snapshots,
+            #num_snapshots,
             CG_hash)
         CG_file = self.map_dir/CG_file_name
 
         try:
-            with open(CG_file, 'rb') as _file:
-                CG_results = pickle.load(_file)
-            if force_recalculate:
+            if self.force_recalculate:
                 raise FileNotFoundError
+            else:
+                with open(CG_file, 'rb') as _file:
+                    CG_results = pickle.load(_file)
         except FileNotFoundError:
 
-            m_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
+            #m_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
+            #    dtype=np.float32)
+            #r_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
+            #    dtype=np.float32)
+            m_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
                 dtype=np.float32)
-            r_hist = np.zeros(shape=(num_snapshots, num_pix_y, num_pix_x, 3),
+            r_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
                 dtype=np.float32)
             chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
-            chi2_f_hist = np.zeros(shape=(num_snapshots, self.num_f),
-                dtype=np.float32)
-            snapshots_index = np.linspace(0, num_iter, num_snapshots,
-                endpoint=True, dtype=int)
+            chi2_f_hist = np.zeros(shape=(2, self.num_f), dtype=np.float32)
+            #snapshots_index = np.linspace(0, num_iter, num_snapshots,
+            #    endpoint=True, dtype=int)
             #stop_point = num_iter + 1
 
             b = self.b
@@ -969,7 +974,7 @@ class Map:
             m_hist[0,:,:,:] = m
             r_hist[0,:,:,:] = r
             chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
-            i_snapshot = 0
+            #i_snapshot = 0
             print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
             for i_iter in range(1, num_iter+1):
                 alpha = dot(r,z) / dot(p, A(p))
@@ -985,25 +990,35 @@ class Map:
                 chi2_hist[i_iter] = chi2
                 r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r)
                 ratio_2norm = r_2norm/r0_2norm
-                if i_iter in snapshots_index:
-                    i_snapshot += 1
-                    m_hist[i_snapshot,:,:,:] = m
-                    r_hist[i_snapshot,:,:,:] = r
-                    chi2_f_hist[i_snapshot,:] = self.get_chi2(m,
-                        freq_mode=True)
+                #if i_iter in snapshots_index:
+                #    i_snapshot += 1
+                #    m_hist[i_snapshot,:,:,:] = m
+                #    r_hist[i_snapshot,:,:,:] = r
+                #    chi2_f_hist[i_snapshot,:] = self.get_chi2(m,
+                #        freq_mode=True)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'.format(
                     i_iter, chi2, ratio_2norm))
-                if (ratio_2norm/(num_pix_x*num_pix-y) < 1e-5
+                #if (r_2norm/(num_pix_x*num_pix_y) < 1e-10
+                #        and i_iter != num_iter):
+                #    # stop calculation if norm per pixel is smaller than 1e-10
+                #    stop_point = i_iter
+                #    chi2_hist[stop_point:] = chi2
+                #    r_2norm_hist[stop_point:] = r_2norm
+                #    i_snapshot += 1
+                #    m_hist[i_snapshot:,:,:,:] = m
+                #    r_hist[i_snapshot:,:,:,:] = r
+                #    chi2_f_hist[i_snapshot:,:] = chi2_f_hist[i_snapshot-1,:]
+                #    break
+                if (r_2norm/(num_pix_x*num_pix_y) < 1e-10
                         and i_iter != num_iter):
-                    # stop calculation if norm per pixel is smaller than 1e-5
                     stop_point = i_iter
                     chi2_hist[stop_point:] = chi2
                     r_2norm_hist[stop_point:] = r_2norm
-                    i_snapshot += 1
-                    m_hist[i_snapshot:,:,:,:] = m
-                    r_hist[i_snapshot:,:,:,:] = r
-                    chi2_f_hist[i_snapshot:,:] = chi2_f_hist[i_snapshot-1,:]
                     break
+
+            m_hist[1,:,:,:] = m
+            r_hist[1,:,:,:] = r
+            chi2_f_hist[1,:] = self.get_chi2(m, freq_mode=True)
 
             CG_results = {}
             CG_results['chi2_hist'] = chi2_hist
@@ -1012,7 +1027,7 @@ class Map:
             CG_results['r_hist'] = r_hist
             CG_results['r_2norm_hist'] = r_2norm_hist
             CG_results['chi2_f_hist'] = chi2_f_hist
-            CG_results['snapshots_index'] = snapshots_index
+            #CG_results['snapshots_index'] = snapshots_index
             #CG_results['stop_point'] = stop_point
             CG_results['etas_iter'] = np.ones(num_iter+1)
             with open(CG_file, 'wb') as _file:
@@ -1027,7 +1042,6 @@ class Map:
             #num_snapshots=2,
             #stop_ratio=0,
             #next_lamb_ratio = 1e-2,
-            force_recalculate=False,
             ):
         """
         messenger field solve map based on Huffenberger 2018: 
@@ -1046,9 +1060,6 @@ class Map:
             num_iter
                 --- int
                 --- number of iteration
-            force_recalculate
-                --- bool
-                --- if True, recalculate even if there is an old result
         return:
             MF_file
                 --- pathlib.Path
@@ -1089,10 +1100,11 @@ class Map:
         MF_file = self.map_dir/MF_file_name
 
         try:
-            with open(MF_file, 'rb') as _file:
-                MF_results = pickle.load(_file)
-            if force_recalculate:
+            if self.force_recalculate:
                 raise FileNotFoundError
+            else:
+                with open(MF_file, 'rb') as _file:
+                    MF_results = pickle.load(_file)
         except FileNotFoundError:
             num_pix_x = self.num_pix_x
             num_pix_y = self.num_pix_y
@@ -1155,9 +1167,9 @@ class Map:
                 #        freq_mode=True)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'\
                     .format(i_iter, chi2, ratio_2norm))
-                if (ratio_2norm/(num_pix_x*num_pix_y) < 1e-5
+                if (r_2norm/(num_pix_x*num_pix_y) < 1e-10
                         and i_iter != num_iter):
-                    # stop calculation if norm per pixel is smaller than 1e-5
+                    # stop calculation if norm per pixel is smaller than 1e-10
                     stop_point = i_iter
                     chi2_hist[stop_point:] = chi2
                     chi2_eta_hist[stop_point:] = chi2_eta
@@ -1197,7 +1209,6 @@ class Map:
             etas=None,
             #num_snapshots=2,
             #stop_ratio=0,
-            force_recalculate=False,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -1237,9 +1248,6 @@ class Map:
             etas
                 --- np.array
                 --- optional eta values, etas[-1] = 1
-            force_recalculate
-                --- bool
-                --- if True, recalculate even if there is an old result
             #num_snapshots
             #    --- int >= 2
             #    --- number of snapshots of map, r, Χ² per freq mode etc.
@@ -1310,10 +1318,11 @@ class Map:
         CG_file = self.map_dir/CG_file_name
 
         try:
-            with open(CG_file, 'rb') as _file:
-                CG_results = pickle.load(_file)
-            if force_recalculate:
+            if self.force_recalculate:
                 raise FileNotFoundError
+            else:
+                with open(CG_file, 'rb') as _file:
+                    CG_results = pickle.load(_file)
         except FileNotFoundError:
             # m_hist r_hist only store initial and final result
             m_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
@@ -1407,7 +1416,7 @@ class Map:
                         )
                         and eta < 1
                     ):
-                    # residual norm per pixel (r/#pix) smaller than
+                    # residual norm per pixel (|r|/#pix) smaller than
                     # next_eta_ratio * std per pixel.
                     # σ²/Δt is the variance of white noise which power
                     # spectrum is P(f) = σ² in time domain.
@@ -1422,9 +1431,9 @@ class Map:
                     p = z.copy()
                     chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
 
-                elif (r_2norm/total_pix < 1e-5
+                elif (r_2norm/total_pix < 1e-10
                         and eta == 1 ):
-                    # stop calculation if norm per pixel is smaller than 1e-5
+                    # stop calculation if norm per pixel is smaller than 1e-10
                     stop_point = i_iter
                     chi2_hist[stop_point:] = chi2
                     chi2_eta_hist[stop_point:] = chi2_eta
@@ -1448,7 +1457,6 @@ class Map:
             #CG_results['snapshots_index'] = snapshots_index
             #CG_results['stop_point'] = stop_point
             CG_results['etas_iter'] = etas_iter
-            print(etas_iter)
             CG_results['etas'] = etas
             with open(CG_file, 'wb') as _file:
                 pickle.dump(CG_results, _file)

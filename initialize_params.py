@@ -14,70 +14,81 @@ f_sample_list = [100,]
 f_knee_list = [
     0.001,
     0.1,
+    0.25,
+    0.5,
     1,
     10,
     100,
-    1000,
+    #1000,
 ]
 
 
 num_sample = int(2**20)
-#condition_number_arr = np.logspace(0,20,11)[1:]
-condition_number_arr = np.array([
-    1e2,
-    1e6,
-    1e12,
-])
+#condition_number_arr = np.array([
+#    1e2,
+#    1e6,
+#    1e12,
+#])
 
 
 x_max = y_max = 1*np.pi/180
 sig_amp = 100
 noise_sigma2 = 10
-noise_index = 2
+noise_index = 3
 num_pix_x = num_pix_y = 512
 crosslink=True
-num_snapshots = 5
+#num_snapshots = 2
 
 figs_dir = Path('figs/').expanduser()
 results_dir = Path('results/').expanduser()
 
 
-# f_apo calculated from f_knee, f_sample, and condition number
-if noise_index == 2:
-    f_sample_knee_apo_list = []
-    for k in condition_number_arr:
-        for f_sample in f_sample_list:
-            for f_knee in f_knee_list:
-                #f_min = f_sample/num_sample    # condition number wo 0f
-                f_min = 0.0   # condition number
-                f_max = f_sample/2
-                a = 2*(k-1)
-                b = (k-1)*f_knee**2 + (k-2)*f_max**2 + (2*k-1)*f_min**2
-                c = (k-1)*f_min**2*f_max**2 + (k*f_min**2-f_max**2)*f_knee**2
-                Delta = b**2 - 4*a*c
-                if Delta < 0:
-                    continue
-                f_apo2_1 = (-b + np.sqrt(Delta))/(2*a)
-                f_apo2_2 = (-b - np.sqrt(Delta))/(2*a)
-                if f_apo2_1 > 0:
-                    f_apo1 = np.sqrt(f_apo2_1)
-                    if f_apo1 < f_knee :
-                        f_sample_knee_apo_list.append([
-                            f_sample,
-                            f_knee,
-                            f_apo1
-                        ])
-                if f_apo2_2 > 0:
-                    f_apo2 = np.sqrt(f_apo2_2)
-                    if f_apo2 < f_knee:
-                        f_sample_knee_apo_list.append([
-                            f_sample,
-                            f_knee,
-                            f_apo2
-                        ])
-                # add 1/f noise, fapo = 0
-                f_sample_knee_apo_list.append([f_sample, f_knee, 0.0])
-    f_sample_knee_apo_arr = np.array(f_sample_knee_apo_list)
+# f_apo = 0.1 f_knee and f_apo = 0.01 f_knee
+f_sample_knee_apo_list = []
+for f_sample in f_sample_list:
+    for f_knee in f_knee_list:
+        f_sample_knee_apo_list.append([f_sample, f_knee, 0.0])
+        f_sample_knee_apo_list.append([f_sample, f_knee, 0.1*f_knee])
+        f_sample_knee_apo_list.append([f_sample, f_knee, 0.01*f_knee])
+f_sample_knee_apo_arr = np.array(f_sample_knee_apo_list)
+        
+
+## f_apo calculated from f_knee, f_sample, and condition numbera
+## based on noise_sigma = 2
+#f_sample_knee_apo_list = []
+#for k in condition_number_arr:
+#    for f_sample in f_sample_list:
+#        for f_knee in f_knee_list:
+#            #f_min = f_sample/num_sample    # condition number wo 0f
+#            f_min = 0.0   # condition number
+#            f_max = f_sample/2
+#            a = 2*(k-1)
+#            b = (k-1)*f_knee**2 + (k-2)*f_max**2 + (2*k-1)*f_min**2
+#            c = (k-1)*f_min**2*f_max**2 + (k*f_min**2-f_max**2)*f_knee**2
+#            Delta = b**2 - 4*a*c
+#            if Delta < 0:
+#                continue
+#            f_apo2_1 = (-b + np.sqrt(Delta))/(2*a)
+#            f_apo2_2 = (-b - np.sqrt(Delta))/(2*a)
+#            if f_apo2_1 > 0:
+#                f_apo1 = np.sqrt(f_apo2_1)
+#                if f_apo1 < f_knee :
+#                    f_sample_knee_apo_list.append([
+#                        f_sample,
+#                        f_knee,
+#                        f_apo1
+#                    ])
+#            if f_apo2_2 > 0:
+#                f_apo2 = np.sqrt(f_apo2_2)
+#                if f_apo2 < f_knee:
+#                    f_sample_knee_apo_list.append([
+#                        f_sample,
+#                        f_knee,
+#                        f_apo2
+#                    ])
+#            # add 1/f noise, fapo = 0
+#            f_sample_knee_apo_list.append([f_sample, f_knee, 0.0])
+#f_sample_knee_apo_arr = np.array(f_sample_knee_apo_list)
 
 
 # detector info
@@ -111,7 +122,7 @@ parameters_dic = {
     'num_pix_x':num_pix_x,
     'num_pix_y':num_pix_y,
     'crosslink':crosslink,
-    'num_snapshots':num_snapshots,
+    #'num_snapshots':num_snapshots,
     #'max_iter':max_iter,
     'num_iter':num_iter,
     'results_dir':results_dir,
@@ -119,7 +130,7 @@ parameters_dic = {
     'cache_dir':cache_dir,
     'seed':seed,
     'f_scan_list':f_scan_list,
-    'condition_number_arr':condition_number_arr,
+    #'condition_number_arr':condition_number_arr,
     #'num_eta_iter_per_eta':num_eta_iter_per_eta,
     'num_eta_arr':num_eta_arr,
     'f_sample_knee_apo_arr':f_sample_knee_apo_arr,

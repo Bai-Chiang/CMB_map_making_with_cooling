@@ -19,7 +19,7 @@ noise_index = parameters_dic['noise_index']
 num_pix_x = parameters_dic['num_pix_x']
 num_pix_y = parameters_dic['num_pix_y']
 crosslink = parameters_dic['crosslink']
-num_snapshots = parameters_dic['num_snapshots']
+#num_snapshots = parameters_dic['num_snapshots']
 #max_iter = parameters_dic['max_iter']
 num_iter = parameters_dic['num_iter']
 results_dir = parameters_dic['results_dir']
@@ -27,7 +27,7 @@ figs_dir = parameters_dic['figs_dir']
 cache_dir = parameters_dic['cache_dir']
 seed = parameters_dic['seed']
 f_scan_list = parameters_dic['f_scan_list']
-condition_number_arr = parameters_dic['condition_number_arr']
+#condition_number_arr = parameters_dic['condition_number_arr']
 #num_eta_iter_per_eta = parameters_dic['num_eta_iter_per_eta']
 num_eta_arr = parameters_dic['num_eta_arr']
 f_sample_knee_apo_arr = parameters_dic['f_sample_knee_apo_arr']
@@ -57,7 +57,10 @@ for f_scan in f_scan_list:
 
 
         ## generate TOD
-        _map = Map(x_max, y_max, num_pix_x, num_pix_y, seed, cache_dir)
+        _map = Map(
+            x_max, y_max, num_pix_x, num_pix_y,
+            seed, cache_dir, force_recalculate
+        )
         _map.generate_scan_info(f_scan, offsets[:,1], offsets[:,2],
             comps, num_sample, f_sample, crosslink)
         scan_info = ('f_scan={:.3g} f_knee={:.5g} f_apo={:.5g} '
@@ -90,9 +93,7 @@ for f_scan in f_scan_list:
             = PurePath(_map.map_dir).relative_to(cache_dir)
 
         # get etas that makes chi2 decrease
-        data_dic['chi2_vs_eta'] = _map.get_chi2_vs_eta(
-            force_recalculate=force_recalculate,
-        )
+        data_dic['chi2_vs_eta'] = _map.get_chi2_vs_eta()
         data_dic['chi2_min'] = _map.chi2_min
 
         # CG with simple preconditioner
@@ -105,8 +106,7 @@ for f_scan in f_scan_list:
             num_iter,
             preconditioner_inv=_map.PTP_preconditioner,
             preconditioner_description='PTP',
-            num_snapshots=num_snapshots,
-            force_recalculate=force_recalculate,
+            #num_snapshots=num_snapshots,
             )
         data_dic['CG_SP_description'] = CG_SP_description
         data_dic['CG_SP_description_latex'] = CG_SP_description_latex
@@ -124,7 +124,6 @@ for f_scan in f_scan_list:
                 preconditioner_inv=_map.PTP_preconditioner,
                 preconditioner_description='PTP',
                 #next_eta_ratio = 1e-2,
-                force_recalculate=force_recalculate,
             )
         data_dic['CG_PT_auto_eta_description'] = CG_PT_description
         data_dic['CG_PT_auto_eta_description_latex'] = CG_PT_description_latex
@@ -152,7 +151,6 @@ for f_scan in f_scan_list:
                     preconditioner_description='PTP',
                     #next_eta_ratio = 1e-2,
                     etas=etas,
-                    force_recalculate=force_recalculate,
                 )
             data_dic['CG_PT_manual_ln_{:d}_eta_description'.format(num_eta)]\
                 = CG_PT_description
@@ -179,7 +177,6 @@ for f_scan in f_scan_list:
         #            lambs=1/etas,
         #            num_iter_per_lamb=1,
         #            num_iter=num_iter,
-        #            force_recalculate=force_recalculate,
         #        )
         #    data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
         #        = MF_description
