@@ -181,13 +181,13 @@ for data_dic in data_list:
     chi2_min = data_dic['chi2_min']
     if f_knee == 10 and f_apo == 0:
         fig_index = 0
-        axs[0].set_title(r'$f_{knee}=10$ $f_{apo}=0$')
-    elif f_knee == 10 and f_apo == 0.1:
+        axs[0].set_title('$f_{knee}=10$\n$f_{apo}=0$')
+    elif f_knee == 1 and f_apo == 0:
         fig_index = 1
-        axs[1].set_title(r'$f_{knee}=10$ $f_{apo}=0.1$')
+        axs[1].set_title('$f_{knee}=1$\n$f_{apo}=0$')
     elif f_knee == 0.1 and f_apo == 0.001:
         fig_index = 2
-        axs[2].set_title(r'$f_{knee}=0.1$ $f_{apo}=0.001$')
+        axs[2].set_title('$f_{knee}=0.1$\n$f_{apo}=0.001$')
     else:
         continue
     with open (data_dic['CG_SP_file'], 'rb') as _file:

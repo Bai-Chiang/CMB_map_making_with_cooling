@@ -506,8 +506,8 @@ Therefore, overall introducing $\eta$ won't have extra computational cost.
 \subsection{Other $\eta$ Choices}
 Now let us compare the performance difference between choosing $\eta$
 parameters based on Eq.~(\ref{etai rule})
-and manually fixing number of $\eta$ parameters $n_{\eta}$ manually.
-We manually choose the $\eta_i$ values using function
+and fixing number of $\eta$ parameters $n_{\eta}$ manually.
+We choose the $\eta_i$ values using function
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
 The results are showed in Figure~(\ref{chi2 neta}).
 
@@ -537,28 +537,28 @@ to get all $\eta$ parameters.
 \label{chi2 neta}
 \end{figure*}
 
+In some cases the $\eta$ series determined by Eq.~(\ref{etai rule}) is ideal
+(the first graph in Figure~(\ref{chi2 neta})), in other cases Eq.~(\ref{etai rule})
+gives too many $\eta$ values such that it is not optimal (the second and third
+graph in Figure~(\ref{chi2 neta})).
 
 
 %\label{other cases}
 
 %Here we show two other results with different scaning frequency from Figure~(\ref{large condi num}),
 %but keep every other parameters sames.
-Since the $\eta$ values determined from Eq.~(\ref{etai rule})
-\begin{align}
-\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
-\tag{\ref{etai rule}}
-\end{align}
-are not dependent on any scanning information,
-it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
-two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
-scanning frequency $f_{\text{scan}}$
-%(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
-in Figure~(\ref{f scan 0.001}) it scans very slow
-and in Figure~(\ref{f scan 10}) it's very fast.
-In these two cases under $1/f$ noise model, 
-our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
-Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
+%Since the $\eta$ values determined from Eq.~(\ref{etai rule})
+%are not dependent on any scanning information,
+%it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
+%Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
+%two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
+%scanning frequency $f_{\text{scan}}$
+%%(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
+%in Figure~(\ref{f scan 0.001}) it scans very slow
+%and in Figure~(\ref{f scan 10}) it's very fast.
+%In these two cases under $1/f$ noise model, 
+%our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
+%Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
 
 
 \subsection{Future Prospects}
