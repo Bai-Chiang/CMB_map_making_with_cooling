@@ -82,12 +82,7 @@ for f_scan in f_scan_list:
         # powerspctrum is monotonic decreasing function so condition
         # number is 0th element devided by last element
         condition_number = _map.N_f_diag[0] / _map.N_f_diag[-1]  
-        condition_number_wo_f0 = _map.N_f_diag[1] / _map.N_f_diag[-1]
-        #total_noise = noise_sigma2 * f_sample/2 \
-        #    + noise_sigma2 / f_apo * (f_knee**2 + f_apo**2) \
-        #    * np.arctan(f_sample/(f_apo*2))
         data_dic['condition_number'] = condition_number
-        data_dic['condition_number_wo_f0'] = condition_number_wo_f0
         data_dic['noise_power_spectrum'] = _map.noise_power_spectrum
         data_dic['relative_dir'] \
             = PurePath(_map.map_dir).relative_to(cache_dir)
@@ -113,22 +108,22 @@ for f_scan in f_scan_list:
         data_dic['CG_SP_file'] = CG_SP_file
 
 
-        # perturbative auto eta
-        print('CG perturbative eta')
-        CG_PT_description = ('CG perturbative eta preconditioner=PTP')
-        CG_PT_description_latex =\
-            ('CG perturbative $\eta$ preconditioner=$P^T P$')
-        CG_PT_file, CG_PT_result =\
-            _map.conjugate_gradient_solver_perturbative_eta(
+        # CG eta
+        print('CG with eta')
+        CG_eta_description = ('CG with eta and preconditioner=PTP')
+        CG_eta_description_latex =\
+            ('CG with $\eta$ and preconditioner=$P^T P$')
+        CG_eta_file, CG_eta_result =\
+            _map.conjugate_gradient_solver_eta(
                 num_iter,
                 preconditioner_inv=_map.PTP_preconditioner,
                 preconditioner_description='PTP',
                 #next_eta_ratio = 1e-2,
             )
-        data_dic['CG_PT_auto_eta_description'] = CG_PT_description
-        data_dic['CG_PT_auto_eta_description_latex'] = CG_PT_description_latex
-        data_dic['CG_PT_auto_eta_file'] = CG_PT_file
-        data_dic['etas'] = CG_PT_result['etas']
+        data_dic['CG_eta_description'] = CG_eta_description
+        data_dic['CG_eta_description_latex'] = CG_eta_description_latex
+        data_dic['CG_eta_file'] = CG_eta_file
+        data_dic['etas'] = CG_eta_result['etas']
 
 
         # CG perturbation manual eta
@@ -140,25 +135,42 @@ for f_scan in f_scan_list:
                 np.log(eta_min), 0, num=num_eta, base=np.e
             )
             print('CG manual ln {:d} eta'.format(num_eta))
-            CG_PT_description = ('CG manual ln {:d} eta '
+            CG_eta_description = ('CG manual ln {:d} eta '
                 'preconditioner=PTP').format(num_eta)
-            CG_PT_description_latex = ('CG manual $\ln$ scale, '
+            CG_eta_description_latex = ('CG manual $\ln$ scale, '
                 '$n_{{\eta}}={:d}$ preconditioner=$P^T P$').format(num_eta)
-            CG_PT_file,_ =\
-                _map.conjugate_gradient_solver_perturbative_eta(
+            CG_eta_file,_ =\
+                _map.conjugate_gradient_solver_eta(
                     num_iter,
                     preconditioner_inv=_map.PTP_preconditioner,
                     preconditioner_description='PTP',
                     #next_eta_ratio = 1e-2,
                     etas=etas,
                 )
-            data_dic['CG_PT_manual_ln_{:d}_eta_description'.format(num_eta)]\
-                = CG_PT_description
-            data_dic['CG_PT_manual_ln_{:d}_eta_description_latex'
+            data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]\
+                = CG_eta_description
+            data_dic['CG_manual_ln_{:d}_eta_description_latex'
                 .format(num_eta)]\
-                = CG_PT_description_latex
-            data_dic['CG_PT_manual_ln_{:d}_eta_file'.format(
-                num_eta)] = CG_PT_file
+                = CG_eta_description_latex
+            data_dic['CG_manual_ln_{:d}_eta_file'.format(
+                num_eta)] = CG_eta_file
+
+        # CG exact eta
+        print('CG with exact eta')
+        CG_eta_description = ('CG with exact eta and preconditioner=PTP')
+        CG_eta_description_latex =\
+            ('CG with exact $\eta$ and preconditioner=$P^T P$')
+        CG_eta_file, CG_eta_result =\
+            _map.conjugate_gradient_solver_exact_eta(
+                num_iter,
+                preconditioner_inv=_map.PTP_preconditioner,
+                preconditioner_description='PTP',
+                #next_eta_ratio = 1e-2,
+            )
+        data_dic['CG_exact_eta_description'] = CG_eta_description
+        data_dic['CG_exact_eta_description_latex'] = CG_eta_description_latex
+        data_dic['CG_exact_eta_file'] = CG_eta_file
+        data_dic['etas'] = CG_eta_result['etas']
 
         ## MF iteration
         #for num_eta in num_eta_arr:

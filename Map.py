@@ -293,54 +293,6 @@ class Map:
                 pickle.dump(signal_data, _file)
 
 
-    #def get_power_spectrum(self,
-    #        f,
-    #        f_knee=0,
-    #        f_apo-0,
-    #        noise_index=2,
-    #        noise_sigma2=1,
-    #        ):
-    #    """
-    #    power spectrum function
-    #    σ² * (1 + ((f_knee/f_apo)**noise_index + 1)) 
-    #    / ((f/f_apo)**noise_index + 1)
-    #    args:
-    #        f
-    #            --- int/float/np.array
-    #        f_knee
-    #            --- int/float
-    #            --- knee frequency
-    #        f_apo
-    #            --- int/float
-    #            --- apo frequency
-    #        noise_sigma2
-    #            --- int/float
-    #            --- variance of noise, σ²
-    #        noise_index
-    #            --- int/float
-    #    return:
-    #        noise_power_spectrum
-    #            --- float/np.array
-    #    """
-    #    if f_apo == 0 and f_knee == 0:
-    #        # white noise
-    #        if isinstance(f, np.ndarray):
-    #            noise_power_spectrum = noise_sigma2 * np.ones(f.shape)    
-    #        else:
-    #            noise_power_spectrum = noise_sigma2   
-    #    else:
-    #        noise_power_spectrum  = \
-    #            noise_sigma2 * (1 + 
-    #                (f_knee**noise_index + f_apo**noise_index)\
-    #                /(f**noise_index + f_apo**noise_index) 
-    #                )
-    #        # for 1/f noise, noise_power_spectrum[0] would be np.inf,
-    #        # make the zeroth element equal to the first one to get
-    #        # finite Χ² value.
-    #        if isinstance(f, np.ndarray) and np.isinf(noise_power_spectrum[0]):
-    #            noise_power_spectrum[0] = noise_power_spectrum[1]
-    #    return noise_power_spectrum
-
 
     def generate_noise(self,
             f_knee=0,
@@ -614,7 +566,7 @@ class Map:
 
     def get_chi2_eta(self, m, eta, tau, Nbar_f):
         """
-            calculate Χ²*(m) = (d - Pm)† (τ + η Nbar)^{-1} (d - Pm)
+            calculate Χ²(m(η),η) = (d - Pm)† (τ + η Nbar)^{-1} (d - Pm)
         args:
             m
                 --- np.array shape=(num_pix_y, num_pix_x, 3)
@@ -639,7 +591,7 @@ class Map:
 
     def get_dchi2_deta(self, m, eta, tau, Nbar_f):
         """
-            calculate per frequency mode for
+            #calculate per frequency mode for
             |dΧ²/dη| = (d - Pm)† N(η)^-1 Nbar N(η)^-1 (d - Pm)
             with N(η) = τ I + η Nbar
         args:
@@ -658,8 +610,9 @@ class Map:
         d_f = self.tod_f
         N_eta = tau + eta*Nbar_f
         dchi2_vs_f = np.sum(
-                (np.conj(d_f - Pm_f) * (d_f - Pm_f)*Nbar_f/N_eta**2).real 
-                , axis=0)
+            (np.conj(d_f - Pm_f) * (d_f - Pm_f)*Nbar_f/N_eta**2).real 
+                #, axis=0)
+        )
         return dchi2_vs_f
             
         
@@ -687,35 +640,6 @@ class Map:
         """
         return la.norm(m.reshape(-1), ord=2)
 
-    #def simple_preconditioner_inv(self, m):
-    #    """
-    #    M = P.T diag(N^-1) P
-    #    noise covariance matrix in time domain
-    #    N{tt'} = \int df P(f) exp(2πi (t-t'))
-    #    P(f) is noise power spectrum
-    #    """
-    #    int_power_spectrum = self.df * np.sum(self.N_f_diag)
-    #    return int_power_spectrum * self._PTP_inv(m)
-        
-
-    #def MF_preconditioner_inv(self, m, eta=1):
-    #    """
-    #    MF preconditioner
-    #    M = P.T T^{-1} P
-    #    = 1/(τλ) (P.T P)
-
-    #    args:
-    #        m
-    #            --- map size object
-    #    return:
-    #        M_inv_m
-    #            --- map size object
-    #            --- M^{-1} m
-    #    """
-    #    tau = np.min(self.N_f_diag)
-    #    M_inv_m = lamb*tau * self._PTP_inv(m)
-    #    return M_inv_m
-
     def PTP_preconditioner(self, m, eta=1):
         """
         M = P.T P
@@ -736,7 +660,7 @@ class Map:
             np.log10(eta_min), 0, num=num_eta, base=10
         )
         _,infinitesimal_step_result = \
-            self.conjugate_gradient_solver_perturbative_eta(
+            self.conjugate_gradient_solver_eta(
                 num_iter=max_iter,
                 preconditioner_inv=self.PTP_preconditioner,
                 preconditioner_description='PTP',
@@ -753,94 +677,6 @@ class Map:
             )
         return (etas, np.array(chi2_list))
         
-    #def get_log_eta_linear_chi2(self, 
-    #        eta_min=1e-20,
-    #        num_eta=100,
-    #        ):
-    #    """
-    #    get log(η) with makes Χ² decrease linearly dΧ²/dx = const.
-    #    x(η) = a Χ²(η) + b    #a,b fix boundary condition x(0)=0 x(1)=1
-    #    first calculate Χ²(η) and normalize it and get x(η)
-    #    η(x) is its inverse
-    #    """
-    #    _,infinitesimal_step_result = \
-    #        self.conjugate_gradient_solver_perturbative_noise(
-    #            lambs=np.logspace(np.log10(eta_min), 0, num=num_eta, base=10),
-    #            num_iter_per_lamb=1,
-    #            num_iter=num_eta,
-    #            preconditioner_inv=self.PTP_preconditioner,
-    #            preconditioner_description='PTP',
-    #        )
-    #    iters = num_eta + 1
-    #    chi2_arr = infinitesimal_step_result['chi2_star_hist'][:iters]
-    #    etas_arr = infinitesimal_step_result['lambs_iter'][:iters]
-    #    # fits boundary condition
-    #    x = -chi2_arr + chi2_arr[0]
-    #    x = x/x[-1]
-    #    log_eta_linear_chi2_interp = interpolate.interp1d(x, np.log(etas_arr))
-    #    self.log_eta_linear_chi2_interp = log_eta_linear_chi2_interp
-    #    return log_eta_linear_chi2_interp
-
-    #def get_log_eta_quadratic_chi2(self, 
-    #        eta_min=1e-20,
-    #        num_eta=100,
-    #        ):
-    #    """
-    #    get log(η) with makes Χ² decrease quadratically Χ² = a(x-1)² + b
-    #    first get y = (x-1)^2 with x:0->1   y: 1->0
-    #    its similar to get_log_eta_linear_chi2.
-    #    then get x = 1-sqrt(y)
-    #    """
-    #    _,infinitesimal_step_result = \
-    #        self.conjugate_gradient_solver_perturbative_noise(
-    #            lambs=np.logspace(np.log10(eta_min), 0, num=num_eta, base=10),
-    #            num_iter_per_lamb=1,
-    #            num_iter=num_eta,
-    #            preconditioner_inv=self.PTP_preconditioner,
-    #            preconditioner_description='PTP',
-    #        )
-    #    iters = num_eta + 1
-    #    chi2_arr = infinitesimal_step_result['chi2_star_hist'][:iters]
-    #    etas_arr = infinitesimal_step_result['lambs_iter'][:iters]
-    #    # fits boundary condition
-    #    y = chi2_arr - chi2_arr[-1]
-    #    y = y/y[0]
-    #    x = 1 - np.sqrt(y)
-    #    log_eta_quadratic_chi2_interp \
-    #        = interpolate.interp1d(x, np.log(etas_arr))
-    #    self.log_eta_quadratic_chi2_interp = log_eta_quadratic_chi2_interp
-    #    return log_eta_quadratic_chi2_interp
-
-    #def get_log_eta_exp_chi2(self, 
-    #        eta_min=1e-20,
-    #        num_eta=100,
-    #        ):
-    #    """
-    #    get log(η) with makes Χ² decrease exponentially Χ² = a exp(-10*x) + b
-    #    first get y = exp(-10*x) with x:0->1   y: 1->exp(-10)
-    #    its similar to get_log_eta_linear_chi2.
-    #    then get x = -np.log(y)/10
-    #    """
-    #    _,infinitesimal_step_result = \
-    #        self.conjugate_gradient_solver_perturbative_noise(
-    #            lambs=np.logspace(np.log10(eta_min), 0, num=num_eta, base=10),
-    #            num_iter_per_lamb=1,
-    #            num_iter=num_eta,
-    #            preconditioner_inv=self.PTP_preconditioner,
-    #            preconditioner_description='PTP',
-    #        )
-    #    iters = num_eta + 1
-    #    chi2_arr = infinitesimal_step_result['chi2_star_hist'][:iters]
-    #    etas_arr = infinitesimal_step_result['lambs_iter'][:iters]
-    #    # fits boundary condition
-    #    y = chi2_arr - chi2_arr[-1]
-    #    y = y/y[0] * (1-np.exp(-10)) + np.exp(-10)
-    #    x = - np.log(y)/10
-    #    log_eta_exp_chi2_interp \
-    #        = interpolate.interp1d(x, np.log(etas_arr))
-    #    self.log_eta_exp_chi2_interp = log_eta_exp_chi2_interp
-    #    return log_eta_exp_chi2_interp
-    
 
 ### solvers
 
@@ -1201,7 +1037,7 @@ class Map:
         return MF_file, MF_results
 
 
-    def conjugate_gradient_solver_perturbative_eta(self,
+    def conjugate_gradient_solver_eta(self,
             num_iter,
             preconditioner_inv,
             preconditioner_description,
@@ -1305,7 +1141,7 @@ class Map:
                 ).encode()
         CG_hash = hashlib.md5(CG_info).hexdigest()
         CG_file_name = (
-            'CG perturbative auto eta next_eta_ratio={} '
+            'CG eta next_eta_ratio={} '
             'preconditioner={} num_iter={:d} {}'
             ).format(
             next_eta_ratio,
@@ -1342,7 +1178,7 @@ class Map:
             #stop_point = num_iter + 1
             etas_iter = np.zeros(num_iter+1, dtype=np.float32)
 
-            print(('CG with perturbative eta solver preconditioner={} '
+            print(('CG with eta solver preconditioner={} '
                 'num_iter={:d}').format(
                 preconditioner_description,
                 num_iter))
@@ -1458,6 +1294,237 @@ class Map:
             #CG_results['stop_point'] = stop_point
             CG_results['etas_iter'] = etas_iter
             CG_results['etas'] = etas
+            with open(CG_file, 'wb') as _file:
+                pickle.dump(CG_results, _file)
+        return CG_file, CG_results
+        
+
+    def conjugate_gradient_solver_exact_eta(self,
+            num_iter,
+            preconditioner_inv,
+            preconditioner_description,
+            next_eta_ratio = 0.1,
+            ):
+        """ 
+        solve map making equation with conjugate gradient method 
+        P.T N(η)^(-1) P m = P.T N(η)^(-1) d(η)  <==> A x = b 
+        where x = m, A(η) = P.T N(η)^(-1) P, b(η) = P.T N(η)^(-1) d
+        
+        N = Nbar + τI
+        with τ = min(diag(N)) in frequency space
+
+        and perterbative parameter η from 0 to 1
+        N(η) = η*Nbar + τI
+        A(η) = P.T N(η)^{-1} P
+        b(η) = P.T N(η)^{-1} d
+
+        the algorithm notation follows:
+        https://en.wikipedia.org/wiki/Conjugate_gradient_method
+        #The_preconditioned_conjugate_gradient_method
+
+
+
+        args:
+            num_iter
+                --- int
+                --- number of iteration
+            preconditioner_inv
+                --- function with input (m, η)
+                    map size object m and cooling parameter η
+                --- the inverse of preconditioner
+            preconditioner_description
+                --- description of preconditioner
+            next_eta_ratio
+                --- float
+                --- If the 2-norm of residual r(η) per pixel smaller
+                    than next_eta_ratio * std per pixel under
+                    white noise assumption P(f)=σ switch to next eta
+                    value
+        return:
+            CG_file
+                --- pathlib.Path
+                --- file of calculation results
+            CG_results
+                --- dictionary {}, with keys:
+                    [
+                        'chi2_hist',
+                        'chi2_eta_hist',
+                        'm_hist',
+                        'r_hist',
+                        'r_2norm_hist',
+                        'chi2_f_hist',
+                        'etas_iter',
+                        'etas',
+                        ]
+        """
+        #assert isinstance(num_snapshots, int) and num_snapshots >= 2
+        assert isinstance(num_iter, int)
+        random.seed(self.seed)
+        num_pix_x = self.num_pix_x
+        num_pix_y = self.num_pix_y
+        total_pix = num_pix_x * num_pix_y
+
+        tau = np.min(self.N_f_diag)
+        Nbar_f = self.N_f_diag - tau
+        etas_list = []
+        #eta1 = tau/Nbar_f.max()
+        #eta_list.append(eta1)
+
+        CG_info = str([
+            num_iter,
+            next_eta_ratio,
+            preconditioner_description,
+            preconditioner_inv(
+                random.rand(num_pix_y, num_pix_x, 3),1) ]
+                ).encode()
+        CG_hash = hashlib.md5(CG_info).hexdigest()
+        CG_file_name = (
+            'CG exact eta next_eta_ratio={} '
+            'preconditioner={} {}'
+            ).format(
+            next_eta_ratio,
+            preconditioner_description,
+            CG_hash
+        )
+        CG_file = self.map_dir/CG_file_name
+
+        try:
+            if self.force_recalculate:
+                raise FileNotFoundError
+            else:
+                with open(CG_file, 'rb') as _file:
+                    CG_results = pickle.load(_file)
+        except FileNotFoundError:
+            m_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
+                dtype=np.float32)
+            r_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
+                dtype=np.float32)
+            chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
+            chi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
+            dchi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
+            r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
+            chi2_f_hist = np.zeros(shape=(2, self.num_f),
+                dtype=np.float32)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
+
+            print(('CG with exact eta solver preconditioner={} '
+                'num_iter={:d}').format(
+                preconditioner_description,
+                num_iter))
+            b = lambda eta: self._PT( fft.irfft(
+                self.tod_f/(eta*Nbar_f + tau),
+                axis=1))
+            def A(m, eta):
+                Pm = self._P(m)
+                Pm_f = fft.rfft(Pm)
+                return self._PT( fft.irfft(
+                    Pm_f/(eta*Nbar_f + tau),
+                    axis=1))
+
+            # dot product in conjugate gradient algorithm
+            dot = lambda x,y: np.sum(x*y)
+                
+            # preconditioned algorithm for conjugate gradient method 
+            m = self.simple_binned_map.copy()
+            r_true = self.b - self._A(m)
+            chi2 = self.get_chi2(m)
+            chi2_hist[0] = chi2
+            chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
+            chi2_eta_hist[0] = chi2_eta
+            dchi2_deta = self.get_dchi2_deta(m, 0, tau, Nbar_f)
+            chi2_eta_prev = chi2_eta   # for calculate dchi2_eta_hist
+            etas_iter[0] = 0
+            eta = chi2_eta/dchi2_deta
+            etas_list.append(eta)
+            r_2norm_hist[0] = r0_2norm = self._get_2norm(r_true)
+            m_hist[0,:,:,:] = m
+            r_hist[0,:,:,:] = r_true
+            chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
+
+            print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
+            r_eta = b(eta) - A(m, eta)
+            r_eta_2norm = self._get_2norm(r_eta)
+            z = preconditioner_inv(r_eta, eta)
+            p = z.copy()
+            for i_iter in range(1, num_iter+1):
+
+                alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                m += alpha * p
+                r_eta_old = r_eta.copy()
+                r_eta -= alpha * A(p, eta)
+                z_old = z.copy()
+                z = preconditioner_inv(r_eta, eta)
+                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
+                p = z + beta * p
+
+                chi2 = self.get_chi2(m)
+                chi2_hist[i_iter] = chi2
+                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                chi2_eta_hist[i_iter] = chi2_eta
+                dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
+                chi2_eta_prev = chi2_eta
+                etas_iter[i_iter] = eta
+                r_true = self.b - self._A(m)
+                r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+                r_eta_2norm = self._get_2norm(r_eta)
+
+                print('iter={:<5d} η={:.5e}  Χ²={:.10e} ||r(η)||/pixel={:.5e}'
+                    .format(
+                        i_iter, eta, chi2, r_eta_2norm/total_pix
+                    )
+                )
+
+                if ( r_eta_2norm/total_pix < next_eta_ratio \
+                        * np.sqrt( 
+                            self.noise_sigma2/self.dt * total_pix/self.num_t
+                        )
+                        and eta < 1
+                    ):
+                    # residual norm per pixel (|r|/#pix) smaller than
+                    # next_eta_ratio * std per pixel.
+                    # σ²/Δt is the variance of white noise which power
+                    # spectrum is P(f) = σ² in time domain.
+                    # (#sample/#pix) is the average hit per pixel.
+                    # (σ²/Δt) * 1/(#sample/#pix) is the variance per 
+                    # pixel.
+                    #i_eta += 1
+                    dchi2_deta = self.get_dchi2_deta(m, eta, tau, Nbar_f)
+                    eta += chi2_eta/dchi2_deta
+                    eta = min(eta, 1.0)
+                    etas_list.append(eta)
+                    r_eta = b(eta) - A(m, eta)
+                    r_eta_2norm = self._get_2norm(r_eta)
+                    z = preconditioner_inv(r_eta, eta)
+                    p = z.copy()
+                    chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
+
+                elif (r_2norm/total_pix < 1e-10
+                        and eta == 1 ):
+                    # stop calculation if norm per pixel is smaller than 1e-10
+                    stop_point = i_iter
+                    chi2_hist[stop_point:] = chi2
+                    chi2_eta_hist[stop_point:] = chi2_eta
+                    etas_iter[stop_point:] = eta
+                    r_2norm_hist[stop_point:] = r_2norm
+                    break
+
+            m_hist[1,:,:,:] = m
+            r_hist[1,:,:,:] = r_true
+            chi2_f_hist[1,:] = self.get_chi2(m, freq_mode=True)
+
+            CG_results = {}
+            CG_results['chi2_hist'] = chi2_hist
+            CG_results['chi2_eta_hist'] = chi2_eta_hist
+            CG_results['dchi2_eta_hist'] = dchi2_eta_hist
+            CG_results['m_hist'] = m_hist
+            CG_results['r_hist'] = r_hist
+            CG_results['r_2norm_hist'] = r_2norm_hist
+            CG_results['chi2_f_hist'] = chi2_f_hist
+            #CG_results['dchi2_deta_hist'] = dchi2_f_hist
+            #CG_results['snapshots_index'] = snapshots_index
+            #CG_results['stop_point'] = stop_point
+            CG_results['etas_iter'] = etas_iter
+            CG_results['etas'] = np.array(etas_list)
             with open(CG_file, 'wb') as _file:
                 pickle.dump(CG_results, _file)
         return CG_file, CG_results

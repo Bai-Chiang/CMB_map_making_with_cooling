@@ -82,26 +82,33 @@ for data_dic in  data_list:
         CG_SP_result = pickle.load(_file)
         results_list.append(CG_SP_result)
 
-    # CG with perturbative auto eta
-    description_list.append(data_dic['CG_PT_auto_eta_description'])
-    description_latex_list.append(data_dic['CG_PT_auto_eta_description_latex'])
-    with open (data_dic['CG_PT_auto_eta_file'], 'rb') as _file:
-        CG_PT_result = pickle.load(_file)
-        results_list.append(CG_PT_result)
+    # CG with eta
+    description_list.append(data_dic['CG_eta_description'])
+    description_latex_list.append(data_dic['CG_eta_description_latex'])
+    with open (data_dic['CG_eta_file'], 'rb') as _file:
+        CG_eta_result = pickle.load(_file)
+        results_list.append(CG_eta_result)
 
-    # CG perturbation manual eta
+    # CG manual eta
     for num_eta in num_eta_arr:
         description_list.append(
-            data_dic['CG_PT_manual_ln_{:d}_eta_description'.format(num_eta)]
+            data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]
         )
         description_latex_list.append(
-            data_dic['CG_PT_manual_ln_{:d}_eta_description_latex'\
+            data_dic['CG_manual_ln_{:d}_eta_description_latex'\
                 .format(num_eta)]
         )
-        with open (data_dic['CG_PT_manual_ln_{:d}_eta_file'.format(num_eta)],
+        with open (data_dic['CG_manual_ln_{:d}_eta_file'.format(num_eta)],
                 'rb') as _file:
-            CG_PT_result = pickle.load(_file)
-            results_list.append(CG_PT_result)
+            CG_eta_result = pickle.load(_file)
+            results_list.append(CG_eta_result)
+
+    # CG exact eta
+    description_list.append(data_dic['CG_exact_eta_description'])
+    description_latex_list.append(data_dic['CG_exact_eta_description_latex'])
+    with open (data_dic['CG_exact_eta_file'], 'rb') as _file:
+        CG_exact_eta_result = pickle.load(_file)
+        results_list.append(CG_exact_eta_result)
 
     # MF iteration
     #for num_eta in num_eta_arr:
