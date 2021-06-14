@@ -563,102 +563,131 @@ graph in Figure~(\ref{chi2 neta})).
 
 \subsection{Future Prospects}
 
-\kmh{some of this future prospects should move to discussion}
-As you may have noticed in the second and third Figure(\ref{f scan 0.1}),
-the perturbation parameter based on
-Eq.~(\ref{etai rule}) is more than needed, especially for $1/f$ noise case.
-For the case $\kappa=10^{12}$, we notice that based on Eq.~(\ref{etai rule})
-it gives us $n_{\eta}\approx40$, however from $\chi^2$
-result in the last Figure(\ref{f scan 0.1}) 
-$n_{\eta}\approx30$ or even $n_{\eta} \approx 15$ is good enough.
-Also, for the nearly-white-noise case, we could certainly choose $n_{\eta}=1$
-such that $\eta_1=1$ which corresponds to vanilla conjugate gradient method,
-based on $\chi^2$ result in first Figure(\ref{f scan 0.1}).
-However Eq.~(\ref{etai rule}) gives us $n_{\eta} \approx 6$,
-even though it does not make the final $\chi^2$ result much different at the
-end.
-
-Is it possible to further improve the analysis, such that it produces
-smaller $n_{\eta}$?
-Let's examine how we get $\eta_i$ series.
-Remember that we determine $\delta\eta$ value based on the upper bound of 
-$-\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$, in
-Eq.~(\ref{eta upper bound}).
-For $\eta \neq 0$, the upper bound is
-%Here I rewrite it in a simplified form
+In Appendix~\ref{appendix:eta calculation}, we determine $\delta\eta_m$ value based on the upper bound of 
+$-\delta\chi^2(\hatm(\eta_m), \eta_m)/\chi^2(\hatm(\eta_m), \eta_m)$, and choose $\delta\eta_m$ such that 
+the upper bound is equal to $1$.
+The reason we use this upper bound instead of using
 \begin{align}
-%-\frac{\delta\chi^2(\hatm(\eta), \eta)}{\chi^2(\hatm(\eta), \eta)}
-%%= -\delta\eta
-%%    \frac{\dv{\eta} \chi^2(\hatm(\eta), \eta)}
-%%    {\chi^2(\hatm(\eta), \eta)}
-\delta\eta \frac{\hat{\vb{r}}_{\eta}^{\dagger} \inv{N(\eta)} \Nbar 
-    \inv{N(\eta)} \hat{\vb{r}}_{\eta} }
-    {\hat{\vb{r}}_{\eta}^{\dagger} \inv{N(\eta)} \hat{\vb{r}}_{\eta} }
-%\\
-\leq  \frac{\delta \eta}{\eta + \frac{\tau}{\max(N_f) -\tau}}
+\delta\eta_m=-\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m)
+\label{exact eta}
 \end{align}
-with
-$
-\vb{r}_{\eta} %= \vbd - P\hatm(\eta) 
-= \qty[ 1 - P\PPinv{\inv{N(\eta)}}\Pdagger \inv{N(\eta)}]\vbd
-\equiv \mathcal{P}_{\eta} \vbd
-$.
-To get the upper bound we treated $\vbd - P\hatm(\eta)$ as an arbitrary 
-vector in frequency domain, since we don't know how to calculate 
-$\mathcal{P}_{\eta}$ for $\eta \neq 0$, and it's hard to 
-analyze the projection matrix $\mathcal{P}_{\eta}$ in frequency space,
-as it contains $\PPinv{\inv{N(\eta)}}$.
-Note that we have to determine all of $\eta$ value before calculation, 
-because we don't want to keep the time ordered data in system RAM,
-so we need to somehow analytically analyze $\mathcal{P}_{\eta}$, and its behavior
-in frequency space.
-Unless $\vb{r}_{\eta}$ almost only has large noise modes,
-$\qty|\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)|$
-won't get close to the upper bound
-$1/\qty(\eta + \frac{\tau}{\max(N_f) -\tau})$.
-Based on the analysis in Section(\ref{intuitive interp}),
-for small $\eta$ the estimated map $\hatm(\eta)$ does not only focusing on 
-minimizing error $\vb{r}_{\eta}$ at low noise region.
-So we would expect that there would be a fair amount of low noise modes
-contribution in $\vb{r}_{\eta}$ especially for the first few $\eta$ values.
-Which means if we could somehow know the frequency distribution of 
-$\vb{r}_{\eta}$, we could tighten the boundary of
-$\qty|\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)|$,
-and get larger $\delta\eta$ value.
-This should make $\eta$ goes to $1$ faster, and yields the fewer $\eta$ parameters 
-we need.
+directly, is that we don't want to keep the time ordered data $\vbd$ in system memory.
+In Figure~(\ref{chi2 exact eta}) we can see if we use Eq.~(\ref{exact eta}) for each
+$\delta\eta_m$, indeed it can improve performance. 
+Especially for the third graph where the power spectrum does not have lots of
+low frequency noise by using Eq.~(\ref{chi2 exact eta}) the result is close to
+vanilla conjugate gradient method.
+To further improve this method, we need to find more accurate expression for Eq.~(\ref{dchi2 chi2}).
 
-Also notice that the $\eta$ values determined from Eq.~(\ref{etai rule})
+
+\begin{figure*}[htb!]
+\centering
+\includegraphics[width=\textwidth]{chi2_exact_eta.pdf}
+\caption{
+    The blue line and orange line is the same as those in Figure~(\ref{chi2 neta})
+    for reference.
+    The extra green line shows the result when $\delta\eta_m$ is determined from 
+    Eq.~(\ref{exact eta}) not from expression Eq.~(\ref{etai rule}).
+}
+\label{chi2 exact eta}
+\end{figure*}
+
+
+%As you may have noticed in the second and third Figure(\ref{f scan 0.1}),
+%the perturbation parameter based on
+%Eq.~(\ref{etai rule}) is more than needed, especially for $1/f$ noise case.
+%For the case $\kappa=10^{12}$, we notice that based on Eq.~(\ref{etai rule})
+%it gives us $n_{\eta}\approx40$, however from $\chi^2$
+%result in the last Figure(\ref{f scan 0.1}) 
+%$n_{\eta}\approx30$ or even $n_{\eta} \approx 15$ is good enough.
+%Also, for the nearly-white-noise case, we could certainly choose $n_{\eta}=1$
+%such that $\eta_1=1$ which corresponds to vanilla conjugate gradient method,
+%based on $\chi^2$ result in first Figure(\ref{f scan 0.1}).
+%However Eq.~(\ref{etai rule}) gives us $n_{\eta} \approx 6$,
+%even though it does not make the final $\chi^2$ result much different at the
+%end.
+%
+%Is it possible to further improve the analysis, such that it produces
+%smaller $n_{\eta}$?
+%Let's examine how we get $\eta_i$ series.
+%Remember that we determine $\delta\eta$ value based on the upper bound of 
+%$-\delta\chi^2(\hatm(\eta), \eta)/\chi^2(\hatm(\eta), \eta)$, in
+%Eq.~(\ref{eta upper bound}).
+%For $\eta \neq 0$, the upper bound is
+%%Here I rewrite it in a simplified form
 %\begin{align}
-%\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
-%\tag{\ref{etai rule}}
+%%-\frac{\delta\chi^2(\hatm(\eta), \eta)}{\chi^2(\hatm(\eta), \eta)}
+%%%= -\delta\eta
+%%%    \frac{\dv{\eta} \chi^2(\hatm(\eta), \eta)}
+%%%    {\chi^2(\hatm(\eta), \eta)}
+%\delta\eta \frac{\hat{\vb{r}}_{\eta}^{\dagger} \inv{N(\eta)} \Nbar 
+%    \inv{N(\eta)} \hat{\vb{r}}_{\eta} }
+%    {\hat{\vb{r}}_{\eta}^{\dagger} \inv{N(\eta)} \hat{\vb{r}}_{\eta} }
+%%\\
+%\leq  \frac{\delta \eta}{\eta + \frac{\tau}{\max(N_f) -\tau}}
 %\end{align}
-are not dependent on any scanning information,
-it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-In Appendix \ref{other cases} we would show 
-%Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
-two examples with same parameters as in Figure(\ref{f scan 0.1}) except 
-scanning frequency $f_{\text{scan}}$.%, in Figure(\ref{large condi num 0.001}) it
-%scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
-%In these two cases our $\eta$ values based on Eq.~(\ref{etai rule}) are better
-%than manually selected values.
-%Based on these two results we know,
-It turns out the $\eta$ values should somehow depends
-on scanning scheme.
-Again that's because when we determine the upper bound% of 
-%$\dv{\eta} \chi^2(\hatm(\eta), \eta)$
-we treated
-$\vb{r}_{\eta}$ % = \vbd - P\hatm = \mathcal{P}_{\eta} \vbd$
-as an arbitrary vector, such that we lose all information related to scanning 
-scheme in the pointing matrix $P$.
-
-Even though the perturbation parameter $\eta$ get from Eq.~(\ref{etai rule}) are
-not the most optimal,
-it still performs much better than traditional conjugate gradient method under
-$1/f$ noise scenario without adding extra computational cost.
-The only extra free parameter added is to determine whether the error at
-current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
-enough such that we advance to next value $\eta_{i+1}$.
+%with
+%$
+%\vb{r}_{\eta} %= \vbd - P\hatm(\eta) 
+%= \qty[ 1 - P\PPinv{\inv{N(\eta)}}\Pdagger \inv{N(\eta)}]\vbd
+%\equiv \mathcal{P}_{\eta} \vbd
+%$.
+%To get the upper bound we treated $\vbd - P\hatm(\eta)$ as an arbitrary 
+%vector in frequency domain, since we don't know how to calculate 
+%$\mathcal{P}_{\eta}$ for $\eta \neq 0$, and it's hard to 
+%analyze the projection matrix $\mathcal{P}_{\eta}$ in frequency space,
+%as it contains $\PPinv{\inv{N(\eta)}}$.
+%Note that we have to determine all of $\eta$ value before calculation, 
+%because we don't want to keep the time ordered data in system RAM,
+%so we need to somehow analytically analyze $\mathcal{P}_{\eta}$, and its behavior
+%in frequency space.
+%Unless $\vb{r}_{\eta}$ almost only has large noise modes,
+%$\qty|\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)|$
+%won't get close to the upper bound
+%$1/\qty(\eta + \frac{\tau}{\max(N_f) -\tau})$.
+%Based on the analysis in Section(\ref{intuitive interp}),
+%for small $\eta$ the estimated map $\hatm(\eta)$ does not only focusing on 
+%minimizing error $\vb{r}_{\eta}$ at low noise region.
+%So we would expect that there would be a fair amount of low noise modes
+%contribution in $\vb{r}_{\eta}$ especially for the first few $\eta$ values.
+%Which means if we could somehow know the frequency distribution of 
+%$\vb{r}_{\eta}$, we could tighten the boundary of
+%$\qty|\dv{\eta}\chi^2(\hatm(\eta),\eta)/\chi^2(\hatm(\eta),\eta)|$,
+%and get larger $\delta\eta$ value.
+%This should make $\eta$ goes to $1$ faster, and yields the fewer $\eta$ parameters 
+%we need.
+%
+%Also notice that the $\eta$ values determined from Eq.~(\ref{etai rule})
+%%\begin{align}
+%%\eta_i =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^i -1) } 
+%%\tag{\ref{etai rule}}
+%%\end{align}
+%are not dependent on any scanning information,
+%it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
+%In Appendix \ref{other cases} we would show 
+%%Figure(\ref{large condi num 0.001}) and Figure(\ref{large condi num 10}) show
+%two examples with same parameters as in Figure(\ref{f scan 0.1}) except 
+%scanning frequency $f_{\text{scan}}$.%, in Figure(\ref{large condi num 0.001}) it
+%%scans very slow and in Figure(\ref{large condi num 10}) it's very fast.
+%%In these two cases our $\eta$ values based on Eq.~(\ref{etai rule}) are better
+%%than manually selected values.
+%%Based on these two results we know,
+%It turns out the $\eta$ values should somehow depends
+%on scanning scheme.
+%Again that's because when we determine the upper bound% of 
+%%$\dv{\eta} \chi^2(\hatm(\eta), \eta)$
+%we treated
+%$\vb{r}_{\eta}$ % = \vbd - P\hatm = \mathcal{P}_{\eta} \vbd$
+%as an arbitrary vector, such that we lose all information related to scanning 
+%scheme in the pointing matrix $P$.
+%
+%Even though the perturbation parameter $\eta$ get from Eq.~(\ref{etai rule}) are
+%not the most optimal,
+%it still performs much better than traditional conjugate gradient method under
+%$1/f$ noise scenario without adding extra computational cost.
+%The only extra free parameter added is to determine whether the error at
+%current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
+%enough such that we advance to next value $\eta_{i+1}$.
 %Since it only takes in to account the noise information in $N$,
 %but ignored all scanning information contained in pointing matrix $P$, because
 %we are unable to analyze the structure of
@@ -666,9 +695,9 @@ enough such that we advance to next value $\eta_{i+1}$.
 %space.
 
 
-Also this analysis of $\eta$ value also explains why cooling parameters
-$\lambda=1/\eta$ in messenger field are chosen to be geometric series or
-\texttt{logspace} used in \cite{Huffenberger_2018}.
+%Also this analysis of $\eta$ value also explains why cooling parameters
+%$\lambda=1/\eta$ in messenger field are chosen to be geometric series or
+%\texttt{logspace} used in \cite{Huffenberger_2018}.
 
 \section{Conclusions} \label{sec:conclusions} 
 
@@ -796,7 +825,7 @@ BQ and KH are supported by NSF award 1815887.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
-\section{The sequence of inverse cooling parameters}
+\section{The sequence of inverse cooling parameters} \label{appendix:eta calculation}
 
 We know that the initial inverse cooling parameter $\eta_0 = 0$.  
 What would be good value for the next parameter $\eta_1$?
@@ -908,7 +937,6 @@ and set the least upper bound of relative decrease equal to 1.
 %See Appendix \ref{derive other etas} for detailed derivation.
 %We would get
 \begin{align}
-\begin{aligned}[b]
 -\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
 =& \delta\eta_m
 \frac{\qty(\vbd - P\hatm(\eta_m))^{\dagger}
@@ -919,9 +947,9 @@ and set the least upper bound of relative decrease equal to 1.
     \inv{N_{\eta_m}}
     \qty\big(\vbd - P\hatm(\eta_m))
 }
+\label{dchi2 chi2}
 \\
 \leq & \delta \eta_m\, \max\qty(\frac{\Nbar_f}{\tau + \eta_m \Nbar_f})
-\end{aligned}
 \end{align}
 The upper bound in the second line is a little bit tricky.
 Both matrix $\Nbar$ and $\inv{N}_{\eta_m}$ 
