@@ -105,7 +105,7 @@ by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\
 %inverse.
 Therefore we use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, while executing each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
 
-As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and, over the course of the iterative solution, it adjusts the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system via a cooling parameter.  The cooling idea again comes from \cite{2013A&A...549A.111E}.  In numerical experiments, \citet{Huffenberger_2018} found that the large scales of map produced by the cooled messenger method converged significantly faster than for standard methods, and to higher fidelity.  
+As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and over the course of the iterative solution, it adjusts the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system via a cooling parameter.  The cooling idea again comes from \cite{2013A&A...549A.111E}.  In numerical experiments, \citet{Huffenberger_2018} found that the large scales of map produced by the cooled messenger method converged significantly faster than for standard methods, and to higher fidelity.  
 
 \citet{2018A&A...620A..59P} showed that the iterations in the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the mapmaking system, in contrast to findings of \citet{Huffenberger_2018}.
 
@@ -151,7 +151,7 @@ map-making equation, and solved the linear system with the alternative covarianc
 \begin{equation}
   N(\eta) = \tau I +  \eta \Nbar 
 \end{equation}
-which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation is insensitive to to scalar multiple of the covariance since is appears on both sides.)
+which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation (Eq.~\ref{map making eq eta}) is insensitive to to scalar multiple of the covariance since is appears on both sides.)
 
 \citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to parameterized map-making equation by iterating on
 \begin{align}
@@ -703,62 +703,21 @@ To further improve this method, we need to find more accurate expression for Eq.
 
 \kmh{We need some discussion of the things that haven't yet been demonstrated with the PCG, like multiple messenger fields.  Has the Kodi-Ramanah dual messenger field scheme been demonstrated in a PCG scheme by Papez?}
 
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
-%\caption{In this case all frequencies are the same as
-%    Figure(\ref{large condi num}) except $f_{\text{scan}} = 0.001$.
-%}
-%\label{large condi num 0.001}
-%\end{figure*}
-%
-%\begin{figure*}[htb!]
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
-%\caption{In this case all frequencies are the same as
-%    Figure(\ref{large condi num}) except $f_{\text{scan}} = 10$.
-%}
-%\label{large condi num 10}
-%\end{figure*}
+We presented a parameterized conjugate gradient method with parameter $\eta$ based on the idea of messenger field
+separating the white noise out of noise covariance matrix.
+Then we gave an analytical expression for $\eta$ series,
+and showed that this method would not introduce extra computational cost than traditional conjugate method.
 
+We tested this method under different power spectrum both apodized and non-apodized.
+The results showed that this method is faster than traditional conjugate gradient method 
+when there are significant amount of low frequency noise.
+But it could be further improved if we could get more accurate estimation for Eq.~(\ref{exact eta}),
+either before iteration or without using time ordered data during iteration.
 
+Also note that we fixed preconditioner as $M = \Pdagger P$ during our calculation,
+this parameterizing process could be applied to any preconditioner and possibly improve performance when 
+there are significant amount of low frequency noise.
 
-%\section{Conclusion}
-%Here we discussed a method to solve map making equation
-%Eq.~(\ref{map making equation})
-%\begin{align}
-%\hatm = \PPinv{N} \Pdagger \inv{N} \vbd \tag{\ref{map making equation}}
-%\end{align}
-%by separating noise covariance matrix $N$ into two parts, white noise part
-%$\tau I$ and the remaining noise $\Nbar$.
-%Then we could think $\Nbar$ as a perturbation added to white noise, 
-%by introducing a parameter $\eta$, as $\eta$ change from $0$ to $1$,
-%we gradually add this non white noise in to system.
-%
-%The $\eta$ values can be predetermined analytically.
-%This property is very important, because we don't want to keep entire time
-%ordered data in system RAM.
-%If these $\eta$ values can be determined before calculation, then we only need
-%to keep several map sized object, which is much smaller than timed ordered 
-%data.
-%Also we showed that this method has same computational cost as vanilla
-%conjugate gradient method but performs better when the condition number of 
-%noise covariance matrix $\kappa(N)$ is large, especially in $1/f$ noise case.
-%The only extra free parameter added is to determine whether the error at
-%current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
-%enough such that we change advance to next value $\eta_{i+1}$.
-
-%\textcolor{green}{
-%}
-
-
-
-All of the calculation are using simple preconditioner $\Pdagger P$, but 
-the entire analysis is independent of preconditioner.
-Better preconditioners would also lead to improvements.
 
 
 
