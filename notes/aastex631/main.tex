@@ -39,7 +39,7 @@
 \title{Cosmic Microwave Background map-making solutions improve with cooling}
 
 
-  \author{Bai-Qiang Qiang (\kmh{want chinese characters? 羌})} % KMH: I don't know how to do it...
+  \author{Bai-Qiang Qiang (\kmh{want chinese characters?})} % KMH: I don't know how to do it...
 \affiliation{Department of Physics, Florida State University, Tallahassee, Florida 32306}
 
 \author[0000-0001-7109-0099]{Kevin M. Huffenberger}
@@ -79,7 +79,7 @@ We give an analytical expression for the parameter that controls how gradually s
 %map-making
 
 In observations of the Cosmic Microwave Background (CMB), map-making is an intermediate step between the collection of raw scanning data and the scientific analyses, such as the estimation of power spectra and cosmological parameters.
-Next generation CMB observations will generate much more data that today, and so
+Next generation CMB observations will generate much more data than those today, and so
 it is worth exploring efficient ways to process the data, even though, on paper, the map-making problem has long been solved.
 
 The time-ordered scanning data is summarized by
@@ -96,20 +96,20 @@ where  $\hatm$ provides the generalized least squares minimization of the $\chi^
 \label{chi2 formula}
 \end{align}
 Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
-and noise covariance matrix could be written as $N = \ev{\vbn \vbn^{\dagger}}$. We cast mapmaking  as a standard linear regression problem.
+and noise covariance matrix is $N = \ev{\vbn \vbn^{\dagger}}$. Thus  mapmaking is a standard linear regression problem.
 In case the noise is Gaussian, the COBE solution is also the maximum likelihood solution.
 
 With current computation power, we cannot solve for $\hatm$
-by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\dag \inv{N}P)$ matrix is too large to invert.  The noise covariance matrix $N$ is sparse in frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain, and their product is dense.   In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
+by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\dag \inv{N}P)$ matrix is too large to invert.  The noise covariance matrix $N$ is often sparse in frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain, and their product is dense.   In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
 %It is impossible to do these matrix multiplication directly and then take
 %inverse.
-Therefore we use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, while executing each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
+We can use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, and execute each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
 
-As an alternative technique, \citet{Huffenberger_2018} showed that the ``messenger method'' could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and, over the course of the iterative solution, it adjusts the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system via a cooling parameter.  The cooling idea again comes from \cite{2013A&A...549A.111E}.  In numerical experiments, \citet{Huffenberger_2018} found that the large scales of map produced by the cooled messenger method converged significantly faster than for standard methods, and to higher fidelity.  
+As an alternative to conjugate gradient descent, \citet{Huffenberger_2018} showed that the ``messenger'' iterative method could be adapted to solve the linear mapmaking system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.  This technique splits the noise covariance into a uniform part and the remainder, and introduces an additional vector that represent the signal plus uniform noise.  This messenger field acts as an intermediary between the signal and the data and has a covariance that is conveniently sparse in every basis.  \cite{2013A&A...549A.111E} also introduced a cooling scheme that takes  advantage of the split covariance: over the course of the iterative solution, we adjust the relative weight of the two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system, under the control of a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that a map produced by the cooled messenger method converged significantly faster than for standard conjugate gradient methods, and to higher fidelity, especially on large scales.  
 
-\citet{2018A&A...620A..59P} showed that the iterations in the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the mapmaking system, in contrast to findings of \citet{Huffenberger_2018}.
+\citet{2018A&A...620A..59P} showed that the the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the mapmaking system, in contrast to findings of \citet{Huffenberger_2018}.
 
-In this paper, we show that the difference arose because the numerical tests in \citet{2018A&A...620A..59P} used much less low-frequency ($1/f$) noise than \citet{Huffenberger_2018}, and show that the cooling technique improves mapmaking performance especially when the low frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.  \citet{2017MNRAS.468.1782K} showed that for Wiener filter the cooling parameter should be chosen as a geometric series.  In this work, we give an alternative interpretation of the parameterizing process and show that for map-making the optimal choice (unsurprisingly) is also a geometric series.
+In this paper, we show that the difference arose because the numerical tests in \citet{2018A&A...620A..59P} used much less low-frequency (or $1/f$) noise than \citet{Huffenberger_2018}, and show that the cooling technique improves mapmaking performance especially when the low frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.  \citet{2017MNRAS.468.1782K} showed that for Wiener filter the cooling parameter should be chosen as a geometric series.  In this work, we give an alternative interpretation of the parameterizing process and show that for map-making the optimal choice (unsurprisingly) is also a geometric series.
 
 %The time-ordered data we collected is given by map signal $P\vbm$ plus noise 
 %$\vbn$.
@@ -140,25 +140,25 @@ In this paper, we show that the difference arose because the numerical tests in 
 %Or rewrite it as
 
 
-In Section \ref{sec:methods} we describe our methods for treating the mapmaking equation and our numerical experiments.  In Section \ref{sec:results} we present our results. In Section \ref{sec:discussion} we interpret the mapmaking approach and its computational cost.  In Section \ref{sec:conclusions} we conclude.  In appendices we derives how we set our cooling schedule.
+In Section \ref{sec:methods} we describe our methods for treating the mapmaking equation and our numerical experiments.  In Section \ref{sec:results} we present our results. In Section \ref{sec:discussion} we interpret the mapmaking approach and its computational cost.  In Section \ref{sec:conclusions} we conclude.  In appendices we derive the prescription for our cooling schedule.
 
 
 \section{Methods}\label{sec:methods}
 
 \subsection{Parameterized Conjugate Gradient Method}
 The messenger field approach introduced an extra cooling parameter $\lambda$ to the
-map-making equation, and solved the linear system with the alternative covariance $N(\lambda) =  \lambda \tau I + \Nbar $.  The parameter $\tau$ represents the uniform level of (white) noise in the covariance, $\Nbar$ is the balance of the noise, and the parameterized covariance equals the original covariance when the cooling parameter $\lambda = 1$.  In this work we find it more convenient to work with the inverse cooling parameter $\eta = \lambda^{-1}$ and define the covariance as
+map-making equation, and solved the linear system with the alternative covariance $N(\lambda) =  \lambda \tau I + \Nbar $.  The parameter $\tau$ represents the uniform level of (white) noise in the covariance, $\Nbar$ is the balance of the noise covariance, and the parameterized covariance equals the original covariance when the cooling parameter $\lambda = 1$.  In this work we find it more convenient to work with the inverse cooling parameter $\eta = \lambda^{-1}$ and define the covariance as
 \begin{equation}
   N(\eta) = \tau I +  \eta \Nbar 
 \end{equation}
 which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation is insensitive to to scalar multiple of the covariance since is appears on both sides.)
 
-\citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to parameterized map-making equation by iterating on
+\citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to the parameterized map-making equation by iterating on
 \begin{align}
 \Pdagger \inv{N(\eta)}  P\ \hatm = \Pdagger \inv{N(\eta)} \vbd
 \label{map making eq eta}
 \end{align}
-as the cooling is adjusted.  In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger mapmaking method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
+as we adjust the parameter.  In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger mapmaking method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
 
 %Based on previous analysis, we know that what messenger field method really
 %does is parameterizing the map-making equation.
@@ -169,18 +169,19 @@ as the cooling is adjusted.  In our numerical experiments, we confirm that the c
 
 When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity matrix $I$, and solution is given by simple binned map
 $\vbm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
-which can be solved directly.  From this starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation.
-\textcolor{green}{
-For each intermediate $\eta_i$, we treat it as a separate conjugate gradient method to solve equation 
-$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
-\hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
+which can be solved directly.
+The non-uniform part $\bar N$ is the troublesome portion of the covariance, and 
+we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
+
+
+From the starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation.  We may iterate more than once at each intermediate $\eta_i$: we solve   with conjugate gradient iterations
+\begin{align}\qty(\Pdagger \inv{N(\eta_i)} P)\, \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd, \end{align}
 using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
-and move to next parameter $\eta_{i+1}$ when 
+and move to next parameter $\eta_{i+1}$ when the residual 
 $\qty(\Pdagger \inv{N(\eta_i)} P)\, 
-\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq 0$,
-}
+\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq 0$.
 %The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
-\kmh{In this description, it is not totally clear whether you intend to update the eta after every iteration.}
+\kmh{I think you have to be specific about the residual threshhold.}
 
 
 %We can parameterize the noise covariance matrix $N$ with a parameter $\eta$,
@@ -200,8 +201,7 @@ $\qty(\Pdagger \inv{N(\eta_i)} P)\,
 
 %Now question is how to find $N(\eta)$ such that $N(\eta_i) \propto I$
 %and $N (\eta_f) \propto N$?
-The non-white part $\bar N$ is the troublesome portion of the covariance, and 
-we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
+
 %Initially there is only white noise and solution is given by $\hatm_0$,
 %then we gradually add extra noise into this equation by changing $\eta$ from 
 %$0$ to $1$.
@@ -223,7 +223,7 @@ we can think of the $\eta$ parameter as turning it on slowly, adding a perturbat
 %be easier for further derivations, and it's a different interpretation.
 
 \subsection{Choice of inverse cooling parameters $\eta$}
-The next question is how we choose these monotonically increasing parameters
+The next question is how to choose these monotonically increasing parameters
 $\eta$. 
 If we choose them inappropriately,  the solution converge
 slowly, because we waste effort converging on the wrong system.
@@ -251,13 +251,26 @@ map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
 
 
 \subsection{Numerical Simulations}
+\begin{figure}[]
+\includegraphics[width=\linewidth]{P_f.pdf}
+\caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
+    $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
+    Two knee frequencies $f_\text{knee}=10$ (solid lines) 
+    and $f_\text{knee}=0.1$ (dashed lines).
+    For each knee frequency, we have $f_\text{apo}=0$, $0.1f_\text{knee}$ and
+    $0.01f_\text{knee}$.
+    The vertical line shows our scanning frequency.
+}
+\label{power spectrum}
+\end{figure}
+
 To compare these algorithms, we need to do some simple simulation of scanning
-processes, and generate time ordered data from random sky signal.\footnote{
+processes, and generate time ordered data from a random sky signal.\footnote{
 The source code and other information are available at \url{https://github.com/Bai-Qiang/map_making_perturbative_approach}
 }
 Our sky is a small rectangular area, with two orthogonal directions $x$ and
 $y$, both with range from $-1\degree$ to $+1\degree$.
-The signal has first three stokes parameters $(I,Q,U)$.
+The signal has stokes parameters $(I,Q,U)$ for intensity and linear polarization.
 %We model the overall electromagnetic signal is created by some normal
 %distributed sources in the sky, with intensity $I_i (x,y)
 %= A_i \exp\qty(-\frac{1}{2} \frac{(x-x_{i})^2 + (y-y_{i})^2}{\sigma_i^2})$,
@@ -275,27 +288,29 @@ The signal has first three stokes parameters $(I,Q,U)$.
 %$S_2(x,y) = \sum_i I_i(x,y) p_i \sin(2\psi_i)$.
 %Again, we ignored $S_3$, because it describes circular polarization.
 
-For the scanning process, our single telescope contains nine detectors,
-each has different sensitivity to polarization $Q$ and $U$.
+For the scanning process, our mock telescope contains nine detectors,
+each with different sensitivity to polarization $Q$ and $U$.
 It scans the sky with a raster scanning pattern and scanning frequency
-$f_{\text{scan}} = 0.1$ Hz sampling frequency $f_{\text{sample}} = 100$ Hz.
+$f_{\text{scan}} = 0.1$ Hz and sampling frequency $f_{\text{sample}} = 100$ Hz.
 The telescope scans the sky horizontally and then vertically,
-and then digitizes the position $(x, y)$ into $512\times 512$ pixel.
-This gives noiseless signal $\vb{s}$.
+and then digitizes the position $(x, y)$ into $512\times 512$ pixels.
+This gives noiseless signal $P\vb{s}$.
 
-The noise power spectrum is given by
+We model the noise power spectrum with
 \begin{align}
 P(f) = \sigma^2 \qty(1+ \frac{f_{\text{knee}}^{\alpha}+f_{\text{apo}}^{\alpha}}
     {f^{\alpha}+f_{\text{apo}}^{\alpha}}) \label{noise power spectrum}
 \end{align}
+which is white at high frequencies, a power law below the knee frequency, and gives us the option to apodize the low frequency noise below an apodization frequency \citep[like][]{2018A&A...620A..59P}.
+Note that as $f_{\text{apo}} \rightarrow 0 $,
+$P(f) \rightarrow \sigma^2\qty(1 + (f/f_{\text{knee}})^{-\alpha} )$, 
+and it becomes a $1/f$ noise model.
+
+\citet{2013ApJ...762...10D} measured the slopes of the atmospheric noise in the Atacama under different water vapor conditions, finding $\alpha = 2.7$ to $2.9$.
 Here we fixed $\sigma^2 = 10$ $\mu$K$^2$, $\alpha=3$, and $f_{\text{knee}} = 10$ Hz,
 and change $f_{\text{apo}}$ to compare the performance under different noise
 models.
-\citet{2013ApJ...762...10D} measured the slopes of the atmospheric noise in the Atacama under different water vapor conditions, finding $\alpha = 2.7$ to $2.9$.
 
-Note that as $f_{\text{apo}} \rightarrow 0 $,
-$P(f) \rightarrow \sigma^2\qty(1 + (f/f_{\text{knee}})^{-\alpha} )$, 
-it becomes a $1/f$ noise model.
 The noise covariance matrix 
 \begin{equation}
 N_{ff'} = P(f) \frac{\delta_{ff'}}{\Delta_f}
@@ -304,19 +319,7 @@ N_{ff'} = P(f) \frac{\delta_{ff'}}{\Delta_f}
 is a diagonal matrix in frequency space, where $\Delta_f$ is equal to reciprocal
 of total scanning time $T \approx 1.05\times 10^{4}$ seconds.
 In our calculations we choose different combination of $f_\text{knee}$ and $f_\text{apo}$,
-some of the power spectrum are shown in Figure(\ref{power spectrum}).
-\begin{figure}[htb!]
-\includegraphics[width=\linewidth]{P_f.pdf}
-\caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
-    $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
-    Two knee frequencies $f_\text{knee}=10$ (solid lines) 
-    and $f_\text{knee}=0.1$ (dashed lines).
-    For each knee frequency, we have $f_\text{apo}=0$, $0.1f_\text{knee}$ and
-    $0.01f_\text{knee}$.
-    The vertical line shows our scanning frequency.
-}
-\label{power spectrum}
-\end{figure}
+some of the power spectrum are shown in Figure~\ref{power spectrum}.
 
 Finally, we get the simulated time ordered data $\vb{d} = \vb{s} + \vb{n}$ by
 adding up signal and noise.
@@ -324,6 +327,9 @@ adding up signal and noise.
 
 
 \section{Results} \label{sec:results}
+
+
+
 First let's compare the results with vanilla conjugate gradient method with
 simple preconditioner $\Pdagger P$.
 %The results are showed in Figure~(\ref{1/f noise chi2}) and Figure~(\ref{apo noise chi2})
