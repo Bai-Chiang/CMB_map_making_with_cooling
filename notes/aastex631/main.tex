@@ -182,7 +182,13 @@ From the starting point, the cooling scheme requires the inverse cooling paramet
 using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
 and move to next parameter $\eta_{i+1}$ when the residual 
 $\qty(\Pdagger \inv{N(\eta_i)} P)\, 
-\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq 0$.
+\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq \vb{0}$.
+\textcolor{green}{
+During our calculation we move to next $\eta$ parameter when the norm of residual $\norm{\vb{r}}$
+is smaller than one tenth of standard deviation of each pixel,
+under the assumption that the noise is purely white with power spectrum $P(f) =\sigma^2$, which is
+the minimum value of our model Eq.~(\ref{noise power spectrum}).
+}
 %The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
 \kmh{I think you have to be specific about the residual threshhold.}
 
