@@ -152,6 +152,9 @@ map-making equation, and solved the linear system with the alternative covarianc
   N(\eta) = \tau I +  \eta \Nbar 
 \end{equation}
 which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation (Eq.~\ref{map making eq eta}) is insensitive to to scalar multiple of the covariance since is appears on both sides.)
+Since the non-white part $\bar N$ is the troublesome portion of the covariance, and 
+we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
+
 
 \citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to parameterized map-making equation by iterating on
 \begin{align}
@@ -174,53 +177,19 @@ which can be solved directly.  From this starting point, the cooling scheme requ
 For each intermediate $\eta_i$, we treat it as a separate conjugate gradient method to solve equation 
 $\qty(\Pdagger \inv{N(\eta_i)} P)\, 
 \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
-using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
-and move to next parameter $\eta_{i+1}$ when 
-$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
-\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq 0$,
+using the result from previous calculation as the initial value,
+and move to next parameter $\eta_{i+1}$ when the residual
+$\vb{r} \equiv \qty(\Pdagger \inv{N(\eta_i)} P)\, 
+\vbm - \Pdagger \inv{N(\eta_i)} \vbd \simeq \vb{0}$.
+During our calculation we move to next $\eta$ parameter when the norm of residual $\norm{\vb{r}}$ 
+is smaller than one tenth of standard deviation of each pixel,
+under the assumption that the noise is purely white with power spectrum $P(f) =\sigma^2$, which is 
+the minimum value of our model Eq.~(\ref{noise power spectrum}).
 }
 %The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
 \kmh{In this description, it is not totally clear whether you intend to update the eta after every iteration.}
 
 
-%We can parameterize the noise covariance matrix $N$ with a parameter $\eta$,
-%such that initially $\eta = \eta_i$ we have $N\qty(\eta_i) \propto I$.
-%In the end $\eta = \eta_f$ and $N\qty(\eta_f) \propto N$,
-%such that the final solution is what we want.
-%We expect that the parameterized noise covariance matrix $N(\eta)$
-%would connect our initial guess $\hatm_0$ and final solution $\hatm$ as we 
-%change $\eta$ from $\eta_i$ to $\eta_f$, such that it would help improve
-%convergence speed.
-
-%Now instead of Eq.~(\ref{map making eq}), we are solving
-%\begin{align}
-%\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
-%= \Pdagger \inv{N(\eta)} \vbd \label{map making para}
-%\end{align}
-
-%Now question is how to find $N(\eta)$ such that $N(\eta_i) \propto I$
-%and $N (\eta_f) \propto N$?
-The non-white part $\bar N$ is the troublesome portion of the covariance, and 
-we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
-%Initially there is only white noise and solution is given by $\hatm_0$,
-%then we gradually add extra noise into this equation by changing $\eta$ from 
-%$0$ to $1$.
-%At the end when $\eta=1$ we are solving equation Eq.~(\ref{map making eq}).
-
-%Therefore we separate noise covariance matrix into two parts
-%$N = \tau I + \Nbar$ where $\tau$ is the minimum eigenvalue of $N$. 
-%Then we define $N(\eta) = \tau I + \eta \Nbar$, 
-%with perturbation parameter $\eta$ which satisfies $\eta_i = 0$ and $\eta_f=1$.
-
-%Eq.~(\ref{map making eq eta}) then becomes
-%\begin{align}
-%\qty(\Pdagger \inv{(\tau I + \eta \Nbar)}P) \, \hatm(\eta) 
-%= \Pdagger \inv{\qty(\tau I + \eta \Nbar)} \vbd \label{map making perturb} 
-%\end{align}
-
-%As you can see, $\eta$ is the reciprocal of $\lambda$.
-%The reason I switch to $\eta$ in stead of keeping $\lambda$ is that it would
-%be easier for further derivations, and it's a different interpretation.
 
 \subsection{Choice of inverse cooling parameters $\eta$}
 The next question is how we choose these monotonically increasing parameters
