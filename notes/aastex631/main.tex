@@ -191,7 +191,7 @@ $\qty(\Pdagger \inv{N(\eta_i)} P)\,
 \subsection{Choice of inverse cooling parameters $\eta$}
 The next question is how to choose these monotonically increasing parameters
 $\eta$. 
-If we choose them inappropriately,  the solution converge
+If we choose them inappropriately,  the solution converges
 slowly, because we waste effort converging on the wrong system.
 We also want to determine $\eta_1, \cdots, \eta_{n-1}$ before starting conjugate
 gradient iterations.  The time ordered data $\vbd$ is very large,
@@ -225,7 +225,7 @@ map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
     and $f_\text{knee}=0.1$ (dashed lines).
     For each knee frequency, we have $f_\text{apo}=0$, $0.1f_\text{knee}$ and
     $0.01f_\text{knee}$.
-    The vertical line shows our scanning frequency.
+    The vertical line shows our scanning frequency. \kmh{try to put the legend below the figure so the plot is not so small.}
 }
 \label{power spectrum}
 \end{figure}
@@ -260,14 +260,14 @@ It scans the sky with a raster scanning pattern and scanning frequency
 $f_{\text{scan}} = 0.1$ Hz and sampling frequency $f_{\text{sample}} = 100$ Hz.
 The telescope scans the sky horizontally and then vertically,
 and then digitizes the position $(x, y)$ into $512\times 512$ pixels.
-This gives noiseless signal $P\vb{s}$.
+This gives noiseless signal $\vb{s} = P\vb{m}$.
 
 We model the noise power spectrum with
 \begin{align}
 P(f) = \sigma^2 \qty(1+ \frac{f_{\text{knee}}^{\alpha}+f_{\text{apo}}^{\alpha}}
     {f^{\alpha}+f_{\text{apo}}^{\alpha}}) \label{noise power spectrum}
 \end{align}
-which is white at high frequencies, a power law below the knee frequency, and gives us the option to apodize the low frequency noise below an apodization frequency \citep[like][]{2018A&A...620A..59P}.
+which is white at high frequencies, a power law below the knee frequency, and gives us the option to flatten the low frequency noise below an apodization frequency \citep[like in][]{2018A&A...620A..59P}.
 Note that as $f_{\text{apo}} \rightarrow 0 $,
 $P(f) \rightarrow \sigma^2\qty(1 + (f/f_{\text{knee}})^{-\alpha} )$, 
 and it becomes a $1/f$ noise model.
@@ -294,14 +294,38 @@ adding up signal and noise.
 
 \section{Results} \label{sec:results}
 
+\begin{figure*}[]
+\centering
+\includegraphics[width=\textwidth]{pink_noise_chi2.pdf}
+\caption{These three figures show the 
+${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
+changes for each iteration under different noise covariance matrix with
+fixed $f_\text{apo}=0$ and $f_\text{knee}$ being $0.1$, $0.5$, and $1.0$.
+}
+\label{1/f noise chi2}
+\end{figure*}
+
+\begin{figure*}[]
+\centering
+\includegraphics[width=\textwidth]{apodized_noise_chi2.pdf}
+\caption{These three figures show the 
+${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
+changes for each iteration under different noise covariance matrix with
+fixed $f_\text{knee}=10$ and $f_\text{apo}$ being $0$, $0.1$, and $1.0$.
+}
+\label{apo noise chi2}
+\end{figure*}
 
 
-First let's compare the results with vanilla conjugate gradient method with
-simple preconditioner $\Pdagger P$.
+
+We first compare the vanilla conjugate gradient method with
+simple preconditioner $\Pdagger P$ versus conjugate gradient with our perturbed linear system.
 %The results are showed in Figure~(\ref{1/f noise chi2}) and Figure~(\ref{apo noise chi2})
 %for different kinds of noise power spectra.
 Figure~(\ref{1/f noise chi2}) shows the results for 1/f noise model ($f_\text{apo}=0$)
-with different knee frequency. 
+with different knee frequencies.
+\kmh{Whenever we show a plot, we need to explain what the reader is to take away from it.  Don't just jump to the next plot.}
+
 In Figure~(\ref{apo noise chi2}) we fixed $f_\text{knee}=10$ Hz, and change $f_\text{apo}$.
 Here note that $\chi^2$ in all figures are calculated based on
 Eq.~(\ref{chi2 formula})
@@ -335,28 +359,6 @@ large scale low frequency noise.
 So introducing $\eta$ parameter could improve perform when there are large low noise
 contribution.
 
-
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=\textwidth]{pink_noise_chi2.pdf}
-\caption{These three figures show the 
-$\frac{\chi^2(\vbm) - \chi^2_\text{min}}{\chi^2_\text{ini} - \chi^2_\text{min}}$
-changes for each iteration under different noise covariance matrix with
-fixed $f_\text{apo}=0$ and $f_\text{knee}$ being $0.1$, $0.5$, and $1.0$.
-}
-\label{1/f noise chi2}
-\end{figure*}
-
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=\textwidth]{apodized_noise_chi2.pdf}
-\caption{These three figures show the 
-$\frac{\chi^2(\vbm) - \chi^2_\text{min}}{\chi^2_\text{ini} - \chi^2_\text{min}}$
-changes for each iteration under different noise covariance matrix with
-fixed $f_\text{knee}=10$ and $f_\text{apo}$ being $0$, $0.1$, and $1.0$.
-}
-\label{apo noise chi2}
-\end{figure*}
 
 We also tried different $\alpha$ values. For $\alpha=2$, the conclusion is the
 same as $\alpha=3$. When $\alpha=1$, there are not many low frequency noise, 
