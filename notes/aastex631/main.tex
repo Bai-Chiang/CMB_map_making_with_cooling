@@ -151,7 +151,10 @@ map-making equation, and solved the linear system with the alternative covarianc
 \begin{equation}
   N(\eta) = \tau I +  \eta \Nbar 
 \end{equation}
-which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation is insensitive to to scalar multiple of the covariance since is appears on both sides.)
+which leads to the same system of mapmaking equations.  (This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the mapmaking equation (Eq.~\ref{map making eq eta}) is insensitive to to scalar multiple of the covariance since is appears on both sides.)
+Since the non-white part $\bar N$ is the troublesome portion of the covariance, and 
+we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
+
 
 \citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to the parameterized map-making equation by iterating on
 \begin{align}
@@ -184,43 +187,6 @@ $\qty(\Pdagger \inv{N(\eta_i)} P)\,
 \kmh{I think you have to be specific about the residual threshhold.}
 
 
-%We can parameterize the noise covariance matrix $N$ with a parameter $\eta$,
-%such that initially $\eta = \eta_i$ we have $N\qty(\eta_i) \propto I$.
-%In the end $\eta = \eta_f$ and $N\qty(\eta_f) \propto N$,
-%such that the final solution is what we want.
-%We expect that the parameterized noise covariance matrix $N(\eta)$
-%would connect our initial guess $\hatm_0$ and final solution $\hatm$ as we 
-%change $\eta$ from $\eta_i$ to $\eta_f$, such that it would help improve
-%convergence speed.
-
-%Now instead of Eq.~(\ref{map making eq}), we are solving
-%\begin{align}
-%\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
-%= \Pdagger \inv{N(\eta)} \vbd \label{map making para}
-%\end{align}
-
-%Now question is how to find $N(\eta)$ such that $N(\eta_i) \propto I$
-%and $N (\eta_f) \propto N$?
-
-%Initially there is only white noise and solution is given by $\hatm_0$,
-%then we gradually add extra noise into this equation by changing $\eta$ from 
-%$0$ to $1$.
-%At the end when $\eta=1$ we are solving equation Eq.~(\ref{map making eq}).
-
-%Therefore we separate noise covariance matrix into two parts
-%$N = \tau I + \Nbar$ where $\tau$ is the minimum eigenvalue of $N$. 
-%Then we define $N(\eta) = \tau I + \eta \Nbar$, 
-%with perturbation parameter $\eta$ which satisfies $\eta_i = 0$ and $\eta_f=1$.
-
-%Eq.~(\ref{map making eq eta}) then becomes
-%\begin{align}
-%\qty(\Pdagger \inv{(\tau I + \eta \Nbar)}P) \, \hatm(\eta) 
-%= \Pdagger \inv{\qty(\tau I + \eta \Nbar)} \vbd \label{map making perturb} 
-%\end{align}
-
-%As you can see, $\eta$ is the reciprocal of $\lambda$.
-%The reason I switch to $\eta$ in stead of keeping $\lambda$ is that it would
-%be easier for further derivations, and it's a different interpretation.
 
 \subsection{Choice of inverse cooling parameters $\eta$}
 The next question is how to choose these monotonically increasing parameters
@@ -709,62 +675,21 @@ To further improve this method, we need to find more accurate expression for Eq.
 
 \kmh{We need some discussion of the things that haven't yet been demonstrated with the PCG, like multiple messenger fields.  Has the Kodi-Ramanah dual messenger field scheme been demonstrated in a PCG scheme by Papez?}
 
-%\begin{figure*}[htb!]
-%\centering
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{0.001/large_condition_num/eta.pdf}
-%\caption{In this case all frequencies are the same as
-%    Figure(\ref{large condi num}) except $f_{\text{scan}} = 0.001$.
-%}
-%\label{large condi num 0.001}
-%\end{figure*}
-%
-%\begin{figure*}[htb!]
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/p_f.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/chi2.pdf}
-%\includegraphics[width=0.3\textwidth]{10/large_condition_num/eta.pdf}
-%\caption{In this case all frequencies are the same as
-%    Figure(\ref{large condi num}) except $f_{\text{scan}} = 10$.
-%}
-%\label{large condi num 10}
-%\end{figure*}
+We presented a parameterized conjugate gradient method with parameter $\eta$ based on the idea of messenger field
+separating the white noise out of noise covariance matrix.
+Then we gave an analytical expression for $\eta$ series,
+and showed that this method would not introduce extra computational cost than traditional conjugate method.
 
+We tested this method under different power spectrum both apodized and non-apodized.
+The results showed that this method is faster than traditional conjugate gradient method 
+when there are significant amount of low frequency noise.
+But it could be further improved if we could get more accurate estimation for Eq.~(\ref{exact eta}),
+either before iteration or without using time ordered data during iteration.
 
+Also note that we fixed preconditioner as $M = \Pdagger P$ during our calculation,
+this parameterizing process could be applied to any preconditioner and possibly improve performance when 
+there are significant amount of low frequency noise.
 
-%\section{Conclusion}
-%Here we discussed a method to solve map making equation
-%Eq.~(\ref{map making equation})
-%\begin{align}
-%\hatm = \PPinv{N} \Pdagger \inv{N} \vbd \tag{\ref{map making equation}}
-%\end{align}
-%by separating noise covariance matrix $N$ into two parts, white noise part
-%$\tau I$ and the remaining noise $\Nbar$.
-%Then we could think $\Nbar$ as a perturbation added to white noise, 
-%by introducing a parameter $\eta$, as $\eta$ change from $0$ to $1$,
-%we gradually add this non white noise in to system.
-%
-%The $\eta$ values can be predetermined analytically.
-%This property is very important, because we don't want to keep entire time
-%ordered data in system RAM.
-%If these $\eta$ values can be determined before calculation, then we only need
-%to keep several map sized object, which is much smaller than timed ordered 
-%data.
-%Also we showed that this method has same computational cost as vanilla
-%conjugate gradient method but performs better when the condition number of 
-%noise covariance matrix $\kappa(N)$ is large, especially in $1/f$ noise case.
-%The only extra free parameter added is to determine whether the error at
-%current step $\vb{r}(\eta_i) = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$ is small
-%enough such that we change advance to next value $\eta_{i+1}$.
-
-%\textcolor{green}{
-%}
-
-
-
-All of the calculation are using simple preconditioner $\Pdagger P$, but 
-the entire analysis is independent of preconditioner.
-Better preconditioners would also lead to improvements.
 
 
 
