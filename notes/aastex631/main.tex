@@ -190,7 +190,7 @@ under the assumption that the noise is purely white with power spectrum $P(f) =\
 the minimum value of our model Eq.~(\ref{noise power spectrum}).
 }
 %The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
-\kmh{I think you have to be specific about the residual threshhold.}
+\kmh{I think you have to be specific about the residual threshold.}
 
 
 
@@ -696,8 +696,11 @@ Also note that we fixed preconditioner as $M = \Pdagger P$ during our calculatio
 this parameterizing process could be applied to any preconditioner and possibly improve performance when 
 there are significant amount of low frequency noise.
 
-
-
+\citet{2018A&A...620A..59P} showed that the messenger field method solving Wiener
+filter problem introduced by \cite{2013A&A...549A.111E} could also be written as 
+parameterized conjugate gradient algorithm.
+Then \citet{2017MNRAS.468.1782K} introduced dual messenger field method to Wiener filter.
+If applying our idea to Wiener filter problem, hopefully, it may also bring improvements.
 
 
 
