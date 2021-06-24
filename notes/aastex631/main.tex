@@ -227,9 +227,9 @@ map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
 \includegraphics[width=\linewidth]{P_f.pdf}
 \caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
     $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
-    Two knee frequencies $f_\text{knee}=10$ (solid lines) 
-    and $f_\text{knee}=0.1$ (dashed lines).
-    For each knee frequency, we have $f_\text{apo}=0$, $0.1f_\text{knee}$ and
+    Two knee frequencies $f_\text{knee}=10$ Hz (solid lines) 
+    and $f_\text{knee}=0.1$ Hz (dashed lines).
+    For each knee frequency, we have $f_\text{apo}=0$ Hz, $0.1f_\text{knee}$ and
     $0.01f_\text{knee}$.
     The vertical line shows our scanning frequency. \kmh{try to put the legend below the figure so the plot is not so small.}
 }
@@ -303,10 +303,20 @@ adding up signal and noise.
 \begin{figure*}[]
 \centering
 \includegraphics[width=\textwidth]{pink_noise_chi2.pdf}
-\caption{These three figures show the 
-${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
-changes for each iteration under different noise covariance matrix with
-fixed $f_\text{apo}=0$ and $f_\text{knee}$ being $0.1$, $0.5$, and $1.0$.
+\caption{
+%These three figures show the 
+%${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
+%changes for each iteration under different noise covariance matrix with
+%fixed $f_\text{apo}=0$ and $f_\text{knee}$ being $0.1$, $0.5$, and $1.0$.
+    Here we show the $\chi^2(\vbm)$ with respect to number of iterations.
+    The vertical axis is rescaled  such that all curves start from 1.
+    The mapmaking equation (Eq.~\ref{map making eq}) minimize the $\chi^2(\vbm)$, so
+    the curve which goes down fast and get close to zero at the end is the preferred method.
+    In this figure we are comparing traditional conjugate gradient method labeled as \textit{CG} (blue line)
+    with parameterized conjugate gradient labeled as \textit{CG with $\eta$} (orange line)
+    under different $1/f$ noise model (fixed $f_\text{apo}=0$ Hz but different $f_\text{knee}$).
+    As we can see here when $f_\text{knee} \gtrsim 10\,f_\text{scan} = 1$ Hz, there are significant amount of
+    low frequency noise and the parameterized conjugate gradient method starts showing advantages.
 }
 \label{1/f noise chi2}
 \end{figure*}
@@ -314,10 +324,17 @@ fixed $f_\text{apo}=0$ and $f_\text{knee}$ being $0.1$, $0.5$, and $1.0$.
 \begin{figure*}[]
 \centering
 \includegraphics[width=\textwidth]{apodized_noise_chi2.pdf}
-\caption{These three figures show the 
-${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
-changes for each iteration under different noise covariance matrix with
-fixed $f_\text{knee}=10$ and $f_\text{apo}$ being $0$, $0.1$, and $1.0$.
+\caption{
+%These three figures show the 
+%${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
+%changes for each iteration under different noise covariance matrix with
+%fixed $f_\text{knee}=10$ and $f_\text{apo}$ being $0$, $0.1$, and $1.0$.
+    The vertical and horizontal axis is the same as Figure~(\ref{1/f noise chi2}),
+    and also compare traditional conjugate gradient mehtod labeled as \textit{CG} (blue line) 
+    with parameterized conjugate gradient method labeled as \textit{CG with $\eta$} (orange line).
+    But here we fix the knee frequency $f_\text{knee} = 10$ Hz, and change apodized frequency $f_\text{apo}$.
+    When $f_\text{apo}$ is much smaller than $f_\text{knee}$, there are more low frequency noise and
+    parameterized conjugate gradient method is better than traditional ones.
 }
 \label{apo noise chi2}
 \end{figure*}
@@ -328,41 +345,29 @@ We first compare the vanilla conjugate gradient method with
 simple preconditioner $\Pdagger P$ versus conjugate gradient with our perturbed linear system.
 %The results are showed in Figure~(\ref{1/f noise chi2}) and Figure~(\ref{apo noise chi2})
 %for different kinds of noise power spectra.
-Figure~(\ref{1/f noise chi2}) shows the results for 1/f noise model ($f_\text{apo}=0$)
+Figure~(\ref{1/f noise chi2}) shows the $\chi^2(\vbm)$ results for 1/f noise model ($f_\text{apo}=0$)
 with different knee frequencies.
-\kmh{Whenever we show a plot, we need to explain what the reader is to take away from it.  Don't just jump to the next plot.}
-
-In Figure~(\ref{apo noise chi2}) we fixed $f_\text{knee}=10$ Hz, and change $f_\text{apo}$.
-Here note that $\chi^2$ in all figures are calculated based on
+Note that $\chi^2$ in all figures are calculated based on
 Eq.~(\ref{chi2 formula})
-%\begin{align}
-%\chi^2(\vbm) = (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm)
-%\tag{\ref{chi2 formula}}
-%\end{align}
 not $\chi^2(\vbm, \eta)$ in Eq.~(\ref{chi2 eta formula}).
-The $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
+And the $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
 method with 100 $\eta$ values, and it stops when the norm of residual 
 $\norm{\vb{r}} = \norm{\Pdagger \inv{N}\vbd - (\Pdagger\inv{N}P) \vbm}$
 per pixel is smaller than $10^{-10}$, or after 1000 iterations.
-
-As we can see in Figure~(\ref{1/f noise chi2}) and the first graph in 
-Figure~(\ref{apo noise chi2}),
+%\kmh{Whenever we show a plot, we need to explain what the reader is to take away from it.  Don't just jump to the next plot.}
+From Figure~(\ref{1/f noise chi2}) we can see (also combine the left graph in Figure~(\ref{apo noise chi2})),
 for $1/f$ noise model, when $f_\text{knee} \gtrsim 10 f_\text{scan}$
 the parameterized method starts showing advantage over vanilla conjugate gradient method.
-%when the condition number of noise covariance matrix $\kappa(N)$ is small,
-%the performance between different these two methods are small.
-%The vanilla conjugate gradient method converge faster, because its perturbation
-%parameter goes to $1$ at the first iteration, however for the perturbation method its
-%$\eta$ value will slowly reach $1$ in about ten iterations.
-%as we can see in
-%the third graph in Figure(\ref{small condi num CG}).
-From Figure~(\ref{apo noise chi2}) we can see that as we increase $f_\text{apo}$
-while fix $f_\text{knee}$, these two methods performs similar.
+
+In Figure~(\ref{apo noise chi2}) we fixed $f_\text{knee}=10$ Hz, and change $f_\text{apo}$.
+When $f_\text{apo}$ is much smaller than $f_\text{knee}$ the parameterized conjugate gradient method would
+performs better.
+As we increase $f_\text{apo}$ while fix $f_\text{knee}$, eventually these two methods perform similar.
 
 If we look at the power spectrum in Figure~(\ref{power spectrum}),
 when $f_\text{knee}$ is small or $f_\text{apo}$ is large there are not many
 large scale low frequency noise.
-So introducing $\eta$ parameter could improve perform when there are large low noise
+So we conclude that by introducing $\eta$ parameter could improve perform when there are large low noise
 contribution.
 
 
