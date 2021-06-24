@@ -42,7 +42,7 @@ f_knee_list = parameters_dic['f_knee_list']
 
 
 # plot power spectrum
-plt.figure(figsize=(5,5))
+plt.figure(figsize=(4,4))
 f = np.linspace(100./2**20, (100./2**20)*(2**19+1), 2**19)
 plt.plot(f, 10*(1+(10**3+0**3)/(f**3+0**3)), 
     label=r'$(f_{knee},f_{apo}) = (10,0)$ Hz'
@@ -67,7 +67,7 @@ plt.xlabel('$f$ (Hz)')
 plt.xscale('log')
 plt.yscale('log')
 plt.ylabel('$P(f)$ ($\mu K^2$)')
-plt.legend(bbox_to_anchor=(1,1), loc="upper right")
+plt.legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=7)
 #plt.show()
 plt.savefig(figs_dir/'P_f.pdf', bbox_inches="tight")
 plt.close()
@@ -116,7 +116,7 @@ for data_dic in data_list:
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
 axs[1].set_xlabel('number of iteration')
-axs[2].legend(bbox_to_anchor=(1,1), loc="upper right")
+axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
 #plt.show()
@@ -163,7 +163,7 @@ for data_dic in data_list:
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
 axs[1].set_xlabel('number of iteration')
-axs[2].legend(bbox_to_anchor=(1,1), loc="upper right")
+axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
 #plt.show()
@@ -218,7 +218,7 @@ for data_dic in data_list:
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
 axs[1].set_xlabel('number of iteration')
-axs[2].legend(bbox_to_anchor=(1,1), loc="upper right")
+axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
 #plt.show()
@@ -280,7 +280,7 @@ for data_dic in data_list:
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
 axs[1].set_xlabel('number of iteration')
-axs[2].legend(bbox_to_anchor=(1,1), loc="upper right")
+axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
 #plt.show()

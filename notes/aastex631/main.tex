@@ -220,11 +220,55 @@ This corresponds to the standard conjugate gradient method with simple binned
 map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
 
 
+\subsection{Computational Cost}
+To properly compare the performance cost of this method with respect to vanilla
+conjugate gradient method with simple preconditioner,
+we need to compare their computational cost at each iteration.
+The right hand side of parameterized map-making equation
+Eq.~(\ref{map making eq eta})
+%\begin{align}
+%\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
+%= \Pdagger \inv{N(\eta)} \vbd \tag{\ref{map making para}}
+%\end{align}
+could be computed before iterations,
+so it won't introduce extra computational cost.
+The most demanding part of conjugate gradient method is calculating
+$\Pdagger \inv{N} P \hatm$, because it contains a Fourier transform of
+$P\hatm$ from time domain to frequency domain and an inverse Fourier transform
+of $\inv{N} P \hatm$ from frequency domain back to time domain,
+which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
+data.
+If we change $\inv{N}$ to $\inv{N(\eta)}$, it won't add extra cost,
+since both matrices are diagonal in frequency domain.
+Therefore the computational cost it the same for one step.
+
+However our previous analysis is based on
+$\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
+$\hatm(\eta_i)$ the estimated map at $\eta_i$.
+So We should update $\eta_i$ to $\eta_{i+1}$ when $\vbm \approx \hatm(\eta_i)$. 
+How do we know this condition is satisfied?
+Since for each new $\eta_i$ value, we are solving a new set of linear
+equations $A(\eta_i) \hatm = \vbb(\eta_i)$ with
+$A(\eta_i) = \Pdagger \inv{N(\eta_i)} P$ and 
+$\vbb(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
+and we could stop calculation and moving to next value $\eta_{i+1}$ when the 
+norm of residual 
+$\qty||\vb{r}(\eta_i)|| = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$
+smaller than some small value.
+%Since when doing conjugate gradient algorithm we calculate $\vb{r}$ and stop
+%the iteration when $\qty||\vb{r}||$ is small enough, now after introducing
+%parameter $\eta$, we move to next parameter $\eta_{i+1}$ when 
+%$\qty||\vb{r}(\eta_i)||$ is small enough.
+Calculate $\qty||\vb{r}(\eta_i)||$ is part of conjugate gradient algorithm,
+so this won't add extra cost compare to vanilla conjugate gradient method.
+Therefore, overall introducing $\eta$ won't have extra computational cost.
+
 
 
 \subsection{Numerical Simulations}
 \begin{figure}[]
-\includegraphics[width=\linewidth]{P_f.pdf}
+\includegraphics[width=0.8\linewidth]{P_f.pdf}
+\centering
 \caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
     $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
     Two knee frequencies $f_\text{knee}=10$ Hz (solid lines) 
@@ -302,7 +346,7 @@ adding up signal and noise.
 
 \begin{figure*}[]
 \centering
-\includegraphics[width=\textwidth]{pink_noise_chi2.pdf}
+\includegraphics[width=0.8\textwidth]{pink_noise_chi2.pdf}
 \caption{
 %These three figures show the 
 %${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
@@ -323,14 +367,10 @@ adding up signal and noise.
 
 \begin{figure*}[]
 \centering
-\includegraphics[width=\textwidth]{apodized_noise_chi2.pdf}
+\includegraphics[width=0.8\textwidth]{apodized_noise_chi2.pdf}
 \caption{
-%These three figures show the 
-%${(\chi^2(\vbm) - \chi^2_\text{min})}/{(\chi^2_\text{ini} - \chi^2_\text{min})}$
-%changes for each iteration under different noise covariance matrix with
-%fixed $f_\text{knee}=10$ and $f_\text{apo}$ being $0$, $0.1$, and $1.0$.
-    The vertical and horizontal axis is the same as Figure~(\ref{1/f noise chi2}),
-    and also compare traditional conjugate gradient mehtod labeled as \textit{CG} (blue line) 
+    The vertical and horizontal axes are the same as in Figure~(\ref{1/f noise chi2}),
+    and also compare traditional conjugate gradient method labeled as \textit{CG} (blue line) 
     with parameterized conjugate gradient method labeled as \textit{CG with $\eta$} (orange line).
     But here we fix the knee frequency $f_\text{knee} = 10$ Hz, and change apodized frequency $f_\text{apo}$.
     When $f_\text{apo}$ is much smaller than $f_\text{knee}$, there are more low frequency noise and
@@ -444,51 +484,26 @@ regions, because the vanilla conjugate gradient method only focuses on the low n
 part and it may have difficulty at these regions.
 
 
-\subsection{Computational Cost}
-To properly compare the performance cost of this method with respect to vanilla
-conjugate gradient method with simple preconditioner,
-we need to compare their computational cost at each iteration.
-The right hand side of parameterized map-making equation
-Eq.~(\ref{map making eq eta})
-%\begin{align}
-%\qty(\Pdagger \inv{N(\eta)} P)\, \hatm(\eta) 
-%= \Pdagger \inv{N(\eta)} \vbd \tag{\ref{map making para}}
-%\end{align}
-could be computed before iterations,
-so it won't introduce extra computational cost.
-The most demanding part of conjugate gradient method is calculating
-$\Pdagger \inv{N} P \hatm$, because it contains a Fourier transform of
-$P\hatm$ from time domain to frequency domain and an inverse Fourier transform
-of $\inv{N} P \hatm$ from frequency domain back to time domain,
-which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
-data.
-If we change $\inv{N}$ to $\inv{N(\eta)}$, it won't add extra cost,
-since both matrices are diagonal in frequency domain.
-Therefore the computational cost it the same for one step.
-
-However our previous analysis is based on
-$\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
-$\hatm(\eta_i)$ the estimated map at $\eta_i$.
-So We should update $\eta_i$ to $\eta_{i+1}$ when $\vbm \approx \hatm(\eta_i)$. 
-How do we know this condition is satisfied?
-Since for each new $\eta_i$ value, we are solving a new set of linear
-equations $A(\eta_i) \hatm = \vbb(\eta_i)$ with
-$A(\eta_i) = \Pdagger \inv{N(\eta_i)} P$ and 
-$\vbb(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
-and we could stop calculation and moving to next value $\eta_{i+1}$ when the 
-norm of residual 
-$\qty||\vb{r}(\eta_i)|| = \qty||\vbb(\eta_i) - A(\eta_i) \vbm||$
-smaller than some small value.
-%Since when doing conjugate gradient algorithm we calculate $\vb{r}$ and stop
-%the iteration when $\qty||\vb{r}||$ is small enough, now after introducing
-%parameter $\eta$, we move to next parameter $\eta_{i+1}$ when 
-%$\qty||\vb{r}(\eta_i)||$ is small enough.
-Calculate $\qty||\vb{r}(\eta_i)||$ is part of conjugate gradient algorithm,
-so this won't add extra cost compare to vanilla conjugate gradient method.
-Therefore, overall introducing $\eta$ won't have extra computational cost.
-
 
 \subsection{Other $\eta$ Choices}
+
+\begin{figure*}[htb!]
+\centering
+\includegraphics[width=0.8\textwidth]{chi2_neta.pdf}
+\caption{
+    The horizontal and vertical axes are the same as in the previous figure.
+    The blue line and the orange line are traditional conjugate gradient method
+    and parameterized conjugate gradient method.
+    For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manually.
+    The $\eta$ series are determined by \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)},
+    instead of Eq.~(\ref{etai rule}).
+    The first graph shows in some cases the $\eta$ series given by Eq.~(\ref{etai rule}) is ideal,
+    but the second and third graph show that Eq.~(\ref{etai rule}) may ends up too many $\eta$
+    which yields slower convergence.
+}
+\label{chi2 neta}
+\end{figure*}
+
 Now let us compare the performance difference between choosing $\eta$
 parameters based on Eq.~(\ref{etai rule})
 and fixing number of $\eta$ parameters $n_{\eta}$ manually.
@@ -496,57 +511,29 @@ We choose the $\eta_i$ values using function
 \texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}.
 The results are showed in Figure~(\ref{chi2 neta}).
 
-%When $\kappa(N)$ is small, and Eq.~(\ref{etai rule}) tells us that only a few
-%$\eta$ parameters are good enough, see the orange line in the first Figure(\ref{f scan 0.1}),
-%where we have $\sim 10$ $\eta$ levels.
-%If unfortunately we choose $n_{\eta}$ being large value, like $15$ or $30$,
-%then it will ends up converge slowly, because it needs at least $15$ or $30$
-%iterations to reach $\eta=1$, at least one iteration per $\eta$ level.
-%
-%On the other hand if $\kappa(N)$ is very large and the power spectrum is $1/f$
-%noise, we need more $\eta$ parameters.
-%If $n_{\eta}$ is too small, for example $n_{\eta}=5$ the green line in
-%last Figure(\ref{f scan 0.1}), it may be better than the vanilla conjugate
-%gradient method, but it is still far from optimal.
-
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=\textwidth]{chi2_neta.pdf}
-\caption{The blue line and the orange line are 
-vanilla conjugate gradient method and parameterized conjugate gradient method.
-For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manually.
-Instead of using Eq.~(\ref{etai rule}), we use
-\texttt{numpy.logspace(start=$\ln(\eta_1)$, stop=0, num=$n_{\eta}$, base=$e$)}
-to get all $\eta$ parameters.
-}
-\label{chi2 neta}
-\end{figure*}
-
 In some cases the $\eta$ series determined by Eq.~(\ref{etai rule}) is ideal
 (the first graph in Figure~(\ref{chi2 neta})), in other cases Eq.~(\ref{etai rule})
 gives too many $\eta$ values such that it is not optimal (the second and third
 graph in Figure~(\ref{chi2 neta})).
 
 
-%\label{other cases}
-
-%Here we show two other results with different scaning frequency from Figure~(\ref{large condi num}),
-%but keep every other parameters sames.
-%Since the $\eta$ values determined from Eq.~(\ref{etai rule})
-%are not dependent on any scanning information,
-%it only depends on noise power spectrum $P(f)$, or noise covariance matrix $N$.
-%Figure~(\ref{f scan 0.001}) and Figure~(\ref{f scan 10}) show
-%two examples with same parameters as in Figure~(\ref{f scan 0.1}) except for the
-%scanning frequency $f_{\text{scan}}$
-%%(also we need to change $f_\text{apo}$ to fix condition number),  \kmh{I'm confused because scanning frequency does not affect the condition number of $N$}
-%in Figure~(\ref{f scan 0.001}) it scans very slow
-%and in Figure~(\ref{f scan 10}) it's very fast.
-%In these two cases under $1/f$ noise model, 
-%our $\eta$ values based on Eq.~(\ref{etai rule}) are better than manually selected values.
-%Based on these two results we know, the $\eta$ values should somehow depends on scanning scheme.
-
 
 \subsection{Future Prospects}
+
+\begin{figure*}[htb!]
+\centering
+\includegraphics[width=0.8\textwidth]{chi2_exact_eta.pdf}
+\caption{
+    The blue line and orange line is the same as in Figure~(\ref{chi2 neta}) for reference.
+    The extra green line shows the result when $\delta\eta_m$ is determined from 
+    Eq.~(\ref{exact eta}) not from Eq.~(\ref{etai rule}).
+    This shows that if we could update based on exact expression Eq.~(\ref{exact eta}),
+    it could converge even faster.
+    Especially in the third graph it would overcome the shortcomings of parameterized conjugate gradient method.
+}
+\label{chi2 exact eta}
+\end{figure*}
+
 
 In Appendix~\ref{appendix:eta calculation}, we determine $\delta\eta_m$ value based on the upper bound of 
 $-\delta\chi^2(\hatm(\eta_m), \eta_m)/\chi^2(\hatm(\eta_m), \eta_m)$, and choose $\delta\eta_m$ such that 
@@ -561,21 +548,10 @@ In Figure~(\ref{chi2 exact eta}) we can see if we use Eq.~(\ref{exact eta}) for 
 $\delta\eta_m$, indeed it can improve performance. 
 Especially for the third graph where the power spectrum does not have lots of
 low frequency noise by using Eq.~(\ref{chi2 exact eta}) the result is close to
-vanilla conjugate gradient method.
-To further improve this method, we need to find more accurate expression for Eq.~(\ref{dchi2 chi2}).
+vanilla conjugate gradient method, which overcomes the shortcomings of parameterized
+conjugate gradient method.
+Therefore, to further improve this method, we need to find more accurate expression for Eq.~(\ref{dchi2 chi2}).
 
-
-\begin{figure*}[htb!]
-\centering
-\includegraphics[width=\textwidth]{chi2_exact_eta.pdf}
-\caption{
-    The blue line and orange line is the same as those in Figure~(\ref{chi2 neta})
-    for reference.
-    The extra green line shows the result when $\delta\eta_m$ is determined from 
-    Eq.~(\ref{exact eta}) not from expression Eq.~(\ref{etai rule}).
-}
-\label{chi2 exact eta}
-\end{figure*}
 
 
 %As you may have noticed in the second and third Figure(\ref{f scan 0.1}),
