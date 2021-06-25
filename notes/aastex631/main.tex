@@ -98,6 +98,10 @@ where  $\hatm$ provides the generalized least squares minimization of the $\chi^
 Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
 and noise covariance matrix is $N = \ev{\vbn \vbn^{\dagger}}$. Thus  mapmaking is a standard linear regression problem.
 In case the noise is Gaussian, the COBE solution is also the maximum likelihood solution.
+\textcolor{green}{
+    From now on we will use $\hatm$ donote an estimated map $\hatm = \PPinv{\inv{N}} \Pdagger \inv{N} \vbd$,
+    and $\vbm$ for arbitary map size vector.
+}
 
 With current computation power, we cannot solve for $\hatm$
 by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\dag \inv{N}P)$ matrix is too large to invert.  The noise covariance matrix $N$ is often sparse in frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain, and their product is dense.   In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
@@ -158,10 +162,17 @@ we can think of the $\eta$ parameter as turning it on slowly, adding a perturbat
 
 \citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to the parameterized map-making equation by iterating on
 \begin{align}
-\Pdagger \inv{N(\eta)}  P\ \hatm = \Pdagger \inv{N(\eta)} \vbd
+\Pdagger \inv{N(\eta)}  P\ \hatm(\eta) = \Pdagger \inv{N(\eta)} \vbd
 \label{map making eq eta}
 \end{align}
-as we adjust the parameter.  In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger mapmaking method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
+as we adjust the parameter. 
+\textcolor{green}{
+    Note that the estimated map $\hatm(\eta)$ is depends on $\eta$.
+    In this paper if we write $\hatm$ without $\eta$ argument,
+    that means the $\hatm$ in the Eq.~(\ref{map making eq}),
+    which is not depends on $\eta$.
+}
+In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger mapmaking method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
 
 %Based on previous analysis, we know that what messenger field method really
 %does is parameterizing the map-making equation.
@@ -171,13 +182,17 @@ as we adjust the parameter.  In our numerical experiments, we confirm that the c
 %due to noise covariance matrix is sandwiched between $\Pdagger P$.
 
 When $\eta = 0$, the noise covariance matrix $N(0)$ is proportional to identity matrix $I$, and solution is given by simple binned map
-$\vbm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
+$\hatm_0 = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
 which can be solved directly.
 The non-uniform part $\bar N$ is the troublesome portion of the covariance, and 
 we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
 
 
-From the starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation.  We may iterate more than once at each intermediate $\eta_i$: we solve   with conjugate gradient iterations
+From the starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation,
+\textcolor{green}{
+    and $\hatm = \hatm(1)$.
+}
+We may iterate more than once at each intermediate $\eta_i$: we solve   with conjugate gradient iterations
 \begin{align}\qty(\Pdagger \inv{N(\eta_i)} P)\, \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd, \end{align}
 using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
 and move to next parameter $\eta_{i+1}$ when the residual 
@@ -242,13 +257,17 @@ If we change $\inv{N}$ to $\inv{N(\eta)}$, it won't add extra cost,
 since both matrices are diagonal in frequency domain.
 Therefore the computational cost it the same for one step.
 
-However our previous analysis is based on
+However
+\textcolor{green}{
+    in Appendix \ref{appendix:eta calculation}
+}
+our analysis is based on
 $\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
 $\hatm(\eta_i)$ the estimated map at $\eta_i$.
-So We should update $\eta_i$ to $\eta_{i+1}$ when $\vbm \approx \hatm(\eta_i)$. 
+So we should update $\eta_i$ to $\eta_{i+1}$ when $\vbm \approx \hatm(\eta_i)$. 
 How do we know this condition is satisfied?
 Since for each new $\eta_i$ value, we are solving a new set of linear
-equations $A(\eta_i) \hatm = \vbb(\eta_i)$ with
+equations $A(\eta_i) \vbm = \vbb(\eta_i)$ with
 $A(\eta_i) = \Pdagger \inv{N(\eta_i)} P$ and 
 $\vbb(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd$,
 and we could stop calculation and moving to next value $\eta_{i+1}$ when the 
@@ -267,7 +286,7 @@ Therefore, overall introducing $\eta$ won't have extra computational cost.
 
 \subsection{Numerical Simulations}
 \begin{figure}[]
-\includegraphics[width=0.8\linewidth]{P_f.pdf}
+\includegraphics[width=\linewidth]{P_f.pdf}
 \centering
 \caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
     $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
@@ -387,8 +406,7 @@ simple preconditioner $\Pdagger P$ versus conjugate gradient with our perturbed 
 %for different kinds of noise power spectra.
 Figure~(\ref{1/f noise chi2}) shows the $\chi^2(\vbm)$ results for 1/f noise model ($f_\text{apo}=0$)
 with different knee frequencies.
-Note that $\chi^2$ in all figures are calculated based on
-Eq.~(\ref{chi2 formula})
+Note that $\chi^2$ in all figures are calculated based on $\chi^2(\vbm)$ in Eq.~(\ref{chi2 formula})
 not $\chi^2(\vbm, \eta)$ in Eq.~(\ref{chi2 eta formula}).
 And the $\chi^2_{\text{min}}$ is calculated from perturbative conjugate gradient
 method with 100 $\eta$ values, and it stops when the norm of residual 
@@ -764,12 +782,13 @@ which minimizes
 %\end{align}
 \begin{align}
 \begin{aligned}[b]
-\chi^2 (\hatm(\eta), \eta)
-&= \qty\big(\vbd - P \hatm(\eta))^{\dagger} \inv{\Neta} 
-    \qty\big(\vbd - P\hatm(\eta)).
+\chi^2 (\vbm, \eta)
+&= \qty\big(\vbd - P \vbm)^{\dagger} \inv{\Neta} 
+    \qty\big(\vbd - P\vbm).
 \label{chi2 eta formula}
 \end{aligned}
 \end{align}
+with $\eta$ being fixed.
 We restrict to the case that the noise covariance matrix
 $N$ is diagonal in the frequency domain, and represent the frequency-domain eigenvalues as $N_f$.
 
