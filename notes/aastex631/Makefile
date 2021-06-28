@@ -1,5 +1,5 @@
 main.pdf: main.tex references.bib
-	lualatex main.tex
+	lualatex -halt-on-error main.tex
 	bibtex main.aux
-	lualatex main.tex
-	lualatex main.tex
+	lualatex -halt-on-error  main.tex
+	lualatex -halt-on-error  main.tex

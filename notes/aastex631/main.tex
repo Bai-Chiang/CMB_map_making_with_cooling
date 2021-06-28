@@ -90,18 +90,19 @@ where $\vbd$, $\vbm$, and $\vbn$ are the vectors of time-ordered data (TOD), the
 \begin{align}
 \qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
 \end{align}
-where  $\hatm$ provides the generalized least squares minimization of the $\chi^2$ statistic
+where  $\hatm$ provides the generalized least squares minimization of the $\chi^2$ statistic,\textcolor{green}{ which for an arbitrary map vector $\vbm$ is }
+
 \begin{align}
 \chi^2(\vbm) & \equiv (\vbd - P\vbm)^{\dagger} N^{-1} (\vbd - P \vbm).
 \label{chi2 formula}
 \end{align}
 Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
 and noise covariance matrix is $N = \ev{\vbn \vbn^{\dagger}}$. Thus  mapmaking is a standard linear regression problem.
-In case the noise is Gaussian, the COBE solution is also the maximum likelihood solution.
-\textcolor{green}{
-    From now on we will use $\hatm$ donote an estimated map $\hatm = \PPinv{\inv{N}} \Pdagger \inv{N} \vbd$,
-    and $\vbm$ for arbitary map size vector.
-}
+In the case where the noise is Gaussian, the COBE solution is also the maximum likelihood solution.
+%\textcolor{green}{
+%    From now on we will use $\hatm$ donote an estimated map $\hatm = \PPinv{\inv{N}} \Pdagger \inv{N} \vbd$,
+%    and $\vbm$ for arbitary map size vector.
+%}
 
 With current computation power, we cannot solve for $\hatm$
 by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly, since the $(P^\dag \inv{N}P)$ matrix is too large to invert.  The noise covariance matrix $N$ is often sparse in frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain, and their product is dense.   In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable.
@@ -160,17 +161,21 @@ Since the non-white part $\bar N$ is the troublesome portion of the covariance, 
 we can think of the $\eta$ parameter as turning it on slowly, adding a perturbation to the solution achieved at a particular stage, building ultimately upon the initial uniform covariance model.
 
 
-\citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to the parameterized map-making equation by iterating on
+\citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to the cooled map-making problem.  In our notation, this is equivalent to iterating on
 \begin{align}
-\Pdagger \inv{N(\eta)}  P\ \hatm(\eta) = \Pdagger \inv{N(\eta)} \vbd
+  \qty(\Pdagger \inv{N(\eta_i)} P)\, \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd,
 \label{map making eq eta}
 \end{align}
-as we adjust the parameter. 
-\textcolor{green}{
-    Note that the estimated map $\hatm(\eta)$ is depends on $\eta$.
-    In this paper if we write $\hatm$ without $\eta$ argument,
-    that means the $\hatm$ in the Eq.~(\ref{map making eq}),
-    which is not depends on $\eta$.
+%\begin{align}
+%\Pdagger \inv{N(\eta)}  P\ \hatm(\eta) = \Pdagger \inv{N(\eta)} \vbd
+%\label{map making eq eta}
+%\end{align}
+as we adjust the parameter through a set of levels $\{\eta_i\}$, which may change every iteration or less frequently. 
+\textcolor{red}{
+    Note that the estimated map $\hatm(\eta)$ depends on $\eta$.
+    If we write $\hatm$ without the $\eta$ argument,
+    that means the $\hatm$ in Eq.~(\ref{map making eq}),
+    independent of $\eta$.
 }
 In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger mapmaking method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
 
@@ -189,23 +194,21 @@ we can think of the $\eta$ parameter as turning it on slowly, adding a perturbat
 
 
 From the starting point, the cooling scheme requires the inverse cooling parameter $\eta$ increase as $0 = \eta_0 \leq \eta_1 \leq \cdots \leq \eta_{\rm final} = 1$, at which point we arrive at the desired mapmaking equation,
-\textcolor{green}{
     and $\hatm = \hatm(1)$.
-}
+
 We may iterate more than once at each intermediate $\eta_i$: we solve   with conjugate gradient iterations
-\begin{align}\qty(\Pdagger \inv{N(\eta_i)} P)\, \hatm(\eta_i) = \Pdagger \inv{N(\eta_i)} \vbd, \end{align}
 using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
-and move to next parameter $\eta_{i+1}$ when the residual 
-$\qty(\Pdagger \inv{N(\eta_i)} P)\, 
-\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd \simeq \vb{0}$.
-\textcolor{green}{
-During our calculation we move to next $\eta$ parameter when the norm of residual $\norm{\vb{r}}$
-is smaller than one tenth of standard deviation of each pixel,
-under the assumption that the noise is purely white with power spectrum $P(f) =\sigma^2$, which is
-the minimum value of our model Eq.~(\ref{noise power spectrum}).
+and move to next parameter $\eta_{i+1}$ when the residual \textcolor{red}{
+ is smaller than a tenth of the pixel variance given by the white noise level of the noise model,
+\begin{align}\qty(\Pdagger \inv{N(\eta_i)} P)\, 
+\hatm(\eta_i) - \Pdagger \inv{N(\eta_i)} \vbd < 0.1 {\sigma^2_{\rm pix}}. \end{align}
+%During our calculation we move to next $\eta$ parameter when the norm of residual $\norm{\vb{r}}$
+%is smaller than one tenth of standard deviation of each pixel,
+%under the assumption that the noise is purely white with power spectrum $P(f) =\sigma^2$, which is
+%the minimum value of our model Eq.~(\ref{noise power spectrum}).
 }
 %The initial guess is $\hatm(\eta_0) = \vbm_0 = \PPinv{} \Pdagger \vbd$.
-\kmh{I think you have to be specific about the residual threshold.}
+%\kmh{I think you have to be specific about the residual threshold.}
 
 
 
@@ -289,12 +292,12 @@ Therefore, overall introducing $\eta$ won't have extra computational cost.
 \includegraphics[width=\linewidth]{P_f.pdf}
 \centering
 \caption{The noise power spectrum based on Eq.~(\ref{noise power spectrum}) with 
-    $\sigma^2 = 10$ $\mu$K$^2$ and $\alpha = 3$.
-    Two knee frequencies $f_\text{knee}=10$ Hz (solid lines) 
+    white noise level $\sigma^2 = 10$ $\mu$K$^2$ and low frequency power-law slope $\alpha = 3$.
+    We show two knee frequencies, $f_\text{knee}=10$ Hz (solid lines) 
     and $f_\text{knee}=0.1$ Hz (dashed lines).
-    For each knee frequency, we have $f_\text{apo}=0$ Hz, $0.1f_\text{knee}$ and
-    $0.01f_\text{knee}$.
-    The vertical line shows our scanning frequency. \kmh{try to put the legend below the figure so the plot is not so small.}
+    For each knee frequency, we have show an unapodized spectrum ($f_\text{apo}=0$ Hz), and two apodized ones ($0.1f_\text{knee}$ and
+    $0.01f_\text{knee}$).
+     The vertical line shows our scanning frequency.
 }
 \label{power spectrum}
 \end{figure}
