@@ -565,7 +565,7 @@ $N$ is diagonal in the frequency domain, and represent the frequency-domain eige
 
 Let us first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
 such that $\eta_1 = \delta \eta$ is very small quantity, $\delta \eta \ll 1$.
-Since $\hatm(\eta)$ minimizes $\chi^2(\hatm(\eta),\eta)$, we have 
+Since $\hatm(\eta)$ minimizes $\chi^2(\vbm,\eta)$ with $\eta$ being fixed, we have 
 $\pdv{\hatm} \chi^2(\hatm(\eta), \eta) = 0$,
 and using chain rule
 \begin{align}
@@ -590,28 +590,26 @@ we treat it as an arbitrary vector, then the least upper bound is given by
 \begin{align}
 -\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
 \leq \frac{\delta \eta} {\tau} \max(\Nbar_f)
+\label{dchi2/chi2 upper bound}
 \end{align}
 where $\max(\Nbar_f)$ is the maximum eigenvalue of $\Nbar$.
-Here if we assume that initial $\chi^2$ value $\chi^2(\hatm(0),0)$ is much
-larger than final value $\chi^2(\hatm(1),1)$,
-$\chi^2(\hatm(0), 0) \gg \chi^2(\hatm(1),1)$,
-then we would expect
+We want $\qty|\delta \chi^2(\hatm(0),0)| = \chi^2(\hatm(0),0)) - \chi^2(\hatm(\eta_1), \eta_1)$
+to be large such that it converge fast.
+Let's say $\chi^2(\hatm(\eta_1), \eta_1)$ is much smaller than $\chi^2(\hatm(0), 0)$
+then $\qty|\delta \chi^2(\hatm(0),0)| \simeq \chi^2(\hatm(0),0)$.
+We would expect
 \begin{align}
 -\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}
-= 1 - \frac{\chi^2(\hatm(1),1)}{\chi^2(\hatm(0),0)}
+= 1 - \frac{\chi^2(\hatm(\eta_1),\eta_1)}{\chi^2(\hatm(0),0)}
 \approx 1^-
+\label{dchi2/chi2 0}
 \end{align}
 The upper bound is strictly smaller than 1.
-Ideally, if
-$\delta \chi^2(\hatm(0),0) = \chi^2(\hatm(1), 1) - \chi^2(\hatm(0),0)$,
-then it would get close to the final $\chi^2$ at next iteration,
-but we do not know the final $\chi^2(\hatm(1),1)$.
-So we want $\qty|\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}|$ to be as
-large as possible, so it could converge fast, but subject to another constraint that the least upper bound cannot exceed 1.
-Therefore we can choose $\delta \eta$ such that the least upper bound is equal to 1.
-Thus we choose
+Combining Eq.~(\ref{dchi2/chi2 upper bound}) and Eq.~(\ref{dchi2/chi2 0})
+we can choose $\delta \eta$ such that the least upper bound is equal to 1.
+Thus we have
 \begin{equation}
-\eta_1 \equiv \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}.
+\eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}.
 \end{equation}
 Here $N_f$ and $\Nbar_f$ are the eigenvalues of $N$ and $\Nbar$ in the frequency
 domain.
@@ -621,8 +619,8 @@ then $\eta_1 \approx \inv{\kappa} (N)$.
 
 What about the other parameters $\eta_m$ with $m > 1$?
 We use a similar analysis,
-letting $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m \ll 1$,
-and set the least upper bound of relative decrease equal to 1.
+letting $\eta_{m+1} = \eta_m + \delta \eta_m$ with a small $\delta\eta_m \ll 1$.
+First, let us find the least upper bound
 \begin{align}
 -\frac{\delta \chi^2(\hatm(\eta_m), \eta_m)}{\chi^2(\hatm(\eta_m), \eta_m)}  
 =& \delta\eta_m
@@ -662,6 +660,12 @@ For any vector $\vb{v} = \sum_f \alpha_f \vb{e}_f$, we have
 \leq \max \qty( \frac{\Nbar_f}{\tau + \eta_m \Nbar_f}).
 \end{equation}
 
+Again assuming $\chi^2(\hatm(\eta_{m+1}), \eta_{m+1}) \ll \chi^2(\hatm(\eta_m), \eta_m)$,
+which we expect it to be satisfied for $ \eta_m \ll 1$.
+That is because if $\eta \approx 1$, then $\chi^2(\hatm(\eta), \eta)$ would also close to the minimum $\chi^2$
+which means the next $\chi^2$ value would be close to current one.
+Since the final result Eq.~(\ref{etai rule appendix}) is a geometric series,
+only the last few $\eta_m$ values fail to satisfy this condition.
 Similarly, we could set the least upper bound equal to 1.
 Then we get
 \begin{align}
@@ -674,13 +678,6 @@ Therefore
 \eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
 \end{align}
 The final term ${\tau }/{\max (\Nbar_f)} = \eta_1$ becomes subdominant after a few terms, and we see that the $\eta_m$ increase like a geometric series. 
-Here we assumed that
-$\chi^2(\hatm(\eta_m),\eta_m) \gg \chi^2(\hatm(1),1)$,
-which we expect it to be satisfied for our assumed $ \eta_m \ll 1$. 
-Since the final result Eq.~(\ref{etai rule})
-is geometric series,
-only the last few $\eta_m$ values fail to be much smaller than 1.
-
 If written in the form $\eta_{m+1} + {\tau }/{\max(\Nbar_f)}
 = 2 \qty( \eta_m + {\tau}/{\max(\Nbar_f)})$
 it's easy to see that for $m \geq 1$,
@@ -695,6 +692,7 @@ Note that $m = 0$ and $\eta_0 = 0$ also satisfy this expression and we've got
 final expression for all $\eta_m$
 \begin{align}
 \eta_m =\min \qty\bigg{1,\; \frac{\tau}{\max(\Nbar_f)} \qty(2^m -1) }
+\label{etai rule appendix}
 \end{align}
 Here we need to truncate the series when $\eta_m > 1$.
 
