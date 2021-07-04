@@ -124,7 +124,7 @@ plt.savefig(figs_dir/'pink_noise_chi2.pdf', bbox_inches="tight")
 plt.close()
 
 
-# plot apodized noise results
+# plot flattened noise results
 fig = plt.figure(figsize=(12,4))
 gs = fig.add_gridspec(1,3, wspace=0)
 axs = gs.subplots(sharey='row')
@@ -167,7 +167,7 @@ axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
 #plt.show()
-plt.savefig(figs_dir/'apodized_noise_chi2.pdf', bbox_inches="tight")
+plt.savefig(figs_dir/'flattened_noise_chi2.pdf', bbox_inches="tight")
 plt.close()
 
 # plot differnt eta results
