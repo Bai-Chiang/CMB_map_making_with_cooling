@@ -19,20 +19,17 @@ noise_index = parameters_dic['noise_index']
 num_pix_x = parameters_dic['num_pix_x']
 num_pix_y = parameters_dic['num_pix_y']
 crosslink = parameters_dic['crosslink']
-#num_snapshots = parameters_dic['num_snapshots']
-#max_iter = parameters_dic['max_iter']
 num_iter = parameters_dic['num_iter']
 results_dir = parameters_dic['results_dir']
 figs_dir = parameters_dic['figs_dir']
 cache_dir = parameters_dic['cache_dir']
 seed = parameters_dic['seed']
 f_scan_list = parameters_dic['f_scan_list']
-#condition_number_arr = parameters_dic['condition_number_arr']
-#num_eta_iter_per_eta = parameters_dic['num_eta_iter_per_eta']
 num_eta_arr = parameters_dic['num_eta_arr']
 f_sample_knee_apo_arr = parameters_dic['f_sample_knee_apo_arr']
 offsets = parameters_dic['offsets']
 comps = parameters_dic['comps']
+next_eta_ratio = parameters_dic['next_eta_ratio']
 
 
 data_list_rank = []
@@ -101,7 +98,6 @@ for f_scan in f_scan_list:
             num_iter,
             preconditioner_inv=_map.PTP_preconditioner,
             preconditioner_description='PTP',
-            #num_snapshots=num_snapshots,
             )
         data_dic['CG_SP_description'] = CG_SP_description
         data_dic['CG_SP_description_latex'] = CG_SP_description_latex
@@ -118,12 +114,12 @@ for f_scan in f_scan_list:
                 num_iter,
                 preconditioner_inv=_map.PTP_preconditioner,
                 preconditioner_description='PTP',
-                #next_eta_ratio = 1e-2,
+                next_eta_ratio=next_eta_ratio,
             )
         data_dic['CG_eta_description'] = CG_eta_description
         data_dic['CG_eta_description_latex'] = CG_eta_description_latex
         data_dic['CG_eta_file'] = CG_eta_file
-        data_dic['etas'] = CG_eta_result['etas']
+        data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
 
         # CG perturbation manual eta
@@ -131,7 +127,7 @@ for f_scan in f_scan_list:
             tau = np.min(_map.N_f_diag)
             Nbar_f = _map.N_f_diag - tau
             eta_min = tau/Nbar_f.max()
-            etas=np.logspace(
+            etas_arr = np.logspace(
                 np.log(eta_min), 0, num=num_eta, base=np.e
             )
             print('CG manual ln {:d} eta'.format(num_eta))
@@ -144,8 +140,8 @@ for f_scan in f_scan_list:
                     num_iter,
                     preconditioner_inv=_map.PTP_preconditioner,
                     preconditioner_description='PTP',
-                    #next_eta_ratio = 1e-2,
-                    etas=etas,
+                    etas_arr=etas_arr,
+                    next_eta_ratio=next_eta_ratio,
                 )
             data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]\
                 = CG_eta_description
@@ -165,38 +161,38 @@ for f_scan in f_scan_list:
                 num_iter,
                 preconditioner_inv=_map.PTP_preconditioner,
                 preconditioner_description='PTP',
-                #next_eta_ratio = 1e-2,
+                next_eta_ratio=next_eta_ratio,
             )
         data_dic['CG_exact_eta_description'] = CG_eta_description
         data_dic['CG_exact_eta_description_latex'] = CG_eta_description_latex
         data_dic['CG_exact_eta_file'] = CG_eta_file
-        data_dic['etas'] = CG_eta_result['etas']
+        data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
-        ## MF iteration
-        #for num_eta in num_eta_arr:
-        #    tau = np.min(_map.N_f_diag)
-        #    Nbar_f = _map.N_f_diag - tau
-        #    eta_min = tau/Nbar_f.max()
-        #    etas=np.logspace(
-        #        np.log(eta_min), 0, num=num_eta, base=np.e
-        #    )
-        #    print('MF ln {:d}x1 eta'.format(num_eta))
-        #    MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
-        #    MF_description_latex = (r'MF $\ln$ scale, '
-        #        r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
-        #    MF_file,_ =\
-        #        _map.messenger_field_solver(
-        #            lambs=1/etas,
-        #            num_iter_per_lamb=1,
-        #            num_iter=num_iter,
-        #        )
-        #    data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
-        #        = MF_description
-        #    data_dic['MF_ln_{:d}_eta_description_latex'
-        #        .format(num_eta)]\
-        #        = MF_description_latex
-        #    data_dic['MF_ln_{:d}_eta_file'.format(
-        #        num_eta)] = MF_file
+        # MF iteration
+        for num_eta in num_eta_arr:
+            tau = np.min(_map.N_f_diag)
+            Nbar_f = _map.N_f_diag - tau
+            eta_min = tau/Nbar_f.max()
+            etas_arr = np.logspace(
+                np.log(eta_min), 0, num=num_eta, base=np.e
+            )
+            print('MF ln {:d}x1 eta'.format(num_eta))
+            MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
+            MF_description_latex = (r'MF $\ln$ scale, '
+                r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
+            MF_file,_ =\
+                _map.messenger_field_solver(
+                    lambs_arr=1/etas_arr,
+                    num_iter_per_lamb=1,
+                    num_iter=num_iter,
+                )
+            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
+                = MF_description
+            data_dic['MF_ln_{:d}_eta_description_latex'
+                .format(num_eta)]\
+                = MF_description_latex
+            data_dic['MF_ln_{:d}_eta_file'.format(
+                num_eta)] = MF_file
 
 
         data_list_rank.append(data_dic)
