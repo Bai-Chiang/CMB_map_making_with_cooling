@@ -5,7 +5,7 @@ from pathlib import Path, PurePath
 
 from Map import Map
 
-force_recalculate = True
+force_recalculate = False
 
 with open('parameters_dic', 'rb') as _file:
     parameters_dic = pickle.load(_file)
@@ -88,7 +88,10 @@ for f_scan in f_scan_list:
             = PurePath(_map.map_dir).relative_to(cache_dir)
 
         # get etas that makes chi2 decrease
-        data_dic['chi2_vs_eta'] = _map.get_chi2_vs_eta()
+        data_dic['chi2_vs_eta'] = _map.get_chi2_vs_eta(
+            preconditioner_inv=_map.PTP_preconditioner,
+            preconditioner_description='PTP',
+        )
         data_dic['chi2_min'] = _map.chi2_min
 
         # CG with simple preconditioner

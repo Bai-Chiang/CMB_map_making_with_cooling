@@ -640,39 +640,192 @@ class Map:
     def PTP_preconditioner(self, m, eta=1):
         """
         M = P.T P
+        return M^-1(m)
         """
         return self._PTP_inv(m)
 
     def get_chi2_vs_eta(self, 
+            preconditioner_inv,
+            preconditioner_description,
             num_eta=100,
-            max_iter=1000,
+            #max_iter=1000,
+            next_eta_ratio=1e-5,
+            stop_ratio=1e-10,
+            max_final_iter=100,
             ):
         """
         get function of Χ²(hatm(η),η) as function of η
+        args:
+            preconditioner_inv
+                --- function with input (m, η)
+                    map size object m and cooling parameter η
+                --- the inverse of preconditioner
+            preconditioner_description
+                --- description of preconditioner
+            num_eta
+                --- int
+                --- n_η, the eta array is {η_1, η_2, ..., η_{n_η}},
+                    with η_1 = 1e-5 * τ/max(Nbar)
+                    and η_{n_η} = 1
+            next_eta_ratio
+                --- float
+                --- if ||r||₂/||b(η_i)|| < next_eta_ratio, advance to η_{i+1}
+            stop_ratio
+                --- float
+                --- when η=1 and the 2-norm of the residual
+                    ||r||₂ / ||b||₂ < stop_ratio the iteration stops
+            max_final_iter
+                --- int
+                --- maximum number of iterations after η=1
         """
+        assert isinstance(num_eta, int)
+        assert isinstance(preconditioner_description, str)
+        assert isinstance(next_eta_ratio, float)
+        assert isinstance(stop_ratio, float)
+        assert isinstance(max_final_iter, int)
         tau = np.min(self.N_f_diag)
         Nbar_f = self.N_f_diag - tau
-        eta_min = 1e-5 * tau/Nbar_f.max()
+        eta_min = 1e-3 * tau/Nbar_f.max()
         etas_arr = np.logspace(
             np.log10(eta_min), 0, num=num_eta, base=10
         )
-        _,infinitesimal_step_result = \
-            self.conjugate_gradient_solver_eta(
-                num_iter=max_iter,
-                preconditioner_inv=self.PTP_preconditioner,
-                preconditioner_description='PTP',
-                etas_arr=etas_arr,
-                next_eta_ratio=1e-5,
+        #_,infinitesimal_step_result = \
+        #    self.conjugate_gradient_solver_eta(
+        #        num_iter=max_iter,
+        #        preconditioner_inv=self.PTP_preconditioner,
+        #        preconditioner_description='PTP',
+        #        etas_arr=etas_arr,
+        #        next_eta_ratio=1e-5,
+        #)
+        #chi2_result = infinitesimal_step_result['chi2_eta_hist']
+        #etas_result = infinitesimal_step_result['etas_iter']
+        #self.chi2_min = infinitesimal_step_result['chi2_hist'].min()
+        #chi2_list = []
+        #for eta in etas_arr:
+        #    chi2_list.append(
+        #        np.min(chi2_result[etas_result==eta])
+        #    )
+        #return (etas_arr, np.array(chi2_list))
+        random.seed(self.seed)
+        num_pix_x = self.num_pix_x
+        num_pix_y = self.num_pix_y
+
+        chi2_vs_eta_info = str([
+            num_eta,
+            preconditioner_description,
+            next_eta_ratio,
+            stop_ratio,
+            max_final_iter,
+            preconditioner_inv(
+                random.rand(num_pix_y, num_pix_x, 3),1) ]
+                ).encode()
+        chi2_vs_eta_hash = hashlib.md5(chi2_vs_eta_info).hexdigest()
+        chi2_vs_eta_file_name = (
+            'chi2(hatm(eta), eta) num_eta={:d} preconditioner={} {}'
+            ).format(
+            num_eta,
+            preconditioner_description,
+            chi2_vs_eta_hash,
         )
-        chi2_result = infinitesimal_step_result['chi2_eta_hist']
-        etas_result = infinitesimal_step_result['etas_iter']
-        self.chi2_min = infinitesimal_step_result['chi2_hist'].min()
-        chi2_list = []
-        for eta in etas_arr:
-            chi2_list.append(
-                np.min(chi2_result[etas_result==eta])
-            )
-        return (etas_arr, np.array(chi2_list))
+        chi2_vs_eta_file = self.map_dir/chi2_vs_eta_file_name
+
+        try:
+            if self.force_recalculate:
+                raise FileNotFoundError
+            else:
+                with open(chi2_vs_eta_file, 'rb') as _file:
+                    chi2_vs_eta_results = pickle.load(_file)
+                    assert np.all(chi2_vs_eta_results['etas_arr'] == etas_arr)
+                    chi2_vs_eta = chi2_vs_eta_results['chi2_vs_eta']
+        except FileNotFoundError:
+            chi2_vs_eta = np.zeros(num_eta)
+
+            print(('chi2(hatm(eta), eta) num_eta={:d} preconditioner={}'
+                .format(num_eta, preconditioner_description)
+            ))
+            b = lambda eta: self._PT( fft.irfft(
+                self.tod_f/(eta*Nbar_f + tau),
+                axis=1))
+            def A(m, eta):
+                Pm = self._P(m)
+                Pm_f = fft.rfft(Pm)
+                return self._PT( fft.irfft(
+                    Pm_f/(eta*Nbar_f + tau),
+                    axis=1))
+
+            # dot product in conjugate gradient algorithm
+            dot = lambda x,y: np.sum(x*y)
+                
+            # preconditioned algorithm for conjugate gradient method 
+            m = self.simple_binned_map.copy()
+            chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
+
+            print('η={:.5e}  Χ²(m,η)={:.10e}'.format(0, chi2_eta))
+            i_eta = 0
+            eta = etas_arr[i_eta]
+            b_eta = b(eta)
+            b_eta_2norm = self._get_2norm(b_eta)
+            r_eta = b_eta - A(m, eta)
+            r_eta_2norm = self._get_2norm(r_eta)
+            z = preconditioner_inv(r_eta, eta)
+            p = z.copy()
+            while eta < 1:
+
+                alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                m += alpha * p
+                r_eta_old = r_eta.copy()
+                r_eta -= alpha * A(p, eta)
+                z_old = z.copy()
+                z = preconditioner_inv(r_eta, eta)
+                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
+                p = z + beta * p
+
+                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                r_eta_2norm = self._get_2norm(r_eta)
+
+                print('η={:.5e}  Χ²(m,η)={:.10e}'.format(eta, chi2_eta))
+
+                if r_eta_2norm/b_eta_2norm < next_eta_ratio :
+                    chi2_vs_eta[i_eta] = chi2_eta 
+                    i_eta += 1
+                    eta = etas_arr[i_eta]
+                    b_eta = b(eta)
+                    b_eta_2norm = self._get_2norm(b_eta)
+                    r_eta = b_eta - A(m, eta)
+                    r_eta_2norm = self._get_2norm(r_eta)
+                    z = preconditioner_inv(r_eta, eta)
+                    p = z.copy()
+
+            # now η=1 
+            assert eta==1
+            for i_iter in range(max_final_iter):
+
+                alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                m += alpha * p
+                r_eta_old = r_eta.copy()
+                r_eta -= alpha * A(p, eta)
+                z_old = z.copy()
+                z = preconditioner_inv(r_eta, eta)
+                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
+                p = z + beta * p
+
+                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                r_eta_2norm = self._get_2norm(r_eta)
+
+                print('η={:.5e}  Χ²(m,η)={:.10e}'.format(eta, chi2_eta))
+
+                if r_eta_2norm/b_eta_2norm < stop_ratio:
+                    # stop calculation
+                    break
+            chi2_vs_eta[-1] = chi2_eta
+
+            chi2_vs_eta_results = {}
+            chi2_vs_eta_results['etas_arr'] = etas_arr
+            chi2_vs_eta_results['chi2_vs_eta'] = chi2_vs_eta
+            with open(chi2_vs_eta_file, 'wb') as _file:
+                pickle.dump(chi2_vs_eta_results, _file)
+        self.chi2_min = chi2_vs_eta[-1]
+        return etas_arr, chi2_vs_eta
         
 
 ### solvers
@@ -907,7 +1060,7 @@ class Map:
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), 
                 dtype=np.float32)
-            etas_iter = np.zeros(num_iter+1, dtype=np.float64)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
 
             print('MF num_iter={:d}'.format(num_iter))
             b = self.b
@@ -1040,7 +1193,6 @@ class Map:
                         'etas_arr',
                     ]
         """
-        #assert isinstance(num_snapshots, int) and num_snapshots >= 2
         assert isinstance(num_iter, int)
         assert isinstance(preconditioner_description, str)
         assert (etas_arr is None) or (isinstance(etas_arr, np.ndarray))
@@ -1097,7 +1249,7 @@ class Map:
             dchi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), dtype=np.float32)
-            etas_iter = np.zeros(num_iter+1, dtype=np.float64)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
 
             print(('CG with eta solver preconditioner={} '
                 'num_iter={:d}').format(
@@ -1300,7 +1452,7 @@ class Map:
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f),
                 dtype=np.float32)
-            etas_iter = np.zeros(num_iter+1, dtype=np.float64)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
 
             print(('CG with exact eta solver preconditioner={} '
                 'num_iter={:d}').format(
