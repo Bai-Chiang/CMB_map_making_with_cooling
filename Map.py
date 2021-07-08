@@ -907,7 +907,7 @@ class Map:
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), 
                 dtype=np.float32)
-            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float64)
 
             print('MF num_iter={:d}'.format(num_iter))
             b = self.b
@@ -1097,7 +1097,7 @@ class Map:
             dchi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), dtype=np.float32)
-            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float64)
 
             print(('CG with eta solver preconditioner={} '
                 'num_iter={:d}').format(
@@ -1300,7 +1300,7 @@ class Map:
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f),
                 dtype=np.float32)
-            etas_iter = np.zeros(num_iter+1, dtype=np.float32)
+            etas_iter = np.zeros(num_iter+1, dtype=np.float64)
 
             print(('CG with exact eta solver preconditioner={} '
                 'num_iter={:d}').format(

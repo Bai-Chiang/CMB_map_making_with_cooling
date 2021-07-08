@@ -5,7 +5,7 @@ from pathlib import Path, PurePath
 
 from Map import Map
 
-force_recalculate = False
+force_recalculate = True
 
 with open('parameters_dic', 'rb') as _file:
     parameters_dic = pickle.load(_file)
@@ -45,6 +45,9 @@ for f_scan in f_scan_list:
         if i_case%size != rank:
             i_case += 1
             continue
+        print('f_scan={:.3e} f_sample={:.3e} f_knee={:.3e} f_apo={:.5e}'.format(
+            f_scan, f_sample, f_knee, f_apo
+        ))
         
         data_dic = {}
         data_dic['f_scan'] = f_scan
