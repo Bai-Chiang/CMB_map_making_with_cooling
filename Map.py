@@ -648,7 +648,7 @@ class Map:
             preconditioner_inv,
             preconditioner_description,
             num_eta=100,
-            next_eta_ratio=1e-2,
+            next_eta_ratio=1e-3,
             stop_ratio=1e-5,
             max_iter_per_eta=100,
             ):
@@ -760,7 +760,7 @@ class Map:
             # preconditioned algorithm for conjugate gradient method 
             m = self.simple_binned_map.copy()
 
-            print('i_η={:<3d} i={:<3d} η={:.5e}'.format(0,0,0))
+            print('i_η={:<5d} i={:<5d} η={:.5e}'.format(0,0,0))
             for i_eta,eta in enumerate(etas_arr):
 
                 b_eta = b(eta)
@@ -783,7 +783,7 @@ class Map:
 
                     r_eta_2norm = self._get_2norm(r_eta)
 
-                    print('i_η={:<3d} i={:<3d} η={:.5e}'
+                    print('i_η={:<5d} i={:<5d} η={:.5e}'
                         .format(i_eta, i_iter, eta)
                     )
 
@@ -847,6 +847,7 @@ class Map:
                     [
                         'chi2_hist',
                         'chi2_eta_hist',
+                        'dchi2_eta_hist',
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
@@ -890,6 +891,7 @@ class Map:
             r_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
                 dtype=np.float32)
             chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
+            dchi2_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), dtype=np.float32)
 
@@ -927,6 +929,7 @@ class Map:
 
                 chi2 = self.get_chi2(m)
                 chi2_hist[i_iter] = chi2
+                dchi2_hist[i_iter] = chi2 - chi2_hist[i_iter-1]
                 r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'.format(
                     i_iter, chi2, r_2norm/r0_2norm))
@@ -944,6 +947,7 @@ class Map:
             CG_results = {}
             CG_results['chi2_hist'] = chi2_hist
             CG_results['chi2_eta_hist'] = chi2_hist
+            CG_results['dchi2_eta_hist'] = dchi2_hist
             CG_results['m_hist'] = m_hist
             CG_results['r_hist'] = r_hist
             CG_results['r_2norm_hist'] = r_2norm_hist
@@ -1255,7 +1259,6 @@ class Map:
             chi2_hist[0] = chi2
             chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
             chi2_eta_hist[0] = chi2_eta
-            chi2_eta_prev = chi2_eta   # for calculate dchi2_eta_hist
             etas_iter[0] = 0
             r_2norm_hist[0] = r0_2norm = self._get_2norm(r_true)
             m_hist[0,:,:,:] = m
@@ -1263,61 +1266,56 @@ class Map:
             chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
 
             print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
-            i_eta = 0
-            eta = etas_arr[i_eta]
-            b_eta = b(eta)
-            b_eta_2norm = self._get_2norm(b_eta)
-            r_eta = b_eta - A(m, eta)
-            r_eta_2norm = self._get_2norm(r_eta)
-            z = preconditioner_inv(r_eta, eta)
-            p = z.copy()
-            for i_iter in range(1, num_iter+1):
-
-                alpha = dot(r_eta,z) / dot(p, A(p, eta))
-                m += alpha * p
-                r_eta_old = r_eta.copy()
-                r_eta -= alpha * A(p, eta)
-                z_old = z.copy()
-                z = preconditioner_inv(r_eta, eta)
-                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
-                p = z + beta * p
-
-                chi2 = self.get_chi2(m)
-                chi2_hist[i_iter] = chi2
-                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
-                chi2_eta_hist[i_iter] = chi2_eta
-                dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
-                chi2_eta_prev = chi2_eta
-                etas_iter[i_iter] = eta
-                r_true = self.b - self._A(m)
-                r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+            i_iter = 1
+            for i_eta,eta in enumerate(etas_arr):
+                eta = etas_arr[i_eta]
+                b_eta = b(eta)
+                b_eta_2norm = self._get_2norm(b_eta)
+                r_eta = b_eta - A(m, eta)
                 r_eta_2norm = self._get_2norm(r_eta)
+                z = preconditioner_inv(r_eta, eta)
+                p = z.copy()
 
-                print('iter={:<5d} η={:.5e}  Χ²={:.10e}'
-                    .format( i_iter, eta, chi2)
-                )
+                # for calculate dchi2_eta_hist
+                chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
 
-                if ( r_eta_2norm/b_eta_2norm < next_eta_ratio
-                        and eta < 1):
-                    i_eta += 1
-                    eta = etas_arr[i_eta]
-                    b_eta = b(eta)
-                    b_eta_2norm = self._get_2norm(b_eta)
-                    r_eta = b_eta - A(m, eta)
-                    r_eta_2norm = self._get_2norm(r_eta)
+                #for i_iter in range(1, num_iter+1):
+                while i_iter <= num_iter:
+                    alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                    m += alpha * p
+                    r_eta_old = r_eta.copy()
+                    r_eta -= alpha * A(p, eta)
+                    z_old = z.copy()
                     z = preconditioner_inv(r_eta, eta)
-                    p = z.copy()
-                    chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                    beta = dot(r_eta,z) / dot(r_eta_old,z_old)
+                    p = z + beta * p
 
-                elif (r_2norm/b_2norm < stop_ratio
-                        and eta == 1 ):
-                    # stop calculation
-                    stop_point = i_iter
-                    chi2_hist[stop_point:] = chi2
-                    chi2_eta_hist[stop_point:] = chi2_eta
-                    etas_iter[stop_point:] = eta
-                    r_2norm_hist[stop_point:] = r_2norm
-                    break
+                    chi2 = self.get_chi2(m)
+                    chi2_hist[i_iter] = chi2
+                    chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                    chi2_eta_hist[i_iter] = chi2_eta
+                    dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
+                    chi2_eta_prev = chi2_eta
+                    etas_iter[i_iter] = eta
+                    r_true = self.b - self._A(m)
+                    r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+                    r_eta_2norm = self._get_2norm(r_eta)
+
+                    print('iter={:<5d} η={:.5e}  Χ²={:.10e}'.format( i_iter, eta, chi2))
+                    i_iter += 1
+
+                    if (eta < 1 and r_eta_2norm/b_eta_2norm < next_eta_ratio):
+                        # to next eta value
+                        break
+
+                    elif (eta == 1 and r_eta_2norm/b_eta_2norm < stop_ratio):
+                        # stop calculation
+                        stop_point = i_iter - 1
+                        chi2_hist[stop_point:] = chi2
+                        chi2_eta_hist[stop_point:] = chi2_eta
+                        etas_iter[stop_point:] = eta
+                        r_2norm_hist[stop_point:] = r_2norm
+                        break
 
             m_hist[1,:,:,:] = m
             r_hist[1,:,:,:] = r_true
@@ -1458,72 +1456,67 @@ class Map:
             chi2_hist[0] = chi2
             chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
             chi2_eta_hist[0] = chi2_eta
-            dchi2_deta = self.get_dchi2_deta(m, 0, tau, Nbar_f)
-            chi2_eta_prev = chi2_eta   # for calculate dchi2_eta_hist
-            etas_iter[0] = 0
-            eta = chi2_eta/dchi2_deta
-            etas_list.append(eta)
+            etas_iter[0] = eta = 0
             r_2norm_hist[0] = r0_2norm = self._get_2norm(r_true)
             m_hist[0,:,:,:] = m
             r_hist[0,:,:,:] = r_true
             chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
 
             print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
-            b_eta = b(eta)
-            b_eta_2norm = self._get_2norm(b_eta)
-            r_eta = b_eta - A(m, eta)
-            r_eta_2norm = self._get_2norm(r_eta)
-            z = preconditioner_inv(r_eta, eta)
-            p = z.copy()
-            for i_iter in range(1, num_iter+1):
+            i_iter = 1
+            while eta < 1 and i_iter <= num_iter:
+                dchi2_deta = self.get_dchi2_deta(m, eta, tau, Nbar_f)
+                eta += chi2_eta/dchi2_deta
+                eta = min(eta, 1.0)
+                etas_list.append(eta)
 
-                alpha = dot(r_eta,z) / dot(p, A(p, eta))
-                m += alpha * p
-                r_eta_old = r_eta.copy()
-                r_eta -= alpha * A(p, eta)
-                z_old = z.copy()
-                z = preconditioner_inv(r_eta, eta)
-                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
-                p = z + beta * p
-
-                chi2 = self.get_chi2(m)
-                chi2_hist[i_iter] = chi2
-                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
-                chi2_eta_hist[i_iter] = chi2_eta
-                dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
-                chi2_eta_prev = chi2_eta
-                etas_iter[i_iter] = eta
-                r_true = self.b - self._A(m)
-                r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+                b_eta = b(eta)
+                b_eta_2norm = self._get_2norm(b_eta)
+                r_eta = b_eta - A(m, eta)
                 r_eta_2norm = self._get_2norm(r_eta)
+                z = preconditioner_inv(r_eta, eta)
+                p = z.copy()
 
-                print('iter={:<5d} η={:.5e}  Χ²={:.10e}'
-                    .format( i_iter, eta, chi2)
-                )
+                # for calculate dchi2_eta_hist
+                chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
 
-                if ( r_eta_2norm/b_eta_2norm < next_eta_ratio
-                        and eta < 1):
-                    dchi2_deta = self.get_dchi2_deta(m, eta, tau, Nbar_f)
-                    eta += chi2_eta/dchi2_deta
-                    eta = min(eta, 1.0)
-                    etas_list.append(eta)
-                    b_eta = b(eta)
-                    b_eta_2norm = self._get_2norm(b_eta)
-                    r_eta = b_eta - A(m, eta)
-                    r_eta_2norm = self._get_2norm(r_eta)
+                while i_iter <= num_iter :
+
+                    alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                    m += alpha * p
+                    r_eta_old = r_eta.copy()
+                    r_eta -= alpha * A(p, eta)
+                    z_old = z.copy()
                     z = preconditioner_inv(r_eta, eta)
-                    p = z.copy()
-                    chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                    beta = dot(r_eta,z) / dot(r_eta_old,z_old)
+                    p = z + beta * p
 
-                elif (r_2norm/b_2norm < stop_ratio
-                        and eta == 1 ):
-                    # stop calculation
-                    stop_point = i_iter
-                    chi2_hist[stop_point:] = chi2
-                    chi2_eta_hist[stop_point:] = chi2_eta
-                    etas_iter[stop_point:] = eta
-                    r_2norm_hist[stop_point:] = r_2norm
-                    break
+                    chi2 = self.get_chi2(m)
+                    chi2_hist[i_iter] = chi2
+                    chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                    chi2_eta_hist[i_iter] = chi2_eta
+                    dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
+                    chi2_eta_prev = chi2_eta
+                    etas_iter[i_iter] = eta
+                    r_true = self.b - self._A(m)
+                    r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+                    r_eta_2norm = self._get_2norm(r_eta)
+
+                    print('iter={:<5d} η={:.5e}  Χ²={:.10e}'.format( i_iter, eta, chi2))
+                    i_iter += 1
+
+                    if (eta < 1 and r_eta_2norm/b_eta_2norm < next_eta_ratio):
+                        # next eta value
+                        break
+
+                    elif (eta==1 and r_eta_2norm/b_eta_2norm < stop_ratio):
+                        # stop calculation
+                        stop_point = i_iter - 1
+                        chi2_hist[stop_point:] = chi2
+                        chi2_eta_hist[stop_point:] = chi2_eta
+                        etas_iter[stop_point:] = eta
+                        r_2norm_hist[stop_point:] = r_2norm
+                        break
 
             m_hist[1,:,:,:] = m
             r_hist[1,:,:,:] = r_true
