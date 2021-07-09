@@ -648,10 +648,9 @@ class Map:
             preconditioner_inv,
             preconditioner_description,
             num_eta=100,
-            #max_iter=1000,
-            next_eta_ratio=1e-5,
-            stop_ratio=1e-10,
-            max_final_iter=100,
+            next_eta_ratio=1e-2,
+            stop_ratio=1e-5,
+            max_iter_per_eta=100,
             ):
         """
         get function of Χ²(hatm(η),η) as function of η
@@ -674,15 +673,17 @@ class Map:
                 --- float
                 --- when η=1 and the 2-norm of the residual
                     ||r||₂ / ||b||₂ < stop_ratio the iteration stops
-            max_final_iter
+            max_iter_per_eta
                 --- int
-                --- maximum number of iterations after η=1
+                --- maximum number of iterations for each η value,
+                    this number prevents endless loop if next_eta_ratio
+                    or stop_ratio cannot be achieved.
         """
         assert isinstance(num_eta, int)
         assert isinstance(preconditioner_description, str)
         assert isinstance(next_eta_ratio, float)
         assert isinstance(stop_ratio, float)
-        assert isinstance(max_final_iter, int)
+        assert isinstance(max_iter_per_eta, int)
         tau = np.min(self.N_f_diag)
         Nbar_f = self.N_f_diag - tau
         eta_min = 1e-3 * tau/Nbar_f.max()
@@ -715,7 +716,7 @@ class Map:
             preconditioner_description,
             next_eta_ratio,
             stop_ratio,
-            max_final_iter,
+            max_iter_per_eta,
             preconditioner_inv(
                 random.rand(num_pix_y, num_pix_x, 3),1) ]
                 ).encode()
@@ -758,66 +759,44 @@ class Map:
                 
             # preconditioned algorithm for conjugate gradient method 
             m = self.simple_binned_map.copy()
-            chi2_eta = self.get_chi2_eta(m, 0, tau, Nbar_f)
 
-            print('η={:.5e}  Χ²(m,η)={:.10e}'.format(0, chi2_eta))
-            i_eta = 0
-            eta = etas_arr[i_eta]
-            b_eta = b(eta)
-            b_eta_2norm = self._get_2norm(b_eta)
-            r_eta = b_eta - A(m, eta)
-            r_eta_2norm = self._get_2norm(r_eta)
-            z = preconditioner_inv(r_eta, eta)
-            p = z.copy()
-            while eta < 1:
+            print('i_η={:<3d} i={:<3d} η={:.5e}'.format(0,0,0))
+            for i_eta,eta in enumerate(etas_arr):
 
-                alpha = dot(r_eta,z) / dot(p, A(p, eta))
-                m += alpha * p
-                r_eta_old = r_eta.copy()
-                r_eta -= alpha * A(p, eta)
-                z_old = z.copy()
-                z = preconditioner_inv(r_eta, eta)
-                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
-                p = z + beta * p
-
-                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                b_eta = b(eta)
+                b_eta_2norm = self._get_2norm(b_eta)
+                r_eta = b_eta - A(m, eta)
                 r_eta_2norm = self._get_2norm(r_eta)
+                z = preconditioner_inv(r_eta, eta)
+                p = z.copy()
 
-                print('η={:.5e}  Χ²(m,η)={:.10e}'.format(eta, chi2_eta))
+                for i_iter in range(max_iter_per_eta):
 
-                if r_eta_2norm/b_eta_2norm < next_eta_ratio :
-                    chi2_vs_eta[i_eta] = chi2_eta 
-                    i_eta += 1
-                    eta = etas_arr[i_eta]
-                    b_eta = b(eta)
-                    b_eta_2norm = self._get_2norm(b_eta)
-                    r_eta = b_eta - A(m, eta)
-                    r_eta_2norm = self._get_2norm(r_eta)
+                    alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                    m += alpha * p
+                    r_eta_old = r_eta.copy()
+                    r_eta -= alpha * A(p, eta)
+                    z_old = z.copy()
                     z = preconditioner_inv(r_eta, eta)
-                    p = z.copy()
+                    beta = dot(r_eta,z) / dot(r_eta_old,z_old)
+                    p = z + beta * p
 
-            # now η=1 
-            assert eta==1
-            for i_iter in range(max_final_iter):
+                    r_eta_2norm = self._get_2norm(r_eta)
 
-                alpha = dot(r_eta,z) / dot(p, A(p, eta))
-                m += alpha * p
-                r_eta_old = r_eta.copy()
-                r_eta -= alpha * A(p, eta)
-                z_old = z.copy()
-                z = preconditioner_inv(r_eta, eta)
-                beta = dot(r_eta,z) / dot(r_eta_old,z_old)
-                p = z + beta * p
+                    print('i_η={:<3d} i={:<3d} η={:.5e}'
+                        .format(i_eta, i_iter, eta)
+                    )
 
-                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
-                r_eta_2norm = self._get_2norm(r_eta)
-
-                print('η={:.5e}  Χ²(m,η)={:.10e}'.format(eta, chi2_eta))
-
-                if r_eta_2norm/b_eta_2norm < stop_ratio:
-                    # stop calculation
-                    break
-            chi2_vs_eta[-1] = chi2_eta
+                    if (eta != 1
+                            and r_eta_2norm/b_eta_2norm < next_eta_ratio) :
+                        chi2_vs_eta[i_eta] \
+                            = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                        break
+                    elif (eta == 1
+                            and r_eta_2norm/b_eta_2norm < stop_ratio) :
+                        chi2_vs_eta[i_eta] \
+                            = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                        break
 
             chi2_vs_eta_results = {}
             chi2_vs_eta_results['etas_arr'] = etas_arr
@@ -834,7 +813,7 @@ class Map:
             num_iter,
             preconditioner_inv, 
             preconditioner_description,
-            stop_ratio=1e-10,
+            stop_ratio=1e-5,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -979,7 +958,7 @@ class Map:
             lambs_arr,
             num_iter_per_lamb,
             num_iter,
-            stop_ratio=1e-10,
+            stop_ratio=1e-5,
             ):
         """
         messenger field solve map based on Huffenberger 2018: 
@@ -1009,8 +988,8 @@ class Map:
             MF_results
                 --- dictionary {}, with keys:
                     [
-                        'chi2_hist', --- Χ(m) vs iteration
-                        'chi2_eta_hist', --- 
+                        'chi2_hist',   # Χ²(m)
+                        'chi2_eta_hist',   # Χ²(m,η)
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
@@ -1135,8 +1114,8 @@ class Map:
             preconditioner_inv,
             preconditioner_description,
             etas_arr=None,
-            next_eta_ratio = 1e-3,
-            stop_ratio=1e-10,
+            next_eta_ratio = 1e-1,
+            stop_ratio=1e-5,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -1182,9 +1161,9 @@ class Map:
             CG_results
                 --- dictionary {}, with keys:
                     [
-                        'chi2_hist',
-                        'chi2_eta_hist',
-                        'dchi2_eta_hist',
+                        'chi2_hist',   # Χ²(m)
+                        'chi2_eta_hist',   # Χ²(m,η)
+                        'dchi2_eta_hist',    # δΧ²(m_i,η) = Χ²(m_i,η) - Χ²(m_{i-1}, η)
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
@@ -1363,8 +1342,8 @@ class Map:
             num_iter,
             preconditioner_inv,
             preconditioner_description,
-            next_eta_ratio = 1e-3,
-            stop_ratio=1e-10,
+            next_eta_ratio=1e-1,
+            stop_ratio=1e-5,
             ):
         """
         The algorithm is the same as self.conjugate_gradient_solver_eta,
@@ -1396,9 +1375,9 @@ class Map:
             CG_results
                 --- dictionary {}, with keys:
                     [
-                        'chi2_hist',
-                        'chi2_eta_hist',
-                        'dchi2_eta_hist',
+                        'chi2_hist',   # Χ²(m)
+                        'chi2_eta_hist',   # Χ²(m,η)
+                        'dchi2_eta_hist',    # δΧ²(m_i,η) = Χ²(m_i,η) - Χ²(m_{i-1}, η)
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',

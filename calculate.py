@@ -174,31 +174,31 @@ for f_scan in f_scan_list:
         data_dic['CG_exact_eta_file'] = CG_eta_file
         data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
-        # MF iteration
-        for num_eta in num_eta_arr:
-            tau = np.min(_map.N_f_diag)
-            Nbar_f = _map.N_f_diag - tau
-            eta_min = tau/Nbar_f.max()
-            etas_arr = np.logspace(
-                np.log(eta_min), 0, num=num_eta, base=np.e
-            )
-            print('MF ln {:d}x1 eta'.format(num_eta))
-            MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
-            MF_description_latex = (r'MF $\ln$ scale, '
-                r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
-            MF_file,_ =\
-                _map.messenger_field_solver(
-                    lambs_arr=1/etas_arr,
-                    num_iter_per_lamb=1,
-                    num_iter=num_iter,
-                )
-            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
-                = MF_description
-            data_dic['MF_ln_{:d}_eta_description_latex'
-                .format(num_eta)]\
-                = MF_description_latex
-            data_dic['MF_ln_{:d}_eta_file'.format(
-                num_eta)] = MF_file
+        ## MF iteration
+        #for num_eta in num_eta_arr:
+        #    tau = np.min(_map.N_f_diag)
+        #    Nbar_f = _map.N_f_diag - tau
+        #    eta_min = tau/Nbar_f.max()
+        #    etas_arr = np.logspace(
+        #        np.log(eta_min), 0, num=num_eta, base=np.e
+        #    )
+        #    print('MF ln {:d}x1 eta'.format(num_eta))
+        #    MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
+        #    MF_description_latex = (r'MF $\ln$ scale, '
+        #        r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
+        #    MF_file,_ =\
+        #        _map.messenger_field_solver(
+        #            lambs_arr=1/etas_arr,
+        #            num_iter_per_lamb=3,
+        #            num_iter=num_iter,
+        #        )
+        #    data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
+        #        = MF_description
+        #    data_dic['MF_ln_{:d}_eta_description_latex'
+        #        .format(num_eta)]\
+        #        = MF_description_latex
+        #    data_dic['MF_ln_{:d}_eta_file'.format(
+        #        num_eta)] = MF_file
 
 
         data_list_rank.append(data_dic)

@@ -99,19 +99,19 @@ for data_dic in  data_list:
         CG_exact_eta_result = pickle.load(_file)
         results_list.append(CG_exact_eta_result)
 
-    # MF iteration
-    for num_eta in num_eta_arr:
-        description_list.append(
-            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]
-        )
-        description_latex_list.append(
-            data_dic['MF_ln_{:d}_eta_description_latex'\
-                .format(num_eta)]
-        )
-        with open (data_dic['MF_ln_{:d}_eta_file'.format(num_eta)],
-                'rb') as _file:
-            MF_result = pickle.load(_file)
-            results_list.append(MF_result)
+    ## MF iteration
+    #for num_eta in num_eta_arr:
+    #    description_list.append(
+    #        data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]
+    #    )
+    #    description_latex_list.append(
+    #        data_dic['MF_ln_{:d}_eta_description_latex'\
+    #            .format(num_eta)]
+    #    )
+    #    with open (data_dic['MF_ln_{:d}_eta_file'.format(num_eta)],
+    #            'rb') as _file:
+    #        MF_result = pickle.load(_file)
+    #        results_list.append(MF_result)
 
 
 
@@ -178,18 +178,32 @@ for data_dic in  data_list:
     plt.close()
     
 
-    # plot Χ² log scale
+    # plot Χ²(m) log scale
     lines = [i['chi2_hist'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
     plt.xlabel('num of iteration')
     plt.yscale('log')
-    plt.ylabel('$\chi^2$') 
+    plt.ylabel('$\chi^2(m)$') 
     for i in range(len(lines)):
         plt.plot(lines[i], '-', label=description_latex_list[i])
     plt.legend()
     plt.grid()
     plt.savefig(plot_dir/'chi2.pdf')
+    plt.close()
+
+    # plot Χ²(m,η) log scale
+    lines = [i['chi2_eta_hist'] for i in results_list]
+    plt.figure(figsize=(12,9))
+    plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
+    plt.xlabel('num of iteration')
+    plt.yscale('log')
+    plt.ylabel('$\chi^2(m,\eta)$') 
+    for i in range(len(lines)):
+        plt.plot(lines[i], '-', label=description_latex_list[i])
+    plt.legend()
+    plt.grid()
+    plt.savefig(plot_dir/'chi2_eta.pdf')
     plt.close()
 
     # plot (Χ²-min)/(ini-min)

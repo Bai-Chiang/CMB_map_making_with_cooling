@@ -151,13 +151,13 @@ We may iterate more than once at each intermediate $\eta_i$: we solve with conju
 using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
 and move to next parameter $\eta_{i+1}$ when the norm of residual vector 
 \begin{align}
-\norm{\vb{r}} \equiv
+\norm{\vb{r}(\vbm,\eta_i)} \equiv
 \norm{ \Pdagger \inv{N(\eta_i)} P\, 
 \vbm - \Pdagger \inv{N(\eta_i)} \vbd  }
 \end{align}
-is smaller than 0.1\% of the norm of the right hand side of Eq.~(\ref{map making eq eta}).
+is an order of magnitude smaller than the norm of the right hand side of Eq.~(\ref{map making eq eta}).
 \begin{align}
-\norm{\vb{r}} < 10^{-3}\ \norm{\Pdagger N(\eta_i)^{-1} \vbd}
+\norm{\vb{r}(\vbm,\eta_i)} < 0.1\ \norm{\Pdagger N(\eta_i)^{-1} \vbd}
 \label{norm threshold}
 \end{align}
 
@@ -223,8 +223,8 @@ How do we know this condition is satisfied?
 Since for each new $\eta_i$ value, we are solving a new set of linear
 equations (\ref{map making eq eta}),
 and we could stop calculation and moving to next value $\eta_{i+1}$ when the 
-norm of residual $\norm{\vb{r}}$ is small, see Eq.~(\ref{norm threshold}).
-Calculate the residual vector $\vb{r}$ is part of conjugate gradient algorithm,
+norm of residual $\norm{\vb{r}(\vbm,\eta_i)}$ is small, see Eq.~(\ref{norm threshold}).
+Calculate the residual vector $\vb{r}(\vbm,\eta_i)$ is part of conjugate gradient algorithm,
 so this won't add extra cost either.
 Therefore, overall introducing $\eta$ won't have extra computational cost.
 
@@ -331,8 +331,8 @@ with different knee frequencies.
 Note that $\chi^2$ in all figures are calculated based on $\chi^2(\vbm)$ in Eq.~(\ref{chi2 formula})
 not $\chi^2(\vbm, \eta)$ in Eq.~(\ref{chi2 eta formula}).
 And the $\chi^2_{\text{min}}$ is calculated from parameterized conjugate gradient
-method with 100 $\eta$ values, and it stops when the final norm of residual $\norm{\vb{r}}$
-is smaller than $10^{-10}\ \norm{\Pdagger N^{-1} \vbd}$, or after 1000 iterations.
+method with 100 $\eta$ values, and it stops when the final norm of residual $\norm{\vb{r}(\vbm,1)}$
+is smaller than $10^{-5}\times\norm{\Pdagger N^{-1} \vbd}$, or 100 iterations after $\eta=1$.
 From Figure~\ref{1/f noise chi2} we can see for $1/f$ noise model,
 when $f_\text{knee} \gtrsim 10 f_\text{scan}$ the parameterized method starts showing advantage
 over vanilla conjugate gradient method.
