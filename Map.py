@@ -797,6 +797,11 @@ class Map:
                         chi2_vs_eta[i_eta] \
                             = self.get_chi2_eta(m, eta, tau, Nbar_f)
                         break
+                    elif i_iter == max_iter_per_eta - 1:
+                        chi2_vs_eta[i_eta] \
+                            = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                        break
+                        
 
             chi2_vs_eta_results = {}
             chi2_vs_eta_results['etas_arr'] = etas_arr

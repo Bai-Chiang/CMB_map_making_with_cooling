@@ -264,8 +264,8 @@ for data_dic in  data_list:
         try:
             dchi2_arr = result['dchi2_eta_hist'][1:]  # 0th element is 0
             eta_arr = result['etas_iter'][1:]
-            (etas, chi2) = data_dic['chi2_vs_eta']
-            log_chi2 = interpolate.interp1d(np.log(etas), np.log(chi2))
+            (etas, chi2_vs_eta) = data_dic['chi2_vs_eta']
+            log_chi2 = interpolate.interp1d(np.log(etas), np.log(chi2_vs_eta))
             dchi2_chi2 = np.zeros(dchi2_arr.shape)
             for j,eta in enumerate(eta_arr):
                 chi2 = np.exp(log_chi2(np.log(eta)))
