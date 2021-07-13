@@ -607,10 +607,10 @@ class Map:
         Pm_f = fft.rfft(Pm, axis=1)
         d_f = self.tod_f
         N_eta = tau + eta*Nbar_f
-        dchi2_vs_f = np.sum(
-            (np.conj(d_f - Pm_f) * (d_f - Pm_f)*Nbar_f/N_eta**2).real 
+        dchi2_deta = np.sum(
+            (np.conj(d_f - Pm_f) * (d_f - Pm_f)).real * Nbar_f/N_eta**2
         )
-        return dchi2_vs_f
+        return dchi2_deta
             
         
     def _A(self, m):
@@ -690,23 +690,6 @@ class Map:
         etas_arr = np.logspace(
             np.log10(eta_min), 0, num=num_eta, base=10
         )
-        #_,infinitesimal_step_result = \
-        #    self.conjugate_gradient_solver_eta(
-        #        num_iter=max_iter,
-        #        preconditioner_inv=self.PTP_preconditioner,
-        #        preconditioner_description='PTP',
-        #        etas_arr=etas_arr,
-        #        next_eta_ratio=1e-5,
-        #)
-        #chi2_result = infinitesimal_step_result['chi2_eta_hist']
-        #etas_result = infinitesimal_step_result['etas_iter']
-        #self.chi2_min = infinitesimal_step_result['chi2_hist'].min()
-        #chi2_list = []
-        #for eta in etas_arr:
-        #    chi2_list.append(
-        #        np.min(chi2_result[etas_result==eta])
-        #    )
-        #return (etas_arr, np.array(chi2_list))
         random.seed(self.seed)
         num_pix_x = self.num_pix_x
         num_pix_y = self.num_pix_y
@@ -771,11 +754,11 @@ class Map:
                 p = z.copy()
 
                 for i_iter in range(max_iter_per_eta):
-
-                    alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                    A_p_eta = A(p, eta)
+                    alpha = dot(r_eta,z) / dot(p, A_p_eta)
                     m += alpha * p
                     r_eta_old = r_eta.copy()
-                    r_eta -= alpha * A(p, eta)
+                    r_eta -= alpha * A_p_eta
                     z_old = z.copy()
                     z = preconditioner_inv(r_eta, eta)
                     beta = dot(r_eta,z) / dot(r_eta_old,z_old)
@@ -852,7 +835,6 @@ class Map:
                     [
                         'chi2_hist',
                         'chi2_eta_hist',
-                        'dchi2_eta_hist',
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
@@ -896,7 +878,6 @@ class Map:
             r_hist = np.zeros(shape=(2, num_pix_y, num_pix_x, 3),
                 dtype=np.float32)
             chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
-            dchi2_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), dtype=np.float32)
 
@@ -934,7 +915,6 @@ class Map:
 
                 chi2 = self.get_chi2(m)
                 chi2_hist[i_iter] = chi2
-                dchi2_hist[i_iter] = chi2 - chi2_hist[i_iter-1]
                 r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r)
                 print('iter={:<5d}  Χ²={:.10e} ||r||₂/||r0||₂={:.10e}'.format(
                     i_iter, chi2, r_2norm/r0_2norm))
@@ -952,7 +932,6 @@ class Map:
             CG_results = {}
             CG_results['chi2_hist'] = chi2_hist
             CG_results['chi2_eta_hist'] = chi2_hist
-            CG_results['dchi2_eta_hist'] = dchi2_hist
             CG_results['m_hist'] = m_hist
             CG_results['r_hist'] = r_hist
             CG_results['r_2norm_hist'] = r_2norm_hist
@@ -1125,6 +1104,7 @@ class Map:
             etas_arr=None,
             next_eta_ratio = 1e-1,
             stop_ratio=1e-5,
+            single_step=False,
             ):
         """ 
         solve map making equation with conjugate gradient method 
@@ -1163,6 +1143,9 @@ class Map:
                 --- float
                 --- when η=1 and the 2-norm of the residual
                     ||r||₂ / ||b||₂ < stop_ratio the iteration stops
+            single_step
+                --- bool
+                --- if true, only do one single step for each conjugate gradient algorithm
         return:
             CG_file
                 --- pathlib.Path
@@ -1172,7 +1155,6 @@ class Map:
                     [
                         'chi2_hist',   # Χ²(m)
                         'chi2_eta_hist',   # Χ²(m,η)
-                        'dchi2_eta_hist',    # δΧ²(m_i,η) = Χ²(m_i,η) - Χ²(m_{i-1}, η)
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
@@ -1206,16 +1188,18 @@ class Map:
             preconditioner_description,
             next_eta_ratio,
             stop_ratio,
+            single_step,
             preconditioner_inv(
                 random.rand(num_pix_y, num_pix_x, 3),1) ]
                 ).encode()
         CG_hash = hashlib.md5(CG_info).hexdigest()
         CG_file_name = (
-            'CG eta={:.2e},{:.2e},{:.2e},... preconditioner={} num_iter={:d} {}'
+            'CG eta={:.2e},{:.2e},{:.2e},... preconditioner={} num_iter={:d} single_step={} {}'
             ).format(
             etas_arr[0], etas_arr[1], etas_arr[2],
             preconditioner_description,
             num_iter,
+            str(single_step),
             CG_hash
         )
         CG_file = self.map_dir/CG_file_name
@@ -1234,7 +1218,6 @@ class Map:
                 dtype=np.float32)
             chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
-            dchi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f), dtype=np.float32)
             etas_iter = np.zeros(num_iter+1, dtype=np.float32)
@@ -1270,10 +1253,15 @@ class Map:
             r_hist[0,:,:,:] = r_true
             chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
 
-            print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
+            print('iter={:<5d} η={:.5e}  Χ²(m)={:.10e}  Χ²(m,η)={:.10e}'
+                .format(0, 0, chi2, chi2_eta)
+            )
+            stop_point = num_iter
             i_iter = 1
-            for i_eta,eta in enumerate(etas_arr):
+            i_eta = 0
+            while i_eta < len(etas_arr) and i_iter <= num_iter:
                 eta = etas_arr[i_eta]
+                i_eta += 1
                 b_eta = b(eta)
                 b_eta_2norm = self._get_2norm(b_eta)
                 r_eta = b_eta - A(m, eta)
@@ -1281,15 +1269,35 @@ class Map:
                 z = preconditioner_inv(r_eta, eta)
                 p = z.copy()
 
-                # for calculate dchi2_eta_hist
-                chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                #chi2 = self.get_chi2(m)
+                chi2_hist[i_iter] = chi2
+                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                chi2_eta_hist[i_iter] = chi2_eta
+                etas_iter[i_iter] = eta
+                r_true = self.b - self._A(m)
+                r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+                r_eta_2norm = self._get_2norm(r_eta)
 
-                #for i_iter in range(1, num_iter+1):
+                print('iter={:<5d} η={:.5e}  Χ²(m)={:.10e}  Χ²(m,η)={:.10e}'
+                    .format( i_iter, eta, chi2, chi2_eta)
+                )
+                i_iter += 1
+
+                if (eta < 1 and r_eta_2norm/b_eta_2norm < next_eta_ratio):
+                    # to next eta value
+                    continue
+                elif (eta == 1 and r_eta_2norm/b_eta_2norm < stop_ratio):
+                    # stop calculation
+                    stop_point = i_iter - 1
+                    i_iter = num_iter + 1
+                    continue
+                
                 while i_iter <= num_iter:
-                    alpha = dot(r_eta,z) / dot(p, A(p, eta))
+                    A_p_eta = A(p, eta)
+                    alpha = dot(r_eta,z) / dot(p, A_p_eta)
                     m += alpha * p
                     r_eta_old = r_eta.copy()
-                    r_eta -= alpha * A(p, eta)
+                    r_eta -= alpha * A_p_eta
                     z_old = z.copy()
                     z = preconditioner_inv(r_eta, eta)
                     beta = dot(r_eta,z) / dot(r_eta_old,z_old)
@@ -1299,29 +1307,32 @@ class Map:
                     chi2_hist[i_iter] = chi2
                     chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
                     chi2_eta_hist[i_iter] = chi2_eta
-                    dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
-                    chi2_eta_prev = chi2_eta
                     etas_iter[i_iter] = eta
                     r_true = self.b - self._A(m)
                     r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
                     r_eta_2norm = self._get_2norm(r_eta)
 
-                    print('iter={:<5d} η={:.5e}  Χ²={:.10e}'.format( i_iter, eta, chi2))
+                    print('iter={:<5d} η={:.5e}  Χ²(m)={:.10e}  Χ²(m,η)={:.10e}'
+                        .format( i_iter, eta, chi2, chi2_eta)
+                    )
                     i_iter += 1
+
+                    if single_step and eta<1:
+                        break
 
                     if (eta < 1 and r_eta_2norm/b_eta_2norm < next_eta_ratio):
                         # to next eta value
                         break
-
                     elif (eta == 1 and r_eta_2norm/b_eta_2norm < stop_ratio):
                         # stop calculation
                         stop_point = i_iter - 1
-                        chi2_hist[stop_point:] = chi2
-                        chi2_eta_hist[stop_point:] = chi2_eta
-                        etas_iter[stop_point:] = eta
-                        r_2norm_hist[stop_point:] = r_2norm
+                        i_iter = num_iter + 1
                         break
 
+            chi2_hist[stop_point:] = chi2
+            chi2_eta_hist[stop_point:] = chi2_eta
+            etas_iter[stop_point:] = eta
+            r_2norm_hist[stop_point:] = r_2norm
             m_hist[1,:,:,:] = m
             r_hist[1,:,:,:] = r_true
             chi2_f_hist[1,:] = self.get_chi2(m, freq_mode=True)
@@ -1329,7 +1340,6 @@ class Map:
             CG_results = {}
             CG_results['chi2_hist'] = chi2_hist
             CG_results['chi2_eta_hist'] = chi2_eta_hist
-            CG_results['dchi2_eta_hist'] = dchi2_eta_hist
             CG_results['m_hist'] = m_hist
             CG_results['r_hist'] = r_hist
             CG_results['r_2norm_hist'] = r_2norm_hist
@@ -1347,6 +1357,7 @@ class Map:
             preconditioner_description,
             next_eta_ratio=1e-1,
             stop_ratio=1e-5,
+            single_step=False
             ):
         """
         The algorithm is the same as self.conjugate_gradient_solver_eta,
@@ -1371,6 +1382,9 @@ class Map:
                 --- float
                 --- when η=1 and the 2-norm of the residual
                     ||r||₂ / ||b||₂ < stop_ratio the iteration stops
+            single_step
+                --- bool
+                --- if true, only do one single step for each conjugate gradient algorithm
         return:
             CG_file
                 --- pathlib.Path
@@ -1380,7 +1394,6 @@ class Map:
                     [
                         'chi2_hist',   # Χ²(m)
                         'chi2_eta_hist',   # Χ²(m,η)
-                        'dchi2_eta_hist',    # δΧ²(m_i,η) = Χ²(m_i,η) - Χ²(m_{i-1}, η)
                         'm_hist',
                         'r_hist',
                         'r_2norm_hist',
@@ -1405,14 +1418,16 @@ class Map:
             num_iter,
             preconditioner_description,
             next_eta_ratio,
+            single_step,
             preconditioner_inv(
                 random.rand(num_pix_y, num_pix_x, 3),1) ]
                 ).encode()
         CG_hash = hashlib.md5(CG_info).hexdigest()
         CG_file_name = (
-            'CG exact eta preconditioner={} {}'
+            'CG exact eta preconditioner={} single_step={} {}'
             ).format(
             preconditioner_description,
+            str(single_step),
             CG_hash
         )
         CG_file = self.map_dir/CG_file_name
@@ -1430,7 +1445,6 @@ class Map:
                 dtype=np.float32)
             chi2_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
-            dchi2_eta_hist = np.zeros(num_iter+1, dtype=np.float32)
             r_2norm_hist = np.zeros(num_iter+1, dtype=np.float32)
             chi2_f_hist = np.zeros(shape=(2, self.num_f),
                 dtype=np.float32)
@@ -1467,7 +1481,10 @@ class Map:
             r_hist[0,:,:,:] = r_true
             chi2_f_hist[0,:] = self.get_chi2(m, freq_mode=True)
 
-            print('iter={:<5d}  Χ²={:.10e}'.format(0, chi2))
+            print('iter={:<5d} η={:.5e}  Χ²(m)={:.10e}  Χ²(m,η)={:.10e}'
+                .format(0, 0, chi2, chi2_eta)
+            )
+            stop_point = num_iter
             i_iter = 1
             while eta < 1 and i_iter <= num_iter:
                 dchi2_deta = self.get_dchi2_deta(m, eta, tau, Nbar_f)
@@ -1482,8 +1499,28 @@ class Map:
                 z = preconditioner_inv(r_eta, eta)
                 p = z.copy()
 
-                # for calculate dchi2_eta_hist
-                chi2_eta_prev = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                #chi2 = self.get_chi2(m)
+                chi2_hist[i_iter] = chi2
+                chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
+                chi2_eta_hist[i_iter] = chi2_eta
+                etas_iter[i_iter] = eta
+                r_true = self.b - self._A(m)
+                r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
+                r_eta_2norm = self._get_2norm(r_eta)
+
+                print('iter={:<5d} η={:.5e}  Χ²(m)={:.10e}  Χ²(m,η)={:.10e}'
+                    .format( i_iter, eta, chi2, chi2_eta)
+                )
+                i_iter += 1
+                
+                if (eta < 1 and r_eta_2norm/b_eta_2norm < next_eta_ratio):
+                    # to next eta value
+                    continue
+                elif (eta == 1 and r_eta_2norm/b_eta_2norm < stop_ratio):
+                    # stop calculation
+                    stop_point = i_iter - 1
+                    i_iter = num_iter + 1
+                    continue
 
                 while i_iter <= num_iter :
 
@@ -1500,15 +1537,18 @@ class Map:
                     chi2_hist[i_iter] = chi2
                     chi2_eta = self.get_chi2_eta(m, eta, tau, Nbar_f)
                     chi2_eta_hist[i_iter] = chi2_eta
-                    dchi2_eta_hist[i_iter] = chi2_eta - chi2_eta_prev
-                    chi2_eta_prev = chi2_eta
                     etas_iter[i_iter] = eta
                     r_true = self.b - self._A(m)
                     r_2norm_hist[i_iter] = r_2norm = self._get_2norm(r_true)
                     r_eta_2norm = self._get_2norm(r_eta)
 
-                    print('iter={:<5d} η={:.5e}  Χ²={:.10e}'.format( i_iter, eta, chi2))
+                    print('iter={:<5d} η={:.5e}  Χ²(m)={:.10e}  Χ²(m,η)={:.10e}'
+                        .format( i_iter, eta, chi2, chi2_eta)
+                    )
                     i_iter += 1
+
+                    if single_step and eta<1:
+                        break
 
                     if (eta < 1 and r_eta_2norm/b_eta_2norm < next_eta_ratio):
                         # next eta value
@@ -1517,12 +1557,13 @@ class Map:
                     elif (eta==1 and r_eta_2norm/b_eta_2norm < stop_ratio):
                         # stop calculation
                         stop_point = i_iter - 1
-                        chi2_hist[stop_point:] = chi2
-                        chi2_eta_hist[stop_point:] = chi2_eta
-                        etas_iter[stop_point:] = eta
-                        r_2norm_hist[stop_point:] = r_2norm
+                        i_iter = num_iter + 1
                         break
 
+            chi2_hist[stop_point:] = chi2
+            chi2_eta_hist[stop_point:] = chi2_eta
+            etas_iter[stop_point:] = eta
+            r_2norm_hist[stop_point:] = r_2norm
             m_hist[1,:,:,:] = m
             r_hist[1,:,:,:] = r_true
             chi2_f_hist[1,:] = self.get_chi2(m, freq_mode=True)
@@ -1530,7 +1571,6 @@ class Map:
             CG_results = {}
             CG_results['chi2_hist'] = chi2_hist
             CG_results['chi2_eta_hist'] = chi2_eta_hist
-            CG_results['dchi2_eta_hist'] = dchi2_eta_hist
             CG_results['m_hist'] = m_hist
             CG_results['r_hist'] = r_hist
             CG_results['r_2norm_hist'] = r_2norm_hist

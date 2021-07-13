@@ -3,7 +3,7 @@ from pathlib import Path, PurePath
 import pickle
 
 
-num_iter = 100
+num_iter = 150
 cache_dir = Path('cache').expanduser()
 seed = 0
 f_scan_list = [

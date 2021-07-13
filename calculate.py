@@ -87,7 +87,7 @@ for f_scan in f_scan_list:
         data_dic['relative_dir'] \
             = PurePath(_map.map_dir).relative_to(cache_dir)
 
-        # get etas that makes chi2 decrease
+        # get X²(m(η),η)
         data_dic['chi2_vs_eta'] = _map.get_chi2_vs_eta(
             preconditioner_inv=_map.PTP_preconditioner,
             preconditioner_description='PTP',
@@ -109,7 +109,6 @@ for f_scan in f_scan_list:
         data_dic['CG_SP_description_latex'] = CG_SP_description_latex
         data_dic['CG_SP_file'] = CG_SP_file
 
-
         # CG eta
         print('CG with eta')
         CG_eta_description = ('CG with eta and preconditioner=PTP')
@@ -125,7 +124,60 @@ for f_scan in f_scan_list:
         data_dic['CG_eta_description'] = CG_eta_description
         data_dic['CG_eta_description_latex'] = CG_eta_description_latex
         data_dic['CG_eta_file'] = CG_eta_file
-        data_dic['etas_arr'] = CG_eta_result['etas_arr']
+        #data_dic['etas_arr'] = CG_eta_result['etas_arr']
+
+        # CG exact eta
+        print('CG with exact eta')
+        CG_eta_description = ('CG with exact eta and preconditioner=PTP')
+        CG_eta_description_latex =\
+            ('CG with exact $\eta$ and preconditioner=$P^T P$')
+        CG_eta_file, CG_eta_result =\
+            _map.conjugate_gradient_solver_exact_eta(
+                num_iter,
+                preconditioner_inv=_map.PTP_preconditioner,
+                preconditioner_description='PTP',
+                next_eta_ratio=next_eta_ratio,
+            )
+        data_dic['CG_exact_eta_description'] = CG_eta_description
+        data_dic['CG_exact_eta_description_latex'] = CG_eta_description_latex
+        data_dic['CG_exact_eta_file'] = CG_eta_file
+        #data_dic['etas_arr'] = CG_eta_result['etas_arr']
+
+        # CG eta (single step)
+        print('CG with eta (single step)')
+        CG_eta_description = ('CG with eta and preconditioner=PTP (single step)')
+        CG_eta_description_latex =\
+            ('CG with $\eta$ and preconditioner=$P^T P$ (single step)')
+        CG_eta_file, CG_eta_result =\
+            _map.conjugate_gradient_solver_eta(
+                num_iter,
+                preconditioner_inv=_map.PTP_preconditioner,
+                preconditioner_description='PTP',
+                next_eta_ratio=next_eta_ratio,
+                single_step=True,
+            )
+        data_dic['CG_eta_description_single_step'] = CG_eta_description
+        data_dic['CG_eta_description_latex_single_step'] = CG_eta_description_latex
+        data_dic['CG_eta_file_single_step'] = CG_eta_file
+        #data_dic['etas_arr'] = CG_eta_result['etas_arr']
+
+        # CG exact eta (single step)
+        print('CG with exact eta (single step)')
+        CG_eta_description = ('CG with exact eta and preconditioner=PTP (single step)')
+        CG_eta_description_latex =\
+            ('CG with exact $\eta$ and preconditioner=$P^T P$ (single step)')
+        CG_eta_file, CG_eta_result =\
+            _map.conjugate_gradient_solver_exact_eta(
+                num_iter,
+                preconditioner_inv=_map.PTP_preconditioner,
+                preconditioner_description='PTP',
+                next_eta_ratio=next_eta_ratio,
+                single_step=True,
+            )
+        data_dic['CG_exact_eta_description_single_step'] = CG_eta_description
+        data_dic['CG_exact_eta_description_latex_single_step'] = CG_eta_description_latex
+        data_dic['CG_exact_eta_file_single_step'] = CG_eta_file
+        #data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
 
         # CG perturbation manual eta
@@ -155,23 +207,6 @@ for f_scan in f_scan_list:
                 = CG_eta_description_latex
             data_dic['CG_manual_ln_{:d}_eta_file'.format(
                 num_eta)] = CG_eta_file
-
-        # CG exact eta
-        print('CG with exact eta')
-        CG_eta_description = ('CG with exact eta and preconditioner=PTP')
-        CG_eta_description_latex =\
-            ('CG with exact $\eta$ and preconditioner=$P^T P$')
-        CG_eta_file, CG_eta_result =\
-            _map.conjugate_gradient_solver_exact_eta(
-                num_iter,
-                preconditioner_inv=_map.PTP_preconditioner,
-                preconditioner_description='PTP',
-                next_eta_ratio=next_eta_ratio,
-            )
-        data_dic['CG_exact_eta_description'] = CG_eta_description
-        data_dic['CG_exact_eta_description_latex'] = CG_eta_description_latex
-        data_dic['CG_exact_eta_file'] = CG_eta_file
-        data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
         # MF iteration
         for num_eta in num_eta_arr:

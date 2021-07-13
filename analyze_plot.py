@@ -78,20 +78,6 @@ for data_dic in  data_list:
         CG_eta_result = pickle.load(_file)
         results_list.append(CG_eta_result)
 
-    # CG manual eta
-    for num_eta in num_eta_arr:
-        description_list.append(
-            data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]
-        )
-        description_latex_list.append(
-            data_dic['CG_manual_ln_{:d}_eta_description_latex'\
-                .format(num_eta)]
-        )
-        with open (data_dic['CG_manual_ln_{:d}_eta_file'.format(num_eta)],
-                'rb') as _file:
-            CG_eta_result = pickle.load(_file)
-            results_list.append(CG_eta_result)
-
     # CG exact eta
     description_list.append(data_dic['CG_exact_eta_description'])
     description_latex_list.append(data_dic['CG_exact_eta_description_latex'])
@@ -99,19 +85,48 @@ for data_dic in  data_list:
         CG_exact_eta_result = pickle.load(_file)
         results_list.append(CG_exact_eta_result)
 
-    # MF iteration
-    for num_eta in num_eta_arr:
-        description_list.append(
-            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]
-        )
-        description_latex_list.append(
-            data_dic['MF_ln_{:d}_eta_description_latex'\
-                .format(num_eta)]
-        )
-        with open (data_dic['MF_ln_{:d}_eta_file'.format(num_eta)],
-                'rb') as _file:
-            MF_result = pickle.load(_file)
-            results_list.append(MF_result)
+    # CG with eta (single step)
+    description_list.append(data_dic['CG_eta_description_single_step'])
+    description_latex_list.append(data_dic['CG_eta_description_latex_single_step'])
+    with open (data_dic['CG_eta_file_single_step'], 'rb') as _file:
+        CG_eta_result = pickle.load(_file)
+        results_list.append(CG_eta_result)
+
+    # CG exact eta (single step)
+    description_list.append(data_dic['CG_exact_eta_description_single_step'])
+    description_latex_list.append(data_dic['CG_exact_eta_description_latex_single_step'])
+    with open (data_dic['CG_exact_eta_file_single_step'], 'rb') as _file:
+        CG_exact_eta_result = pickle.load(_file)
+        results_list.append(CG_exact_eta_result)
+
+
+    ## CG manual eta
+    #for num_eta in num_eta_arr:
+    #    description_list.append(
+    #        data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]
+    #    )
+    #    description_latex_list.append(
+    #        data_dic['CG_manual_ln_{:d}_eta_description_latex'\
+    #            .format(num_eta)]
+    #    )
+    #    with open (data_dic['CG_manual_ln_{:d}_eta_file'.format(num_eta)],
+    #            'rb') as _file:
+    #        CG_eta_result = pickle.load(_file)
+    #        results_list.append(CG_eta_result)
+
+    ## MF iteration
+    #for num_eta in num_eta_arr:
+    #    description_list.append(
+    #        data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]
+    #    )
+    #    description_latex_list.append(
+    #        data_dic['MF_ln_{:d}_eta_description_latex'\
+    #            .format(num_eta)]
+    #    )
+    #    with open (data_dic['MF_ln_{:d}_eta_file'.format(num_eta)],
+    #            'rb') as _file:
+    #        MF_result = pickle.load(_file)
+    #        results_list.append(MF_result)
 
 
 
@@ -167,7 +182,7 @@ for data_dic in  data_list:
     lines = [i['r_2norm_hist'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
-    plt.xlabel('num of iteration')
+    plt.xlabel('num of $P^{\dagger} N(\eta) P$ operation')
     plt.yscale('log')
     plt.ylabel('$||r||_2$') 
     for i in range(len(lines)):
@@ -182,7 +197,7 @@ for data_dic in  data_list:
     lines = [i['chi2_hist'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
-    plt.xlabel('num of iteration')
+    plt.xlabel('num of $P^{\dagger} N(\eta) P$ operation')
     plt.yscale('log')
     plt.ylabel('$\chi^2(m)$') 
     for i in range(len(lines)):
@@ -196,7 +211,7 @@ for data_dic in  data_list:
     lines = [i['chi2_eta_hist'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
-    plt.xlabel('num of iteration')
+    plt.xlabel('num of $P^{\dagger} N(\eta) P$ operation')
     plt.yscale('log')
     plt.ylabel('$\chi^2(m,\eta)$') 
     for i in range(len(lines)):
@@ -210,7 +225,7 @@ for data_dic in  data_list:
     chi2_hist_list = [i['chi2_hist'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title('{}\n$\kappa = {:.1e}$'.format(scan_info_latex, condition_number))
-    plt.xlabel('num of iteration')
+    plt.xlabel('num of $P^{\dagger} N(\eta) P$ operation')
     plt.yscale('log')
     plt.ylabel(r'$\frac{\chi^2 - \chi^2_{min}}{\chi^2_{ini} - \chi^2_{min}}$') 
     for i,chi2_hist in enumerate(chi2_hist_list):
@@ -225,7 +240,7 @@ for data_dic in  data_list:
     lines = [i['etas_iter'] for i in results_list]
     plt.figure(figsize=(12,9))
     plt.title(scan_info_latex)
-    plt.xlabel('num of iteration')
+    plt.xlabel('num of $P^{\dagger} N(\eta) P$ operation')
     plt.ylabel('$\eta$') 
     plt.yscale('log')
     for i,line in enumerate(lines):
@@ -247,9 +262,9 @@ for data_dic in  data_list:
     ax.set_xlabel('$\eta$')
     ax.set_xscale('log')
     ax.set_ylabel('$\chi^2(\hat{m}(\eta),\eta)$') 
-    ax.set_xticks(ticks=data_dic['etas_arr'], minor=True)
+    #ax.set_xticks(ticks=data_dic['etas_arr'], minor=True)
     ax.set_xticks(ticks=np.logspace(-10,0,11,base=10), minor=False)
-    ax.set_xticklabels([],minor=True) # clear minor xticks
+    #ax.set_xticklabels([],minor=True) # clear minor xticks
     ax.tick_params(axis='x', which='minor', length=5, width=2.5, color='r')
     ax.grid(axis='x', which='minor', color='r', alpha=0.3)
     ax.set_xlim(eta_arr.min(),1)
@@ -257,29 +272,29 @@ for data_dic in  data_list:
     plt.close()
 
 
-    # plot -δΧ²(m, η)/Χ²(m(η), η)
-    plt.figure(figsize=(12,9))
-    plt.title(scan_info_latex)
-    for i,result in enumerate(results_list):
-        try:
-            dchi2_arr = result['dchi2_eta_hist'][1:]  # 0th element is 0
-            eta_arr = result['etas_iter'][1:]
-            (etas, chi2_vs_eta) = data_dic['chi2_vs_eta']
-            log_chi2 = interpolate.interp1d(np.log(etas), np.log(chi2_vs_eta))
-            dchi2_chi2 = np.zeros(dchi2_arr.shape)
-            for j,eta in enumerate(eta_arr):
-                chi2 = np.exp(log_chi2(np.log(eta)))
-                dchi2_chi2[j] = -dchi2_arr[j]/chi2
-            plt.plot(dchi2_chi2, label=description_latex_list[i])
-        except KeyError:
-            pass
-    plt.legend()
-    plt.grid()
-    plt.yscale('log')
-    plt.xlabel('num of iteration')
-    plt.ylabel(r'$-\frac{\delta\chi^2(m,\eta)}{\chi^2(\hat{m}(\eta),\eta)}$') 
-    plt.savefig(plot_dir/'dchi2_chi2.pdf')
-    plt.close()
+    ## plot -δΧ²(m, η)/Χ²(m(η), η)
+    #plt.figure(figsize=(12,9))
+    #plt.title(scan_info_latex)
+    #for i,result in enumerate(results_list):
+    #    try:
+    #        dchi2_arr = result['dchi2_eta_hist'][1:]  # 0th element is 0
+    #        eta_arr = result['etas_iter'][1:]
+    #        (etas, chi2_vs_eta) = data_dic['chi2_vs_eta']
+    #        log_chi2 = interpolate.interp1d(np.log(etas), np.log(chi2_vs_eta))
+    #        dchi2_chi2 = np.zeros(dchi2_arr.shape)
+    #        for j,eta in enumerate(eta_arr):
+    #            chi2 = np.exp(log_chi2(np.log(eta)))
+    #            dchi2_chi2[j] = -dchi2_arr[j]/chi2
+    #        plt.plot(dchi2_chi2, label=description_latex_list[i])
+    #    except KeyError:
+    #        pass
+    #plt.legend()
+    #plt.grid()
+    #plt.yscale('log')
+    #plt.xlabel('num of iteration')
+    #plt.ylabel(r'$-\frac{\delta\chi^2(m,\eta)}{\chi^2(\hat{m}(\eta),\eta)}$') 
+    #plt.savefig(plot_dir/'dchi2_chi2.pdf')
+    #plt.close()
 
 plt.close('all')
 

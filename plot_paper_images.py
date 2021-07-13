@@ -115,7 +115,7 @@ for data_dic in data_list:
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of iteration')
+axs[1].set_xlabel('number of $P^{\dagger}N(\eta)P$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
@@ -162,7 +162,7 @@ for data_dic in data_list:
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of iteration')
+axs[1].set_xlabel('number of $P^{\dagger}N(\eta)P$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
@@ -170,60 +170,60 @@ for ax in axs:
 plt.savefig(figs_dir/'flattened_noise_chi2.pdf', bbox_inches="tight")
 plt.close()
 
-# plot differnt eta results
-fig = plt.figure(figsize=(12,4))
-gs = fig.add_gridspec(1,3, wspace=0)
-axs = gs.subplots(sharey='row')
-for data_dic in data_list:
-    f_scan = data_dic['f_scan']
-    f_knee = data_dic['f_knee']
-    f_apo = data_dic['f_apo']
-    chi2_min = data_dic['chi2_min']
-    if f_knee == 10 and f_apo == 0:
-        fig_index = 0
-        axs[0].set_title('$(f_{knee},f_{apo})=(10,0)$ Hz')
-    elif f_knee == 1 and f_apo == 0:
-        fig_index = 1
-        axs[1].set_title('$(f_{knee},f_{apo})=(1,0)$ Hz')
-    elif f_knee == 0.1 and f_apo == 0.001:
-        fig_index = 2
-        axs[2].set_title('$(f_{knee},f_{apo})=(0.1,0.001)$ Hz')
-    else:
-        continue
-    with open (data_dic['CG_SP_file'], 'rb') as _file:
-        CG_SP_result = pickle.load(_file)
-        chi2 = CG_SP_result['chi2_hist']
-        axs[fig_index].plot(
-            (chi2-chi2_min)/(chi2[0]-chi2_min),
-            label='CG'
-        )
-    with open (data_dic['CG_eta_file'], 'rb') as _file:
-        CG_eta_result = pickle.load(_file)
-        chi2 = CG_eta_result['chi2_hist']
-        axs[fig_index].plot(
-            (chi2-chi2_min)/(chi2[0]-chi2_min),
-            label='CG with $\eta$'
-        )
-    for num_eta in num_eta_arr:
-        with open (data_dic['CG_manual_ln_{:d}_eta_file'.format(num_eta)],
-                'rb') as _file:
-            CG_eta_result = pickle.load(_file)
-            chi2 = CG_eta_result['chi2_hist']
-            axs[fig_index].plot(
-                (chi2-chi2_min)/(chi2[0]-chi2_min),
-                label='CG with $n_{{\eta}} = {:d}$'.format(num_eta)
-            )
-    axs[fig_index].set_yscale('log')
-    axs[fig_index].set_ylim(1e-12,1)
-    axs[fig_index].grid()
-axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of iteration')
-axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
-for ax in axs:
-    ax.label_outer()
-#plt.show()
-plt.savefig(figs_dir/'chi2_neta.pdf', bbox_inches="tight")
-plt.close()
+## plot differnt eta results
+#fig = plt.figure(figsize=(12,4))
+#gs = fig.add_gridspec(1,3, wspace=0)
+#axs = gs.subplots(sharey='row')
+#for data_dic in data_list:
+#    f_scan = data_dic['f_scan']
+#    f_knee = data_dic['f_knee']
+#    f_apo = data_dic['f_apo']
+#    chi2_min = data_dic['chi2_min']
+#    if f_knee == 10 and f_apo == 0:
+#        fig_index = 0
+#        axs[0].set_title('$(f_{knee},f_{apo})=(10,0)$ Hz')
+#    elif f_knee == 1 and f_apo == 0:
+#        fig_index = 1
+#        axs[1].set_title('$(f_{knee},f_{apo})=(1,0)$ Hz')
+#    elif f_knee == 0.1 and f_apo == 0.001:
+#        fig_index = 2
+#        axs[2].set_title('$(f_{knee},f_{apo})=(0.1,0.001)$ Hz')
+#    else:
+#        continue
+#    with open (data_dic['CG_SP_file'], 'rb') as _file:
+#        CG_SP_result = pickle.load(_file)
+#        chi2 = CG_SP_result['chi2_hist']
+#        axs[fig_index].plot(
+#            (chi2-chi2_min)/(chi2[0]-chi2_min),
+#            label='CG'
+#        )
+#    with open (data_dic['CG_eta_file'], 'rb') as _file:
+#        CG_eta_result = pickle.load(_file)
+#        chi2 = CG_eta_result['chi2_hist']
+#        axs[fig_index].plot(
+#            (chi2-chi2_min)/(chi2[0]-chi2_min),
+#            label='CG with $\eta$'
+#        )
+#    for num_eta in num_eta_arr:
+#        with open (data_dic['CG_manual_ln_{:d}_eta_file'.format(num_eta)],
+#                'rb') as _file:
+#            CG_eta_result = pickle.load(_file)
+#            chi2 = CG_eta_result['chi2_hist']
+#            axs[fig_index].plot(
+#                (chi2-chi2_min)/(chi2[0]-chi2_min),
+#                label='CG with $n_{{\eta}} = {:d}$'.format(num_eta)
+#            )
+#    axs[fig_index].set_yscale('log')
+#    axs[fig_index].set_ylim(1e-12,1)
+#    axs[fig_index].grid()
+#axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
+#axs[1].set_xlabel('number of iteration')
+#axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
+#for ax in axs:
+#    ax.label_outer()
+##plt.show()
+#plt.savefig(figs_dir/'chi2_neta.pdf', bbox_inches="tight")
+#plt.close()
 
 # plot exact eta results
 fig = plt.figure(figsize=(12,4))
@@ -279,7 +279,7 @@ for data_dic in data_list:
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of iteration')
+axs[1].set_xlabel('number of $P^{\dagger}N(\eta)P$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()

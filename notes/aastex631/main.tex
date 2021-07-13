@@ -398,41 +398,41 @@ then as $\eta$ slowly increases, it gradually give more focus to the lowest nois
 
 
 
-\subsection{Other $\eta$ Choices}
-
-\begin{figure*}[tb!]
-\centering
-\includegraphics[width=0.8\textwidth]{chi2_neta.pdf}
-\caption{
-    The horizontal and vertical axes are the same as in the previous figure.
-    The blue line and the orange line are traditional conjugate gradient method
-    and parameterized conjugate gradient method.
-    For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manually.
-    The $\eta$ series are determined by Eq.~(\ref{neta eq}).
-    The first graph shows in some cases the $\eta$ series given by Eq.~(\ref{etai rule}) is ideal,
-    but the second and third graph show that Eq.~(\ref{etai rule}) may ends up too many $\eta$
-    which yields slower convergence.
-}
-\label{chi2 neta}
-\end{figure*}
-
-Now let us compare the performance difference between choosing $\eta$
-parameters based on Eq.~(\ref{etai rule})
-and fixing number of $\eta$ parameters $n_{\eta}$ manually then
-choose the $\eta_i$ from this geometric series
-\begin{align}
-\eta_i = \eta_1^{\frac{n_{\eta}-i}{n_{\eta} - 1}} \ \textrm{ with } i=1,2,\cdots,n_{\eta}
-\label{neta eq}
-\end{align}
-with $\eta_1 = \tau/\max(\Nbar_f)$.
-
-The results are showed in Figure~\ref{chi2 neta}.
-In some cases the $\eta$ series determined by Eq.~(\ref{etai rule}) is ideal
-(the first graph in Figure~\ref{chi2 neta}), in other cases Eq.~(\ref{etai rule})
-gives too many $\eta$ values such that it is not optimal (the second and third
-graph in Figure~\ref{chi2 neta}).
-So we need to find a way to improve Eq.(\ref{etai rule}).
-
+%\subsection{Other $\eta$ Choices}
+%
+%\begin{figure*}[tb!]
+%\centering
+%\includegraphics[width=0.8\textwidth]{chi2_neta.pdf}
+%\caption{
+%    The horizontal and vertical axes are the same as in the previous figure.
+%    The blue line and the orange line are traditional conjugate gradient method
+%    and parameterized conjugate gradient method.
+%    For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manually.
+%    The $\eta$ series are determined by Eq.~(\ref{neta eq}).
+%    The first graph shows in some cases the $\eta$ series given by Eq.~(\ref{etai rule}) is ideal,
+%    but the second and third graph show that Eq.~(\ref{etai rule}) may ends up too many $\eta$
+%    which yields slower convergence.
+%}
+%\label{chi2 neta}
+%\end{figure*}
+%
+%Now let us compare the performance difference between choosing $\eta$
+%parameters based on Eq.~(\ref{etai rule})
+%and fixing number of $\eta$ parameters $n_{\eta}$ manually then
+%choose the $\eta_i$ from this geometric series
+%\begin{align}
+%\eta_i = \eta_1^{\frac{n_{\eta}-i}{n_{\eta} - 1}} \ \textrm{ with } i=1,2,\cdots,n_{\eta}
+%\label{neta eq}
+%\end{align}
+%with $\eta_1 = \tau/\max(\Nbar_f)$.
+%
+%The results are showed in Figure~\ref{chi2 neta}.
+%In some cases the $\eta$ series determined by Eq.~(\ref{etai rule}) is ideal
+%(the first graph in Figure~\ref{chi2 neta}), in other cases Eq.~(\ref{etai rule})
+%gives too many $\eta$ values such that it is not optimal (the second and third
+%graph in Figure~\ref{chi2 neta}).
+%So we need to find a way to improve Eq.(\ref{etai rule}).
+%
 
 
 \subsection{Future Prospects}
@@ -564,8 +564,10 @@ BQ and KH are supported by NSF award 1815887.
 We know that initial degree of heteroscedasticity $\eta_0 = 0$,
 which means the system is homoscedastic.
 What would be good value for the next parameter $\eta_1$?
-To simplify notation, we use $\Neta$ to denote the parameterized covariance $N(\eta) = \tau I +  \eta \bar N$.
-For some specific $\eta$ value, the estimated map $\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$ minimizes
+To simplify notation, we use $\Neta$ to denote the parameterized covariance matrix
+$N(\eta) = \tau I +  \eta \bar N$.
+For some specific $\eta$ value, the estimated map
+$\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$ minimizes
 \begin{align}
 \begin{aligned}[b]
 \chi^2 (\vbm, \eta)
@@ -575,11 +577,15 @@ For some specific $\eta$ value, the estimated map $\hatm(\eta) = \PPinv{\inv{\Ne
 \end{aligned}
 \end{align}
 with $\eta$ being fixed.
-We restrict to the case that the noise covariance matrix
-$N$ is diagonal in the frequency domain, and represent the frequency-domain eigenvalues as $N_f$.
+We restrict to the case that the noise covariance matrix $N$ is diagonal in the frequency domain,
+and represent the frequency-domain eigenvalues as $N_f$.
 
-Let us first consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
-such that $\eta_1 = \delta \eta$ is very small quantity, $\delta \eta \ll 1$.
+The perturbative scheme works like this.
+We start with $\chi^2(\hatm(\eta_0),\eta_0)$ with $\hatm(\eta_0) = \PPinv{} \Pdagger \vbd$ which could be solved directly.
+Then we use conjugate gradient method to find $\hatm(\eta_1)$
+and the corresponding $\chi^2$ value is $\chi^2(\hatm(\eta_1),\eta_1)$.
+So let us consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
+such that $\eta_1 = \delta \eta$ is very small quantity, $\delta \eta \ll 1$ (remember $\eta_0 = 0$).
 Since $\hatm(\eta)$ minimizes $\chi^2(\vbm,\eta)$ with $\eta$ being fixed, we have 
 $\pdv{\hatm} \chi^2(\hatm(\eta), \eta) = 0$,
 and using the chain rule
@@ -588,23 +594,22 @@ and using the chain rule
 = - \qty(\vbd - P\hatm(\eta))^{\dagger} \inv{\Neta} \Nbar \inv{\Neta}
     (\vbd - P\hatm(\eta)) \label{d chi2}
 \end{align}
-Then the fractional decrease of $\chi^2(\hatm(0),0)$ from $\eta_0= 0$ to 
-$\eta_1 = \delta \eta$ is
+Then the fractional decrease of $\chi^2(\hatm(\eta_0),\eta_0)$ from $\eta_0$ to $\eta_1 = \delta \eta$ is
 \begin{align}
--\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
-= - \delta \eta \frac{\dv{\eta} \chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}
+-\frac{\delta \chi^2(\hatm(\eta_0), \eta_0)}{\chi^2(\hatm(\eta_0), \eta_0)} 
+= - \delta \eta \frac{\dv{\eta} \chi^2(\hatm(\eta_0),\eta_0)}{\chi^2(\hatm(\eta_0),\eta_0)}
 &= \delta \eta 
 \frac{1}{\tau}
-\frac{\qty(\vbd - P\hatm(0))^{\dagger} \Nbar  (\vbd - P\hatm(0)) }
-    {\qty\big(\vbd - P \hatm(0))^{\dagger} \qty\big(\vbd - P\hatm(0))}
+\frac{\qty(\vbd - P\hatm(\eta_0))^{\dagger} \Nbar  (\vbd - P\hatm(\eta_0)) }
+    {\qty\big(\vbd - P \hatm(\eta_0))^{\dagger} \qty\big(\vbd - P\hatm(\eta_0))}
 \label{chi2 fractional decrease}
 \end{align}
 Here we put a minus sign in front of this expression such that it's 
 non-negative, and use $N_{\eta=0} = \tau I$ at the second equality.
-We want $\qty|\delta \chi^2(\hatm(0),0)| = \chi^2(\hatm(0),0)) - \chi^2(\hatm(\eta_1), \eta_1)$
+We want $\qty|\delta \chi^2(\hatm(\eta_0),\eta_0)| = \chi^2(\hatm(\eta_0),\eta_0)) - \chi^2(\hatm(\eta_1), \eta_1)$
 to be large such that it could converge fast.
-Let's say $\chi^2(\hatm(\eta_1), \eta_1)$ is much smaller than $\chi^2(\hatm(0), 0)$,
-or $\chi^2(\hatm(\eta_1), \eta_1) \ll \chi^2(\hatm(0), 0)$.
+Which means $\chi^2(\hatm(\eta_1), \eta_1)$ is much smaller than $\chi^2(\hatm(\eta_0), \eta_0)$,
+or $\chi^2(\hatm(\eta_1), \eta_1) \ll \chi^2(\hatm(\eta_0), \eta_0)$.
 Then we would expect
 \begin{align}
 -\frac{\delta\chi^2(\hatm(0),0)}{\chi^2(\hatm(0),0)}
@@ -614,25 +619,28 @@ Then we would expect
 \end{align}
 The upper bound is strictly smaller than 1.
 Now we could use Eq.(\ref{chi2 fractional decrease}) and let it equal to $1$, then
-$\delta\eta=-\chi^2(\hatm(0), 0)/\dv{\eta}\chi^2(\hatm(0),0)$.
-If we use this idea for $\eta_{m+1} = \eta_m + \delta \eta_m$ with $m \geq 1$, we would get
+$\delta\eta=-\chi^2(\hatm(\eta_0), \eta_0)/\dv{\eta}\chi^2(\hatm(\eta_0),\eta_0)$.
+However if we apply this idea to $\eta_{m+1} = \eta_m + \delta \eta_m$ with $m \geq 1$, we would get
 $ \delta\eta_m = -\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m) $.
-But as mentioned before, we need to determine the entire series $\qty{\eta_i}$ before conjugate gradient iterations,
+As mentioned before, we need to determine the entire series $\qty{\eta_i}$ before conjugate gradient iterations,
 and we could not calculate $\hatm(\eta_m)$ directly because of the difficulty of matrix inversions.
 Therefore we could not get $\delta \eta_m$ values in advance.
 That means we need to find another approach.
 
 Let us go back to Eq.(\ref{chi2 fractional decrease}).
 Since it is hard to analyze $\vbd - P\hatm(\eta)$ under frequency domain,
-we treat it as an arbitrary vector, then the least upper bound is given by
+we treat it as an arbitrary vector, then the least upper bound of Eq.(\ref{chi2 fractional decrease}) is given by
 \begin{align}
--\frac{\delta \chi^2(\hatm(0), 0)}{\chi^2(\hatm(0), 0)} 
+-\frac{\delta \chi^2(\hatm(\eta_0), \eta_0)}{\chi^2(\hatm(\eta_0), \eta_0)} 
 \leq \frac{\delta \eta} {\tau} \max(\Nbar_f)
 \label{dchi2/chi2 upper bound}
 \end{align}
 where $\max(\Nbar_f)$ is the maximum eigenvalue of $\Nbar$.
-Now let us combine Eq.~(\ref{dchi2/chi2 0}) and Eq.~(\ref{dchi2/chi2 upper bound}).
-We can choose $\delta \eta$ such that the least upper bound is equal to 1.
+We want $ -\frac{\delta \chi^2(\hatm(\eta_0), \eta_0)}{\chi^2(\hatm(\eta_0), \eta_0)}$ being as large as possible,
+but it won't exceed $1$.
+If we combine Eq.~(\ref{dchi2/chi2 0}) and Eq.~(\ref{dchi2/chi2 upper bound}),
+and choose $\delta \eta$ such that the least upper bound is equal to 1,
+to make sure the process would not going too fast.
 Thus we have
 \begin{equation}
 \eta_1 = \frac{\tau}{\max(\Nbar_f)} = \frac{\min(N_f)}{\max(N_f) - \min(N_f)}.
