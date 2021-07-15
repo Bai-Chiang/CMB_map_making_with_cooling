@@ -1433,7 +1433,6 @@ class Map:
         CG_file = self.map_dir/CG_file_name
 
         try:
-            raise FileNotFoundError
             if self.force_recalculate:
                 raise FileNotFoundError
             else:
@@ -1489,7 +1488,7 @@ class Map:
             i_iter = 1
             while eta < 1 and i_iter <= num_iter:
                 dchi2_deta = self.get_dchi2_deta(m, eta, tau, Nbar_f)
-                eta += 0.9*chi2_eta/dchi2_deta
+                eta += chi2_eta/dchi2_deta
                 eta = min(eta, 1.0)
                 etas_list.append(eta)
 

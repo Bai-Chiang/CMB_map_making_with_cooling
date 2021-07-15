@@ -55,7 +55,8 @@ In the context of Cosmic Microwave Background data analysis, we study the soluti
 As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjusting their relative weight during the iterative solution.
 We find that this ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.
 A conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach.%, for the same computational cost per iteration.
-We give an analytical expression for the parameter that controls how gradually should change during the course of the solution. 
+Here we give an analytical expression for the parameter that controls how gradually should change during the course of the solution.
+We show that this ``cooling'' technique is helpful when there are significant amount of low frequency noise.
 
 \end{abstract}
 
@@ -137,7 +138,7 @@ Notation alert $\hatm$ without $\eta$ argument
 means the estimated $\hatm$ in Eq.~(\ref{map making eq}),
 independent of $\eta$.
 We could define $A(\eta) \equiv \Pdagger \inv{N(\eta)} P$ and $b(\eta) \equiv \Pdagger \inv{N(\eta)} \vbd$,
-and equation (\ref{map making eq eta}) could be simplified as $A(\eta_i) \hatm(\eta_i) = b(\eta_i)$.
+and equation (\ref{map making eq eta}) could be written as $A(\eta_i) \hatm(\eta_i) = b(\eta_i)$.
 
 In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
 
@@ -252,16 +253,16 @@ so this won't add extra cost either.
 Therefore, overall introducing $\eta$ won't have extra computational cost.
 
 However, we start a new conjugate gradient algorithm whenever $\eta_i$ updates to $\eta_{i+1}$,
-which means the residual $\vb{r}(\vbm, \eta_{i+1})$ need to be calculated basd on new $\eta_{i+1}$
-and then starts conjugate gradient iterations.
+which means the residual $\vb{r}(\vbm, \eta_{i+1})$ need to be calculated based on new $\eta_{i+1}$,
+the initialization process of conjugate gradient algorithm.
 This residual calculation contains an extra $A(\eta_i) \vbm$ operation.
-Therefore, overall if we have a series $\eta_1, \eta_2, \eta_3, \cdots, \eta_{n_{\eta}}$,
+Therefore, if we have a series $\eta_1, \eta_2, \eta_3, \cdots, \eta_{n_{\eta}}$,
 there will have $n_{\eta}-1$ extra $A(\eta) \vbm$ operations compare to traditional conjugate gradient
 method.
 If the total number of iterations is much larger than the number of $\eta$ parameters $n_{\eta}$,
 then this extra cost is negligible.
 For our simulation, this extra step would have rather significant impact on final result.
-To have a fair comparision between parameterized and traditional conjugate gradient method,
+To have a fair comparison between parameterized and traditional conjugate gradient method,
 we will present our results with number of $\Pdagger \inv{N(\eta)} P\vbm$ operations as horizontal axis.
 
 
@@ -769,7 +770,7 @@ We did some numerical simulation, and find that if we update $\eta$ parameter ba
 there is only marginally improvements over the $\eta$ series given in Eq. \ref{etai rule appendix}
 for the $1/f$ noise model, and slightly improvements when there is not many low frequency noise.
 If we use Eq. \ref{delta eta update},
-it ends up with some less $\eta$ parameters, but the inverval between $\eta_i$ and $\eta_{i+1}$ gets larger. 
+it ends up with some less $\eta$ parameters, but the interval between $\eta_i$ and $\eta_{i+1}$ gets larger. 
 In our simulation this sometimes causes one more iteration at certain $\eta$ value, so at the end there 
 is only slightly improvements.
 For large data set that need lots of iteration to converge from $\eta_i$ to $\eta_{i+1}$,
