@@ -115,7 +115,7 @@ for data_dic in data_list:
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of $P^{\dagger}N(\eta)P$ operations')
+axs[1].set_xlabel(r'number of $P^{\dagger}N(\eta)^{-1}P m$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
@@ -162,7 +162,7 @@ for data_dic in data_list:
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of $P^{\dagger}N(\eta)P$ operations')
+axs[1].set_xlabel(r'number of $P^{\dagger}N(\eta)^{-1}P m$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()
@@ -279,7 +279,7 @@ for data_dic in data_list:
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
 axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
-axs[1].set_xlabel('number of $P^{\dagger}N(\eta)P$ operations')
+axs[1].set_xlabel(r'number of $P^{\dagger}N(\eta)^{-1}P m$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
     ax.label_outer()

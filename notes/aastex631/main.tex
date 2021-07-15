@@ -2,6 +2,9 @@
 \usepackage{physics}
 \usepackage{gensymb}
 \usepackage{CJK}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+\usepackage[ruled,vlined]{algorithm2e}
 
 % Operators
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -51,7 +54,7 @@
 In the context of Cosmic Microwave Background data analysis, we study the solution to the equation that transforms scanning data into a map.
 As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjusting their relative weight during the iterative solution.
 We find that this ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.
-A conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach, for the same computational cost per iteration.
+A conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach.%, for the same computational cost per iteration.
 We give an analytical expression for the parameter that controls how gradually should change during the course of the solution. 
 
 \end{abstract}
@@ -100,7 +103,7 @@ In this paper, we show that the difference arose because the numerical tests in 
 
 In Section \ref{sec:methods} we describe our methods for treating the map-making equation and our numerical experiments.
 In Section \ref{sec:results} we present our results. 
-In Section \ref{sec:discussion} we intuitively interpret our method, and point out possible improvement direction.
+In Section \ref{sec:discussion} we intuitively interpret our method.
 Section \ref{sec:conclusions} is our conclusion.
 In Appendix \ref{appendix:eta calculation} we derive the prescription for our ``cooling'' schedule.
 
@@ -133,6 +136,9 @@ as we adjust the parameter through a set of levels $\{\eta_i\}$.
 Notation alert $\hatm$ without $\eta$ argument
 means the estimated $\hatm$ in Eq.~(\ref{map making eq}),
 independent of $\eta$.
+We could define $A(\eta) \equiv \Pdagger \inv{N(\eta)} P$ and $b(\eta) \equiv \Pdagger \inv{N(\eta)} \vbd$,
+and equation (\ref{map making eq eta}) could be simplified as $A(\eta_i) \hatm(\eta_i) = b(\eta_i)$.
+
 In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.  For simplicity we fix the preconditioner to $M= \Pdagger P$ for all of calculations.
 
 
@@ -160,6 +166,23 @@ is an order of magnitude smaller than the norm of the right hand side of Eq.~(\r
 \norm{\vb{r}(\vbm,\eta_i)} < 0.1\ \norm{\Pdagger N(\eta_i)^{-1} \vbd}
 \label{norm threshold}
 \end{align}
+
+%\caption{Euclid algorithm}
+%\begin{algorithmic}[1]
+%\State $r = 1$
+%\end{algorithmic}
+%\begin{algorithm}
+%\begin{algorithmic}[5]
+%\If {$i\geq maxval$}
+%    \State $i\gets 0$
+%\Else
+%    \If {$i+k\leq maxval$}
+%        \State $i\gets i+k$
+%    \EndIf
+%\EndIf
+%\end{algorithmic}
+%\KwData{A(m)}
+%\end{algorithm}
 
 
 
@@ -197,12 +220,12 @@ To properly compare the performance cost of this method with respect to vanilla
 conjugate gradient method with simple preconditioner,
 we need to compare their computational cost at each iteration.
 The right hand side of parameterized map-making equation
-(\ref{map making eq eta})
+(\ref{map making eq eta}) $b(\eta_i)$
 could be computed before iterations,
 since we have determined $\qty{\eta_i}$ in advance,
 so it won't introduce extra computational cost.
 The most demanding part of conjugate gradient method is calculating
-its left hand side, because it contains a Fourier transform of
+its left hand side $A(\eta_i) \vbm$, because it contains a Fourier transform of
 $P\vbm$ from time domain to frequency domain and an inverse Fourier transform
 of $\inv{N(\eta_i)} P \vbm$ from frequency domain back to time domain,
 which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
@@ -227,6 +250,19 @@ norm of residual $\norm{\vb{r}(\vbm,\eta_i)}$ is small, see Eq.~(\ref{norm thres
 Calculate the residual vector $\vb{r}(\vbm,\eta_i)$ is part of conjugate gradient algorithm,
 so this won't add extra cost either.
 Therefore, overall introducing $\eta$ won't have extra computational cost.
+
+However, we start a new conjugate gradient algorithm whenever $\eta_i$ updates to $\eta_{i+1}$,
+which means the residual $\vb{r}(\vbm, \eta_{i+1})$ need to be calculated basd on new $\eta_{i+1}$
+and then starts conjugate gradient iterations.
+This residual calculation contains an extra $A(\eta_i) \vbm$ operation.
+Therefore, overall if we have a series $\eta_1, \eta_2, \eta_3, \cdots, \eta_{n_{\eta}}$,
+there will have $n_{\eta}-1$ extra $A(\eta) \vbm$ operations compare to traditional conjugate gradient
+method.
+If the total number of iterations is much larger than the number of $\eta$ parameters $n_{\eta}$,
+then this extra cost is negligible.
+For our simulation, this extra step would have rather significant impact on final result.
+To have a fair comparision between parameterized and traditional conjugate gradient method,
+we will present our results with number of $\Pdagger \inv{N(\eta)} P\vbm$ operations as horizontal axis.
 
 
 
@@ -435,40 +471,35 @@ then as $\eta$ slowly increases, it gradually give more focus to the lowest nois
 %
 
 
-\subsection{Future Prospects}
+%\subsection{Future Prospects}
+%
+%\begin{figure*}[tb!]
+%\centering
+%\includegraphics[width=0.8\textwidth]{chi2_exact_eta.pdf}
+%\caption{
+%    The blue line and orange line are traditional and parameterized conjugate gradient method for reference.
+%    The extra green line shows the result when $\delta\eta_m$ is determined from 
+%    Eq.~(\ref{exact eta}) not from Eq.~(\ref{etai rule}).
+%    This shows that if we could update based on exact expression Eq.~(\ref{exact eta}),
+%    it could converge even faster.
+%    Especially in the third graph it would overcome the shortcomings of parameterized conjugate gradient method.
+%}
+%\label{chi2 exact eta}
+%\end{figure*}
+%
+%In Appendix~\ref{appendix:eta calculation}, we determine $\delta\eta_m$ value based on the least upper bound of 
+%$-\delta\chi^2(\hatm(\eta_m), \eta_m)/\chi^2(\hatm(\eta_m), \eta_m)$, and choose $\delta\eta_m$ such that 
+%the least upper bound is equal to $1$.
+%The reason we use this upper bound instead of using
+%\begin{align}
+%\delta\eta_m=-\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m)
+%\label{exact eta}
+%\end{align}
+%directly, is that we don't want to keep the time ordered data $\vbd$ in system memory.
+%But we could do this in simulations.
+%In Figure~\ref{chi2 exact eta} we can see if we use Eq.~(\ref{exact eta}) it only show marginally improvements
+%for $1/f$ noise model, and slightly improvements when there is not too many low frequency noise. 
 
-\begin{figure*}[tb!]
-\centering
-\includegraphics[width=0.8\textwidth]{chi2_exact_eta.pdf}
-\caption{
-    The blue line and orange line is the same as in Figure~\ref{chi2 neta} for reference.
-    The extra green line shows the result when $\delta\eta_m$ is determined from 
-    Eq.~(\ref{exact eta}) not from Eq.~(\ref{etai rule}).
-    This shows that if we could update based on exact expression Eq.~(\ref{exact eta}),
-    it could converge even faster.
-    Especially in the third graph it would overcome the shortcomings of parameterized conjugate gradient method.
-}
-\label{chi2 exact eta}
-\end{figure*}
-
-In Appendix~\ref{appendix:eta calculation}, we determine $\delta\eta_m$ value based on the least upper bound of 
-$-\delta\chi^2(\hatm(\eta_m), \eta_m)/\chi^2(\hatm(\eta_m), \eta_m)$, and choose $\delta\eta_m$ such that 
-the least upper bound is equal to $1$.
-The reason we use this upper bound instead of using
-\begin{align}
-\delta\eta_m=-\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m)
-\label{exact eta}
-\end{align}
-directly, is that we don't want to keep the time ordered data $\vbd$ in system memory.
-But we could do this in simulations.
-In Figure~\ref{chi2 exact eta} we can see if we use Eq.~(\ref{exact eta}), indeed it can improve performance. 
-Especially for the third graph where the power spectrum does not have lots of
-low-frequency noise.
-This performance could get close to vanilla conjugate gradient method
-when there is no significant amount of low-frequency noise,
-which overcomes the shortcomings of parameterized conjugate gradient method.
-Therefore, to further improve this method, we need to find more accurate expression for Eq.~(\ref{dchi2 chi2})
-and Eq.~(\ref{exact eta}).
 
 
 
@@ -621,7 +652,10 @@ The upper bound is strictly smaller than 1.
 Now we could use Eq.(\ref{chi2 fractional decrease}) and let it equal to $1$, then
 $\delta\eta=-\chi^2(\hatm(\eta_0), \eta_0)/\dv{\eta}\chi^2(\hatm(\eta_0),\eta_0)$.
 However if we apply this idea to $\eta_{m+1} = \eta_m + \delta \eta_m$ with $m \geq 1$, we would get
-$ \delta\eta_m = -\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m) $.
+\begin{align}
+\delta\eta_m = -\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m).
+\label{delta eta update}
+\end{align}
 As mentioned before, we need to determine the entire series $\qty{\eta_i}$ before conjugate gradient iterations,
 and we could not calculate $\hatm(\eta_m)$ directly because of the difficulty of matrix inversions.
 Therefore we could not get $\delta \eta_m$ values in advance.
@@ -730,6 +764,17 @@ final expression for all $\eta_m$
 \label{etai rule appendix}
 \end{align}
 Here we need to truncate the series when $\eta_m > 1$.
+
+We did some numerical simulation, and find that if we update $\eta$ parameter based on Eq. \ref{delta eta update},
+there is only marginally improvements over the $\eta$ series given in Eq. \ref{etai rule appendix}
+for the $1/f$ noise model, and slightly improvements when there is not many low frequency noise.
+If we use Eq. \ref{delta eta update},
+it ends up with some less $\eta$ parameters, but the inverval between $\eta_i$ and $\eta_{i+1}$ gets larger. 
+In our simulation this sometimes causes one more iteration at certain $\eta$ value, so at the end there 
+is only slightly improvements.
+For large data set that need lots of iteration to converge from $\eta_i$ to $\eta_{i+1}$,
+where several extra calculation may not be significant, using Eq. \ref{delta eta update} may have larger performance
+boost.
 
 
 

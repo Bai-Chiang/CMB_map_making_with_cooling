@@ -12,13 +12,13 @@ f_scan_list = [
 num_eta_arr = np.array([5,15,30],dtype=int)
 f_sample_list = [100,]
 f_knee_list = [
-    0.001,
+    #0.001,
     0.1,
-    0.25,
-    0.5,
-    1,
+    #0.25,
+    #0.5,
+    #1,
     10,
-    100,
+    #100,
 ]
 
 
@@ -42,8 +42,8 @@ f_sample_knee_apo_list = []
 for f_sample in f_sample_list:
     for f_knee in f_knee_list:
         f_sample_knee_apo_list.append([f_sample, f_knee, 0.0])
-        f_sample_knee_apo_list.append([f_sample, f_knee, 0.1*f_knee])
-        f_sample_knee_apo_list.append([f_sample, f_knee, 0.01*f_knee])
+        #f_sample_knee_apo_list.append([f_sample, f_knee, 0.1*f_knee])
+        #f_sample_knee_apo_list.append([f_sample, f_knee, 0.01*f_knee])
 f_sample_knee_apo_arr = np.array(f_sample_knee_apo_list)
         
 

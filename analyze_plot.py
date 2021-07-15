@@ -85,19 +85,19 @@ for data_dic in  data_list:
         CG_exact_eta_result = pickle.load(_file)
         results_list.append(CG_exact_eta_result)
 
-    # CG with eta (single step)
-    description_list.append(data_dic['CG_eta_description_single_step'])
-    description_latex_list.append(data_dic['CG_eta_description_latex_single_step'])
-    with open (data_dic['CG_eta_file_single_step'], 'rb') as _file:
-        CG_eta_result = pickle.load(_file)
-        results_list.append(CG_eta_result)
+    ## CG with eta (single step)
+    #description_list.append(data_dic['CG_eta_description_single_step'])
+    #description_latex_list.append(data_dic['CG_eta_description_latex_single_step'])
+    #with open (data_dic['CG_eta_file_single_step'], 'rb') as _file:
+    #    CG_eta_result = pickle.load(_file)
+    #    results_list.append(CG_eta_result)
 
-    # CG exact eta (single step)
-    description_list.append(data_dic['CG_exact_eta_description_single_step'])
-    description_latex_list.append(data_dic['CG_exact_eta_description_latex_single_step'])
-    with open (data_dic['CG_exact_eta_file_single_step'], 'rb') as _file:
-        CG_exact_eta_result = pickle.load(_file)
-        results_list.append(CG_exact_eta_result)
+    ## CG exact eta (single step)
+    #description_list.append(data_dic['CG_exact_eta_description_single_step'])
+    #description_latex_list.append(data_dic['CG_exact_eta_description_latex_single_step'])
+    #with open (data_dic['CG_exact_eta_file_single_step'], 'rb') as _file:
+    #    CG_exact_eta_result = pickle.load(_file)
+    #    results_list.append(CG_exact_eta_result)
 
 
     ## CG manual eta

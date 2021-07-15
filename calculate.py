@@ -143,95 +143,95 @@ for f_scan in f_scan_list:
         data_dic['CG_exact_eta_file'] = CG_eta_file
         #data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
-        # CG eta (single step)
-        print('CG with eta (single step)')
-        CG_eta_description = ('CG with eta and preconditioner=PTP (single step)')
-        CG_eta_description_latex =\
-            ('CG with $\eta$ and preconditioner=$P^T P$ (single step)')
-        CG_eta_file, CG_eta_result =\
-            _map.conjugate_gradient_solver_eta(
-                num_iter,
-                preconditioner_inv=_map.PTP_preconditioner,
-                preconditioner_description='PTP',
-                next_eta_ratio=next_eta_ratio,
-                single_step=True,
-            )
-        data_dic['CG_eta_description_single_step'] = CG_eta_description
-        data_dic['CG_eta_description_latex_single_step'] = CG_eta_description_latex
-        data_dic['CG_eta_file_single_step'] = CG_eta_file
-        #data_dic['etas_arr'] = CG_eta_result['etas_arr']
+        ## CG eta (single step)
+        #print('CG with eta (single step)')
+        #CG_eta_description = ('CG with eta and preconditioner=PTP (single step)')
+        #CG_eta_description_latex =\
+        #    ('CG with $\eta$ and preconditioner=$P^T P$ (single step)')
+        #CG_eta_file, CG_eta_result =\
+        #    _map.conjugate_gradient_solver_eta(
+        #        num_iter,
+        #        preconditioner_inv=_map.PTP_preconditioner,
+        #        preconditioner_description='PTP',
+        #        next_eta_ratio=next_eta_ratio,
+        #        single_step=True,
+        #    )
+        #data_dic['CG_eta_description_single_step'] = CG_eta_description
+        #data_dic['CG_eta_description_latex_single_step'] = CG_eta_description_latex
+        #data_dic['CG_eta_file_single_step'] = CG_eta_file
+        ##data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
-        # CG exact eta (single step)
-        print('CG with exact eta (single step)')
-        CG_eta_description = ('CG with exact eta and preconditioner=PTP (single step)')
-        CG_eta_description_latex =\
-            ('CG with exact $\eta$ and preconditioner=$P^T P$ (single step)')
-        CG_eta_file, CG_eta_result =\
-            _map.conjugate_gradient_solver_exact_eta(
-                num_iter,
-                preconditioner_inv=_map.PTP_preconditioner,
-                preconditioner_description='PTP',
-                next_eta_ratio=next_eta_ratio,
-                single_step=True,
-            )
-        data_dic['CG_exact_eta_description_single_step'] = CG_eta_description
-        data_dic['CG_exact_eta_description_latex_single_step'] = CG_eta_description_latex
-        data_dic['CG_exact_eta_file_single_step'] = CG_eta_file
-        #data_dic['etas_arr'] = CG_eta_result['etas_arr']
+        ## CG exact eta (single step)
+        #print('CG with exact eta (single step)')
+        #CG_eta_description = ('CG with exact eta and preconditioner=PTP (single step)')
+        #CG_eta_description_latex =\
+        #    ('CG with exact $\eta$ and preconditioner=$P^T P$ (single step)')
+        #CG_eta_file, CG_eta_result =\
+        #    _map.conjugate_gradient_solver_exact_eta(
+        #        num_iter,
+        #        preconditioner_inv=_map.PTP_preconditioner,
+        #        preconditioner_description='PTP',
+        #        next_eta_ratio=next_eta_ratio,
+        #        single_step=True,
+        #    )
+        #data_dic['CG_exact_eta_description_single_step'] = CG_eta_description
+        #data_dic['CG_exact_eta_description_latex_single_step'] = CG_eta_description_latex
+        #data_dic['CG_exact_eta_file_single_step'] = CG_eta_file
+        ##data_dic['etas_arr'] = CG_eta_result['etas_arr']
 
 
-        # CG perturbation manual eta
-        for num_eta in num_eta_arr:
-            tau = np.min(_map.N_f_diag)
-            Nbar_f = _map.N_f_diag - tau
-            eta_1 = tau/Nbar_f.max()
-            i = np.arange(num_eta) + 1.0
-            etas_arr = eta_1 ** ( (num_eta-i)/ (num_eta-1) )
-            print('CG manual ln {:d} eta'.format(num_eta))
-            CG_eta_description = ('CG manual ln {:d} eta '
-                'preconditioner=PTP').format(num_eta)
-            CG_eta_description_latex = ('CG manual $\ln$ scale, '
-                '$n_{{\eta}}={:d}$ preconditioner=$P^T P$').format(num_eta)
-            CG_eta_file,_ =\
-                _map.conjugate_gradient_solver_eta(
-                    num_iter,
-                    preconditioner_inv=_map.PTP_preconditioner,
-                    preconditioner_description='PTP',
-                    etas_arr=etas_arr,
-                    next_eta_ratio=next_eta_ratio,
-                )
-            data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]\
-                = CG_eta_description
-            data_dic['CG_manual_ln_{:d}_eta_description_latex'
-                .format(num_eta)]\
-                = CG_eta_description_latex
-            data_dic['CG_manual_ln_{:d}_eta_file'.format(
-                num_eta)] = CG_eta_file
+        ## CG perturbation manual eta
+        #for num_eta in num_eta_arr:
+        #    tau = np.min(_map.N_f_diag)
+        #    Nbar_f = _map.N_f_diag - tau
+        #    eta_1 = tau/Nbar_f.max()
+        #    i = np.arange(num_eta) + 1.0
+        #    etas_arr = eta_1 ** ( (num_eta-i)/ (num_eta-1) )
+        #    print('CG manual ln {:d} eta'.format(num_eta))
+        #    CG_eta_description = ('CG manual ln {:d} eta '
+        #        'preconditioner=PTP').format(num_eta)
+        #    CG_eta_description_latex = ('CG manual $\ln$ scale, '
+        #        '$n_{{\eta}}={:d}$ preconditioner=$P^T P$').format(num_eta)
+        #    CG_eta_file,_ =\
+        #        _map.conjugate_gradient_solver_eta(
+        #            num_iter,
+        #            preconditioner_inv=_map.PTP_preconditioner,
+        #            preconditioner_description='PTP',
+        #            etas_arr=etas_arr,
+        #            next_eta_ratio=next_eta_ratio,
+        #        )
+        #    data_dic['CG_manual_ln_{:d}_eta_description'.format(num_eta)]\
+        #        = CG_eta_description
+        #    data_dic['CG_manual_ln_{:d}_eta_description_latex'
+        #        .format(num_eta)]\
+        #        = CG_eta_description_latex
+        #    data_dic['CG_manual_ln_{:d}_eta_file'.format(
+        #        num_eta)] = CG_eta_file
 
-        # MF iteration
-        for num_eta in num_eta_arr:
-            tau = np.min(_map.N_f_diag)
-            Nbar_f = _map.N_f_diag - tau
-            eta_1 = tau/Nbar_f.max()
-            i = np.arange(num_eta) + 1.0
-            etas_arr = eta_1 ** ( (num_eta-i)/ (num_eta-1) )
-            print('MF ln {:d}x1 eta'.format(num_eta))
-            MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
-            MF_description_latex = (r'MF $\ln$ scale, '
-                r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
-            MF_file,_ =\
-                _map.messenger_field_solver(
-                    lambs_arr=1/etas_arr,
-                    num_iter_per_lamb=1,
-                    num_iter=num_iter,
-                )
-            data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
-                = MF_description
-            data_dic['MF_ln_{:d}_eta_description_latex'
-                .format(num_eta)]\
-                = MF_description_latex
-            data_dic['MF_ln_{:d}_eta_file'.format(
-                num_eta)] = MF_file
+        ## MF iteration
+        #for num_eta in num_eta_arr:
+        #    tau = np.min(_map.N_f_diag)
+        #    Nbar_f = _map.N_f_diag - tau
+        #    eta_1 = tau/Nbar_f.max()
+        #    i = np.arange(num_eta) + 1.0
+        #    etas_arr = eta_1 ** ( (num_eta-i)/ (num_eta-1) )
+        #    print('MF ln {:d}x1 eta'.format(num_eta))
+        #    MF_description = ('MF ln {:d}x1 eta '.format(num_eta))
+        #    MF_description_latex = (r'MF $\ln$ scale, '
+        #        r'$\lambda$ ${:d}$ $\times$ $1$').format(num_eta)
+        #    MF_file,_ =\
+        #        _map.messenger_field_solver(
+        #            lambs_arr=1/etas_arr,
+        #            num_iter_per_lamb=1,
+        #            num_iter=num_iter,
+        #        )
+        #    data_dic['MF_ln_{:d}_eta_description'.format(num_eta)]\
+        #        = MF_description
+        #    data_dic['MF_ln_{:d}_eta_description_latex'
+        #        .format(num_eta)]\
+        #        = MF_description_latex
+        #    data_dic['MF_ln_{:d}_eta_file'.format(
+        #        num_eta)] = MF_file
 
 
         data_list_rank.append(data_dic)
