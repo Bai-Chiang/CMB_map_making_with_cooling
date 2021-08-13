@@ -114,7 +114,7 @@ for data_dic in data_list:
     axs[fig_index].set_yscale('log')
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
-axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
+axs[0].set_ylabel(r'$(\chi^2-\chi^2_{min})/(\chi^2_{ini}- \chi^2_{min})$') 
 axs[1].set_xlabel(r'number of $P^{\dagger}N(\eta)^{-1}P m$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
@@ -133,15 +133,15 @@ for data_dic in data_list:
     f_knee = data_dic['f_knee']
     f_apo = data_dic['f_apo']
     chi2_min = data_dic['chi2_min']
-    if f_knee == 10 and f_apo == 0:
+    if f_knee == 10 and f_apo == 1:
         fig_index = 0
-        axs[0].set_title(r'$(f_{knee},f_{apo})=(10, 0)$ Hz')
+        axs[0].set_title(r'$(f_{knee},f_{apo})=(10, 1)$ Hz')
     elif f_knee == 10 and f_apo == 0.1:
         fig_index = 1
         axs[1].set_title(r'$(f_{knee},f_{apo})=(10, 0.1)$ Hz')
-    elif f_knee == 10 and f_apo == 1:
+    elif f_knee == 10 and f_apo == 0:
         fig_index = 2
-        axs[2].set_title(r'$(f_{knee},f_{apo})=(10, 1)$ Hz')
+        axs[2].set_title(r'$(f_{knee},f_{apo})=(10, 0)$ Hz')
     else:
         continue
     with open (data_dic['CG_SP_file'], 'rb') as _file:
@@ -161,7 +161,7 @@ for data_dic in data_list:
     axs[fig_index].set_yscale('log')
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
-axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
+axs[0].set_ylabel(r'$(\chi^2-\chi^2_{min})/(\chi^2_{ini}- \chi^2_{min})$') 
 axs[1].set_xlabel(r'number of $P^{\dagger}N(\eta)^{-1}P m$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
@@ -234,15 +234,15 @@ for data_dic in data_list:
     f_knee = data_dic['f_knee']
     f_apo = data_dic['f_apo']
     chi2_min = data_dic['chi2_min']
-    if f_knee == 10 and f_apo == 0:
+    if f_knee == 0.1 and f_apo == 0.001:
         fig_index = 0
-        axs[0].set_title('$(f_{knee},f_{apo})=(10,0)$ Hz')
+        axs[0].set_title('$(f_{knee},f_{apo})=(0.1,0.001)$ Hz')
     elif f_knee == 1 and f_apo == 0:
         fig_index = 1
         axs[1].set_title('$(f_{knee},f_{apo})=(1,0)$ Hz')
-    elif f_knee == 0.1 and f_apo == 0.001:
+    elif f_knee == 10 and f_apo == 0:
         fig_index = 2
-        axs[2].set_title('$(f_{knee},f_{apo})=(0.1,0.001)$ Hz')
+        axs[2].set_title('$(f_{knee},f_{apo})=(10,0)$ Hz')
     else:
         continue
     with open (data_dic['CG_SP_file'], 'rb') as _file:
@@ -266,19 +266,10 @@ for data_dic in data_list:
             (chi2-chi2_min)/(chi2[0]-chi2_min),
             label=r'CG with $\delta\eta = \frac{\chi^2}{-\frac{d}{d\eta}\chi^2}$'
         )
-    #for num_eta in num_eta_arr:
-    #    with open (data_dic['CG_manual_ln_{:d}_eta_file'.format(num_eta)],
-    #            'rb') as _file:
-    #        CG_eta_result = pickle.load(_file)
-    #        chi2 = CG_eta_result['chi2_hist']
-    #        axs[fig_index].plot(
-    #            (chi2-chi2_min)/(chi2[0]-chi2_min),
-    #            label='CG with $n_{{\eta}} = {:d}$'.format(num_eta)
-    #        )
     axs[fig_index].set_yscale('log')
     axs[fig_index].set_ylim(1e-12,1)
     axs[fig_index].grid()
-axs[0].set_ylabel(r'$\frac{\chi^2-\chi^2_{min}} {\chi^2_{ini}- \chi^2_{min}}$') 
+axs[0].set_ylabel(r'$(\chi^2-\chi^2_{min})/(\chi^2_{ini}- \chi^2_{min})$') 
 axs[1].set_xlabel(r'number of $P^{\dagger}N(\eta)^{-1}P m$ operations')
 axs[2].legend(bbox_to_anchor=(1,1), loc="upper right", fontsize=10)
 for ax in axs:
