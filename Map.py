@@ -404,9 +404,9 @@ class Map:
         #    np.einsum(
         #        'ic,itc->it',
         #        self.comps,
-        #        noiseless_map[P_y, P_x,:]
+        #        self.noiseless_map[P_y, P_x,:]
         #    )
-        #self.tod = self.noiseless_pixelized_signal + self.noise
+        #self.tod = noiseless_pixelized_signal + self.noise
         #self.tod_f = fft.rfft(self.tod, axis=1)
 
         # some calculation in self._PTP_inv
