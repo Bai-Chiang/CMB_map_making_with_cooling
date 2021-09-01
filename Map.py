@@ -377,10 +377,17 @@ class Map:
                 pickle.dump(self.noise, _file)
 
 
-    def get_tod(self):
+    def get_tod(self,
+            is_exact_signal=True
+        ):
         """
         combine signal and noise as time ordered data, 
         stored in self.tod --- np.array shape=(N_detector, N_sample)
+        args:
+            is_exact_signal
+                --- bool
+                --- if True noiseless signal is taken from continious continious space,
+                    if False noiseless signal is taken from pixelized map.
         """
         # hits per pixel
         num_pix_x = self.num_pix_x
@@ -396,18 +403,25 @@ class Map:
             .reshape(self.num_data, num_pix_y, num_pix_x)
         )
 
+        if not is_exact_signal:
+            self.noiseless_signal = \
+                np.einsum(
+                    'ic,itc->it',
+                    self.comps,
+                    self.noiseless_map[P_y, P_x,:]
+                )
         self.tod = self.noiseless_signal + self.noise
         self.tod_f = fft.rfft(self.tod, axis=1)
-
-        ## TOD from pixelized noiseless map
-        #noiseless_pixelized_signal = \
-        #    np.einsum(
-        #        'ic,itc->it',
-        #        self.comps,
-        #        self.noiseless_map[P_y, P_x,:]
-        #    )
-        #self.tod = noiseless_pixelized_signal + self.noise
-        #self.tod_f = fft.rfft(self.tod, axis=1)
+        print('the root-mean-square of noiseless signal (under time domain): {:.3f}'\
+            .format(
+                np.sqrt(np.mean(self.noiseless_signal**2))
+            )
+        )
+        print('the root-mean-squre of noise (under time domain): {:.3f}'\
+            .format(
+                np.sqrt(np.mean(self.noise**2))
+            )
+        )
 
         # some calculation in self._PTP_inv
         comps = self.comps

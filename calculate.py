@@ -72,7 +72,7 @@ for f_scan in f_scan_list:
         _map.generate_noiseless_signal(sig_amp=sig_amp)
         _map.generate_noise(f_knee, f_apo, 
             noise_index=noise_index, noise_sigma2=noise_sigma2)
-        _map.get_tod()
+        _map.get_tod(is_exact_signal=True)
 
         data_dic['scan_info'] = scan_info
         data_dic['scan_info_latex'] = scan_info_latex
