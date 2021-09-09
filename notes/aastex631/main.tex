@@ -33,7 +33,7 @@
 \newcommand{\PPinv}[1]{\inv{\qty(\Pdagger #1 P)}}
 \newcommand{\Neta}{N_{\eta}}
 
-\newcommand{\kmh}[1]{\textcolor{red}{KMH: #1}}
+\newcommand{\kmh}[1]{\textcolor{red}{#1}}
 \newcommand{\textgreen}[1]{\textcolor{green}{#1}}
 
 
@@ -594,9 +594,9 @@ For this work, BQQ and KMH are supported by NSF award 1815887.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \appendix
-\section{The derivation of $\eta$ series} \label{appendix:eta calculation}
+\section{The derivation of $\eta$ parameter series} \label{appendix:eta calculation}
 
-We know that \textgreen{the} initial degree of heteroscedasticity $\eta_0 = 0$,
+We know that the initial degree of heteroscedasticity $\eta_0 = 0$,
 which means the system is homoscedastic (uniform noise) to start.
 What would be a good value for the next parameter $\eta_1$?
 To simplify notation, we use $\Neta$ to denote the parameterized covariance matrix
@@ -612,17 +612,14 @@ $\hatm(\eta) = \PPinv{\inv{\Neta}} \Pdagger \inv{\Neta} \vbd$ minimizes
 \end{aligned}
 \end{align}
 with $\eta$ being fixed.
-We restrict to the case that the noise covariance matrix $N$ is diagonal in \textgreen{the?} frequency domain,
+We restrict to the case that the noise covariance matrix $N$ is diagonal in the frequency domain,
 and represent the frequency-domain eigenvalues as $N_f$.
 
 The perturbative scheme works like this.
 We start with $\chi^2(\hatm(\eta_0),\eta_0)$ with $\hatm(\eta_0) = \PPinv{} \Pdagger \vbd$ which could be solved directly.
 Then we use conjugate gradient method to find $\hatm(\eta_1)$
 and
-\textgreen{
-    \sout{the corresponding $\chi^2$ value is $\chi^2(\hatm(\eta_1),\eta_1)$}
     its corresponding $\chi^2(\hatm(\eta_1),\eta_1)$.
-}
 So let us consider $\eta_1 = \eta_0 + \delta\eta = \delta\eta$
 such that $\eta_1 = \delta \eta$ is very small quantity, $\delta \eta \ll 1$. (Remember $\eta_0 = 0$.)
 Since $\hatm(\eta)$ minimizes $\chi^2(\vbm,\eta)$ with $\eta$ being fixed, we have 
@@ -643,11 +640,11 @@ Then the fractional decrease of $\chi^2(\hatm(\eta_0),\eta_0)$ from $\eta_0$ to 
     {\qty\big(\vbd - P \hatm(\eta_0))^{\dagger} \qty\big(\vbd - P\hatm(\eta_0))}
 \label{chi2 fractional decrease}
 \end{align}
-Here we put a minus sign in front of this expression such that it's 
+Here we put a minus sign in front of this expression such that it is 
 non-negative, and use $N_{\eta=0} = \tau I$ at the second equality.
 We want $\qty|\delta \chi^2(\hatm(\eta_0),\eta_0)| = \chi^2(\hatm(\eta_0),\eta_0)) - \chi^2(\hatm(\eta_1), \eta_1)$
-to be large such that it could converge fast.
-Which means $\chi^2(\hatm(\eta_1), \eta_1)$ is much smaller than $\chi^2(\hatm(\eta_0), \eta_0)$,
+to be large \kmh{to encourage fast convergence}.
+Therefore $\chi^2(\hatm(\eta_1), \eta_1)$ is much smaller than $\chi^2(\hatm(\eta_0), \eta_0)$,
 or $\chi^2(\hatm(\eta_1), \eta_1) \ll \chi^2(\hatm(\eta_0), \eta_0)$.
 Then we would expect
 \begin{align}
@@ -659,18 +656,16 @@ Then we would expect
 Here we use the notation $1^-$ means the upper bound is close to but strictly smaller than 1.
 Now we could use \Eq{chi2 fractional decrease} and let it equal to $1$, then
 $\delta\eta=-\chi^2(\hatm(\eta_0), \eta_0)/\dv{\eta}\chi^2(\hatm(\eta_0),\eta_0)$.
-However if we apply this idea to $\eta_{m+1} = \eta_m + \delta \eta_m$ with $m \geq 1$, we would get
+
+\kmh{Applying this same idea} to $\eta_{m+1} = \eta_m + \delta \eta_m$ with $m \geq 1$, we would get
 \begin{align}
 \delta\eta_m = -\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m).
 \label{delta eta update}
 \end{align}
-As mentioned before, we need to determine the entire series $\qty{\eta_i}$ before conjugate gradient iterations,
-and we could not calculate $\hatm(\eta_m)$ directly because of the difficulty of matrix inversions.
-Therefore we could not get $\delta \eta_m$ values in advance.
-That means we need to find another approach.
+As mentioned in the main text, we need to determine the entire series $\qty{\eta_i}$ before conjugate gradient iterations. \kmh{We do not have the $\hatm(\eta_m)$ with which to calculate them and need to find another approach.}
 
 Let us go back to \Eq{chi2 fractional decrease}.
-Since it is hard to analyze $\vbd - P\hatm(\eta)$ under frequency domain,
+Since it is hard to analyze $\vbd - P\hatm(\eta)$ under frequency domain \kmh{(what do you mean here?)},
 we treat it as an arbitrary vector, then the least upper bound of \Eq{chi2 fractional decrease} is given by
 \begin{align}
 -\frac{\delta \chi^2(\hatm(\eta_0), \eta_0)}{\chi^2(\hatm(\eta_0), \eta_0)} 
@@ -720,7 +715,7 @@ the corresponding eigenvalue of the matrix on the numerator
 $\inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m}$
 is
 $\lambda_f = \Nbar_f (\tau + \eta_m \Nbar_f)^{-2}$,
-and the eigenvalue for \textgreen{the}  matrix on the denominator
+and the eigenvalue for the  matrix in the denominator
 $\inv{N}_{\eta_m}$
 is
 $\gamma_f = (\tau + \eta_m \Nbar_f)^{-1}$.
@@ -773,15 +768,15 @@ final expression for all $\eta_m$
 \end{align}
 Here we need to truncate the series when $\eta_m > 1$.
 
-We did some numerical simulation, and find that if we update \textgreen{the} $\eta$ parameter based on \Eq{delta eta update},
+In numerical simulations, we find that if we update the $\eta$ parameter based on \kmh{more precise} \Eq{delta eta update},
 there is only marginally improvements over the $\eta$ series given in \Eq{etai rule appendix}
-for the $1/f$ noise model, and slightly improvements when there is not many low frequency noise.
+for the $1/f$ noise model, and slight improvements when there is not much low frequency noise.
 If we use \Eq{delta eta update},
-it ends up with some less $\eta$ parameters, but the interval between $\eta_i$ and $\eta_{i+1}$ gets larger. 
-In our simulation this sometimes causes one more iteration at certain $\eta$ value, so at the end there 
-is only slightly improvements.
-For large data set that need lots of iteration to converge from $\eta_i$ to $\eta_{i+1}$,
-where several extra \textgreen{calculations} may not be significant, using \Eq{delta eta update} may have larger performance
+it ends up with fewer $\eta$ parameters in the series, but the interval between $\eta_i$ and $\eta_{i+1}$ gets larger. 
+In our simulation this sometimes causes one more iteration at certain $\eta$ value, so in the end there 
+is only slight improvements.
+For large data set that need lots of iterations to converge from $\eta_i$ to $\eta_{i+1}$,
+where several extra \kmh{\sout{calculations} iterations?} may not be significant, using \Eq{delta eta update} may provide a larger performance
 boost.
 
 
