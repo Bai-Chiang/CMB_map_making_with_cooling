@@ -59,7 +59,7 @@
 In the context of Cosmic Microwave Background data analysis, we study the solution to the equation that transforms scanning data into a map.
 As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjust their relative weights during the iterative solution.
 With simulations, we study mock instrumental data with different noise properties, and find that this ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.  In such cases, a conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach. %, for the same computational cost per iteration.
-We give an analytic estimate for the parameter that controls how gradually the linear system changes during the course of the solution.
+We give an analytic estimate for the parameter that controls how gradually the linear system should change during the course of the solution.
 % We show that this cooling technique is helpful when there are significant amount of low frequency noise.
 
 \end{abstract}
@@ -244,14 +244,14 @@ If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
 gradient method, then {it}
 will focus most on minimizing the low-noise part, such that $\chi^2$ would
 converge very fast on {the} low-noise modes (typically high temporal frequencies and small spatial scales), but slowly on the high-noise part (low frequencies and large scales).
-The solver may get stuck at \kmh{some local minimum {points}} in $\chi^2$ and have trouble getting to the global minimum.
+The solver may get stuck at \kmh{some local minimum {point}} in $\chi^2$ and have trouble getting to the global minimum. \kmh{(Question: if $\chi^2$ is a quadratic form, are there any local minima other than the global one?)}
 However by introducing the $\eta$ parameter, we let the solver first treat every
 frequency equally,
 then as $\eta$ slowly increases, it gradually {gives} more focus to the lowest noise part.
 
 
 \subsection{Computational Cost}
-To properly compare the performance cost of this method with respect to \textgreen{the} vanilla
+To properly compare the performance cost of this method with respect to {the} vanilla
 conjugate gradient method with {the} simple preconditioner,
 we need to compare their computational cost at each iteration.
 {
@@ -311,8 +311,8 @@ we will present our results with number of $\Pdagger \inv{N(\eta)} P\vbm$ operat
 \begin{figure}[tb!]
 \includegraphics[width=\linewidth]{P_f.pdf}
 \centering
-\caption{Noise power spectra that we use in our map-making simulations.  These show a variety of low-frequency behavior, parameterized by \Eq{noise power spectrum}, with 
-    white-noise level $\sigma^2 = 10$ $\mu$K$^2$ and low-frequency power-law slope $\alpha = 3$.
+\caption{Noise power spectra that we use in our map-making simulations.  These show a variety of low-frequency behavior, parameterized by \Eq{noise power spectrum}, with \kmh{white noise at high frequency 
+    \sout{white-noise level $\sigma^2 = 10$ $\mu$K$^2$} and a} low-frequency power-law slope $\alpha = 3$.
     Here we show two knee frequencies, $f_\text{knee}=10$ Hz (solid lines)  
     and $f_\text{knee}=0.1$ Hz (dashed lines).
     For each knee frequency, we have shown an unflattened spectrum ($f_\text{apo}=0$ Hz), and two flattened ones ($f_\text{apo}=0.1f_\text{knee}$ and
@@ -372,15 +372,15 @@ adding up {the} signal and noise.
 \includegraphics[width=\textwidth]{pink_noise_chi2.pdf}
 \caption{
     Convergence properties depend on the amount of low-frequency noise,
-    which increases with increasing knee frequency from the left panel to the right.
-    Here we show the $\chi^2(\vbm)$ with respect to number of iterations. 
+    which increases from the left panel to the right panel with increasing knee frequency.
+    %Here we show the $\chi^2(\vbm)$ with respect to number of iterations. 
     The map-making equation \ref{map making eq} minimize the $\chi^2(\vbm)$, so
-    the curve which falls fastest is the preferred method.
+    the curve which falls fastest versus the number of operations is the preferred method.
     We compare the traditional conjugate gradient method (``{CG},'' blue line)
     with the parameterized conjugate gradient method (``{CG with $\eta$},'' orange line)
     under different $1/f$ noise models (fixed $f_\text{apo}=0$ Hz but different $f_\text{knee}$ in \Eq{noise power spectrum}).
-    When $f_\text{knee} \gtrsim 10\,f_\text{scan} = 1$ Hz, there \textgreen{are/is a?} significant amount of
-    low-frequency noise and the parameterized conjugate gradient method starts showing advantages.  The vertical axis is rescaled  such that all curves start from 1.
+    When $f_\text{knee} \gtrsim 10\,f_\text{scan} = 1$ Hz, the significant amount of
+    low-frequency noise causes the parameterized conjugate gradient method to start showing its advantage.  The vertical axis is rescaled  such that all curves start from 1.
 }
 \label{1/f noise chi2}
 \end{figure*}
@@ -388,12 +388,12 @@ adding up {the} signal and noise.
 \begin{figure*}[tb!]
 \centering
 \includegraphics[width=\textwidth]{flattened_noise_chi2.pdf}
-\caption{Like \Figure{1/f noise chi2}, but adjusting the low-frequency noise by flattening it with an apodization parameter.
-    Low-frequency noise increases with decreasing apodization frequency from left to right.
-    We compare the traditional conjugate gradient method (``{CG},'' blue line) 
+\caption{Like \Figure{1/f noise chi2}, low-frequency noise increases from left to right, but by flattening the low-frequency noise at an apodization frequency.
+    Low-frequency noise increases with decreasing apodization frequency (compare Figure \ref{power spectrum}).
+    We again compare the traditional conjugate gradient method (``{CG},'' blue line) 
     with the parameterized conjugate gradient method (``{CG with $\eta$},'' orange line).
-    When $f_\text{apo}$ is much smaller than $f_\text{knee}$, there \textgreen{is} a lot of low-frequency noise and
-    the parameterized conjugate gradient method is better (falls faster) than the traditional one.
+    When $f_\text{apo}$ is much smaller than $f_\text{knee}$, there is a lot of low-frequency noise and
+    the parameterized conjugate gradient method is better (ultimately falls faster) than the traditional one.
 }
 \label{apo noise chi2}
 \end{figure*}
@@ -768,7 +768,7 @@ final expression for all $\eta_m$
 \end{align}
 Here we need to truncate the series when $\eta_m > 1$.
 
-In numerical simulations, we find that if we update the $\eta$ parameter based on \kmh{more precise} \Eq{delta eta update},
+In numerical simulations, we find that if we update the $\eta$ parameter based on \kmh{the more precise} \Eq{delta eta update},
 there is only marginally improvements over the $\eta$ series given in \Eq{etai rule appendix}
 for the $1/f$ noise model, and slight improvements when there is not much low frequency noise.
 If we use \Eq{delta eta update},
