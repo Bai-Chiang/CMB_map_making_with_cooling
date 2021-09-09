@@ -16,7 +16,7 @@
 \newcommand{\Cov}[1]{\text{Cov}\qty[#1]}
 
 \newcommand{\Eq}[1]{\text{Eq.\,\ref{#1}}}
-\newcommand{\Figure}[1]{\text{Figure\,\ref{#1}}}
+\newcommand{\Figure}[1]{\text{Figure \ref{#1}}}
 
 % variables
 \newcommand{\bb}[1]{\mathbb{#1}}
@@ -57,9 +57,9 @@
 \begin{abstract}
 
 In the context of Cosmic Microwave Background data analysis, we study the solution to the equation that transforms scanning data into a map.
-As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjust their relative weight during the iterative solution.
-With simulations we study systems that have different noise properties, and find that this ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.  In such cases, a conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach. %, for the same computational cost per iteration.
-We give an analytical expression for the parameter that controls how gradually the linear system changes during the course of the solution.
+As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjust their relative weights during the iterative solution.
+With simulations, we study mock instrumental data with different noise properties, and find that this ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.  In such cases, a conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach. %, for the same computational cost per iteration.
+We give an analytic estimate for the parameter that controls how gradually the linear system changes during the course of the solution.
 % We show that this cooling technique is helpful when there are significant amount of low frequency noise.
 
 \end{abstract}
@@ -71,14 +71,14 @@ We give an analytical expression for the parameter that controls how gradually t
 
 In observations of the Cosmic Microwave Background (CMB), map-making is an intermediate step between the collection of raw scanning data and the scientific analyses, such as the estimation of power spectra and cosmological parameters.
 Next generation CMB observations will generate much more data than those today, and so
-it is worth exploring efficient ways to process the data, even though, on paper, the map-making problem has long been solved.
+it is worth exploring efficient ways to process the data even though, on paper, the map-making problem has long been solved.
 
 The time-ordered scanning data is summarized by
 \begin{equation}
 \vbd = P\vbm + \vbn \label{map making model}
 \end{equation}
 where $\vbd$, $\vbm$, and $\vbn$ are the vectors of time-ordered data (TOD), the CMB sky-map signal, and measurement noise.
-$P$ is a sparse matrix in \textgreen{the?} time-by-pixel domain that encodes the telescope's pointing.
+$P$ is a sparse matrix in the time-by-pixel domain that encodes the telescope's pointing.
 Of several map-making methods \citep{1997ApJ...480L..87T}, one of the most common is the method introduced for the Cosmic Background Explorer \cite[COBE,][]{1992ASIC..359..391J}.  This optimal, linear solution is 
 \begin{align}
 \qty(\Pdagger \inv{N}  P) \hatm = \Pdagger \inv{N} \vbd \label{map making eq}
@@ -95,14 +95,14 @@ In the case where the noise is Gaussian, the COBE solution is also the maximum l
 
 With current computational power, we cannot solve for $\hatm$
 by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly.
-The noise covariance matrix $N$ is often sparse in frequency domain and the pointing matrix $P$ is sparse in \textgreen{the?} time-by-pixel domain.
+The noise covariance matrix $N$ is often sparse in frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain.
 In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable unless the covariance is uniform.
 We can use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, and execute each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
 
-As an alternative to conjugate gradient descent, \citet{Huffenberger_2018} showed that \textgreen{the} ``messenger'' iterative method could be adapted to solve the linear map-making system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.
-This technique splits the noise covariance into a uniform part and \textgreen{the/a} remainder, and introduces an additional vector that represent the signal plus uniform noise.
+As an alternative to conjugate gradient descent, \citet{Huffenberger_2018} showed that the ``messenger'' iterative method could be adapted to solve the linear map-making system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.
+This technique splits the noise covariance into a uniform part and the remainder, and introduces an additional vector that represent the signal plus uniform noise.
 This messenger field acts as an intermediary between the signal and the data and has a covariance that is conveniently sparse in every basis.
-\cite{2013A&A...549A.111E} also introduced a cooling scheme that takes advantage of the split covariance: over the course of the iterative solution, we adjust the relative weight of \textgreen{those} two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system, under the control of a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that a map produced by the cooled messenger method converged significantly faster than for standard conjugate gradient methods, and to higher fidelity, especially on large scales.  
+\cite{2013A&A...549A.111E} also introduced a cooling scheme that takes advantage of the split covariance: over the course of the iterative solution, we adjust the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system, under the control of a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that a map produced by the cooled messenger method converged significantly faster than for standard conjugate gradient methods, and to higher fidelity, especially on large scales.  
 
 \citet{2018A&A...620A..59P} showed that the the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the map-making system, in contrast to the findings of \citet{Huffenberger_2018}.
 
@@ -120,9 +120,9 @@ In Appendix \ref{appendix:eta calculation} we derive the prescription for our co
 
 \subsection{Parameterized Conjugate Gradient Method}
 The messenger field approach introduced an extra cooling parameter $\lambda$ to the
-map-making equation, and solved the linear system with \textgreen{an} alternative parameterized covariance $N(\lambda) =  \lambda \tau I + \Nbar $.
+map-making equation, and solved the linear system with an alternative parameterized covariance $N(\lambda) =  \lambda \tau I + \Nbar $.
 The parameter $\tau = \min(\diag(N))$ represents the uniform level of (white) noise in the original covariance.
-$\Nbar \equiv N - \tau I$ is the non-uniform part of the original noise covariance.
+The remainder $\Nbar \equiv N - \tau I$ is the non-uniform part of the original noise covariance.
 (Here $N$ without any arguments denotes the original noise covariance matrix $N = \ev{\vbn \vbn^{\dagger}}$.)
 In this work we find it more convenient to work with the reciprocal of cooling parameter $\eta = \lambda^{-1}$
 which represents the degree of heteroscedasticity (non-uniformity) in the parameterized covariance
@@ -130,9 +130,9 @@ which represents the degree of heteroscedasticity (non-uniformity) in the parame
   N(\eta) = \tau I +  \eta \Nbar, 
 \end{equation}
 a choice that leads to the same system of map-making equation.
-(This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the map-making equation \ref{map making eq eta} is insensitive to scalar multiples of the covariance.)
+(This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the map-making equation (\ref{map making eq}) is insensitive to scalar multiples of the covariance.)
 When $\eta=1$ this parameterized covariance $N(\eta)$ equals $N$.
-
+ 
 
 \citet{2018A&A...620A..59P} showed that the conjugate gradient method can be easily applied to the cooled map-making problem.
 In our notation, this is equivalent to iterating on the parameterized map-making equation
@@ -145,10 +145,10 @@ as we adjust the parameter through a set of levels $\{\eta_i\}$.
 mean the estimated $\hatm$ in \Eq{map making eq},
 independent of $\eta$.)
 
-In our numerical experiments, we confirm that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.  For concreteness we fix the preconditioner to $M= \Pdagger P$ for all calculations.
+In our numerical experiments, we confirm the conclusion from \citet{2018A&A...620A..59P} that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.  For concreteness we fix the preconditioner to $M= \Pdagger P$ for all calculations.
 
 
-When $\eta = 0$, the noise covariance matrix $N(0)$ is homoscedastic (uniform), and \textgreen{the} solution is given by \textgreen{the} simple binned map
+When $\eta = 0$, the noise covariance matrix $N(0)$ is homoscedastic (uniform), and the solution is given by the simple binned map
 $\hatm(0) = \inv{\qty(\Pdagger P)} \Pdagger \vbd$,
 which can be solved directly.
 
@@ -159,11 +159,10 @@ Therefore, this quasi-static process requires $\eta$ increase as $0 = \eta_0 \le
 and the solution $\hatm(1) = \hatm$.
 
 We may iterate more than once at each intermediate $\eta_i$:
-\textgreen{
-we solve equation \ref{map making eq eta} with conjugate gradient iterations
-using the result from previous calculation $\hatm(\eta_{i-1})$ as the initial value,
-and move to next parameter $\eta_{i+1}$ when the norm of residual vector 
-}
+we solve equation (\ref{map making eq eta}) with conjugate gradient iterations
+using the result from the previous calculation $\hatm(\eta_{i-1})$ as the initial value.
+We move to next parameter $\eta_{i+1}$ when the norm of residual vector 
+
 \begin{align}
 \norm{\vb{r}(\vbm,\eta_i)} \equiv
 \norm{ \Pdagger \inv{N(\eta_i)} P\, 
@@ -200,24 +199,24 @@ $\eta$.
 We also want to determine $\eta_1, \cdots, \eta_{n-1}$ before starting conjugate
 gradient iterations,
 because the time ordered data $\vbd$ is very large,
-and we do not want to keep it in the system memory during calculation.
+and we do not want to keep it in the system memory during calculation or repeatedly read it in from disk.
 If we determine $\eta_1, \cdots, \eta_{n-1}$ before the iterations, 
 then we can precompute the right-hand side of \Eq{map making eq eta}
-for each $\eta_i$ and keep these map-sized objects in memory, instead of the entire time-ordered data.
+for each $\eta_i$ and keep these map-sized objects, instead of the entire time-ordered data.
 
-In Appendix~\ref{appendix:eta calculation}, we show that a generic good choice for the $\eta$ parameters are \textgreen{given by this} geometric series
+In Appendix~\ref{appendix:eta calculation}, we show that a generic good choice for the $\eta$ parameters is {given by this} geometric series
 \begin{align}
 \eta_i =\min \qty\bigg{ \qty(2^i -1)\frac{\tau}{\max(\Nbar_f)},\; 1 },
 \label{etai rule}
 \end{align}
 where $\bar N_f$ are the eigenvalues of $\Nbar$ under frequency representation.
 This is one of our main results.
-It \textgreen{not only tells us} how to choose parameters $\eta_i$,
+It {not only tells us} how to choose parameters $\eta_i$,
 but also when we should stop the perturbation, and set $\eta = 1$.
-For example, if \textgreen{the} noise covariance matrix $N$ is almost \textgreen{\sout{white noise} uniform},
+For example, if {the} noise covariance matrix $N$ is almost {uniform},
 then $\Nbar = N - \tau I \approx 0$,
 and we would have ${\tau}/{\max(\Nbar_f)} > 1$.
-This tell us that we don't need to use parameterized method at all, 
+This tell us that we don't need to use the parameterized method at all, 
 because $\eta_0=0$ and $\eta_1= \eta_2 = \cdots= 1$.
 This corresponds to the standard conjugate gradient method with simple binned 
 map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
@@ -228,37 +227,37 @@ map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
 Here is a way to interpret the role of $\eta$ that is less technical than Appendix \ref{appendix:eta calculation}.
 Our ultimate goal is to find $\hatm(1)$ which minimizes $\chi^2(\vbm)$ in \Eq{chi2 formula}.
 Since $N$ is diagonal in frequency space,
-$\chi^2$ could be written as a sum of all frequency \textgreen{\sout{mode} modes}
+$\chi^2$ could be written as a sum of all frequency {modes}
 $\qty|(\vbd-P\vbm)_f|^2$ with weight $\inv{N}_f$, such as
 $\chi^2(\vbm) = \sum_f \qty|(\vbd-P\vbm)_f|^2 \inv{N}_f$.
 The weight is large for low-noise frequency modes (small $N_f$), and small for high-noise modes.
-Which means $\chi^2(\vbm)$ would favor the low-noise modes, and therefore \textgreen{the} conjugate gradient map-making $\hatm$ focuses on minimizing the error
+Which means $\chi^2(\vbm)$ would favor the low-noise modes, and therefore {the} conjugate gradient map-making focuses on minimizing the error
 $\vb*{\varepsilon} \equiv \vbd - P\vbm$ in the low-noise part.
 
 After introducing $\eta$, we minimize
 $\chi^2(\vbm,\eta)$ in \Eq{chi2 eta formula} instead.
 For $\eta=0$, $N^{-1}(0) \propto I$ the system is homoscedastic and the estimated map $\hatm(0)$
-does not prioritize any frequency \textgreen{modes}.
+does not prioritize any frequency {modes}.
 As we slowly increase $\eta$, we decrease the weight for the high-noise modes,
-and focusing minimizing error for \textgreen{the} low-noise part.
+and focusing minimizing error for {the} low-noise part.
 If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
-gradient method, then \textgreen{\sout{the conjugate gradient solver} it}
+gradient method, then {it}
 will focus most on minimizing the low-noise part, such that $\chi^2$ would
-converge very fast on \textgreen{the} low-noise modes, but slowly on the high-noise part.
-It may get stuck at some local minimum \textgreen{\sout{point} points} in $\chi^2$ and have trouble getting to the global minimum.
-However by introducing $\eta$ parameter, we let the solver first treat every
+converge very fast on {the} low-noise modes (typically high temporal frequencies and small spatial scales), but slowly on the high-noise part (low frequencies and large scales).
+The solver may get stuck at \kmh{some local minimum {points}} in $\chi^2$ and have trouble getting to the global minimum.
+However by introducing the $\eta$ parameter, we let the solver first treat every
 frequency equally,
-then as $\eta$ slowly increases, it gradually \textgreen{\sout{give} gives} more focus to the lowest noise part.
+then as $\eta$ slowly increases, it gradually {gives} more focus to the lowest noise part.
 
 
 \subsection{Computational Cost}
 To properly compare the performance cost of this method with respect to \textgreen{the} vanilla
-conjugate gradient method with \textgreen{the} simple preconditioner,
+conjugate gradient method with {the} simple preconditioner,
 we need to compare their computational cost at each iteration.
-\textgreen{
+{
 We could define $A(\eta) \equiv \Pdagger \inv{N(\eta)} P$ and $b(\eta) \equiv \Pdagger \inv{N(\eta)} \vbd$,
-and equation \ref{map making eq eta} could be written as $A(\eta_i) \hatm(\eta_i) = b(\eta_i)$.
-$b(\eta_i)$ could be computed before iterations,
+and equation \ref{map making eq eta} could be written as $A(\eta_i) \hatm(\eta_i) = b(\eta_i)$.  The right-hand side
+$b(\eta_i)$ could be computed before iterating,
 }
 since we have determined $\qty{\eta_i}$ in advance,
 so it will not introduce extra computational cost.
@@ -268,39 +267,41 @@ $P\vbm$ from time domain to frequency domain and an inverse Fourier transform
 of $\inv{N(\eta_i)} P \vbm$ from frequency domain back to time domain,
 which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
 data.
-Compare to traditional conjugate gradient method,
+Compared to the traditional conjugate gradient method,
 we swap $\inv{N}$ with $\inv{N(\eta)}$, and the cost is the same for one step,
 since both methods need a fast Fourier transform and inverse fast Fourier transform 
 at one iteration.
-\textgreen{\sout{Therefore the computational cost it the same for one step.}}
 
-In Appendix \ref{appendix:eta calculation}
-our analysis is based on
-$\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
-$\hatm(\eta_i)$ the estimated map at $\eta_i$.
-So we should update $\eta_i$ to $\eta_{i+1}$ when the map from our calculation
-$\vbm \approx \hatm(\eta_i)$. 
-How do we know this condition is satisfied?
-Since for each new $\eta_i$ value, we are solving a different equation \ref{map making eq eta},
-and we could stop calculation and moving to next value $\eta_{i+1}$ when the 
-norm of residual $\norm{\vb{r}(\vbm,\eta_i)}$ is small, see \Eq{norm threshold}.
-Calculation of the residual vector $\vb{r}(\vbm,\eta_i)$ is part of \textgreen{the?} conjugate gradient algorithm,
+
+% In Appendix \ref{appendix:eta calculation}
+% our analysis is based on
+% $\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
+% $\hatm(\eta_i)$ the estimated map at $\eta_i$.
+% So we should update $\eta_i$ to $\eta_{i+1}$ when the map from our calculation
+% $\vbm \approx \hatm(\eta_i)$. 
+% How do we know this condition is satisfied?
+% Since for each new $\eta_i$ value, we are solving a different equation \ref{map making eq eta},
+% and we could stop the calculation and moving to next value $\eta_{i+1}$ when the 
+% norm of residual $\norm{\vb{r}(\vbm,\eta_i)}$ is small, see \Eq{norm threshold}.
+\kmh{
+  At each $\eta_i$ level, we use the residual to determine whether to switch to the next level ($\eta_{i+1}$), as  is Equation (\ref{norm threshold}).
+}
+Calculation of the residual vector $\vb{r}(\vbm,\eta_i)$ is part of the conjugate gradient algorithm,
 so this will not add extra cost either.
-Therefore, overall introducing $\eta$ will not have extra computational cost \textgreen{for each step}.
+Therefore, overall introducing the $\eta$ will not have extra computational cost within the conjugate gradient iterations.
 
 However, we start a new conjugate gradient algorithm whenever $\eta_i$ updates to $\eta_{i+1}$.
-\textgreen{
-Thus must re-initialize the conjugate gradient algorithm when $\eta$ changes,
-which means the residual $\vb{r}(\vbm, \eta_{i+1})$ need to be re-calculated based on new $\eta_{i+1}$.  
+\kmh{
+Thus we must re-initialize the conjugate gradient algorithm, re-calculating the residual $\vb{r}(\vbm, \eta_{i+1})$ based on new $\eta_{i+1}$.  
 }
 This residual calculation contains an extra $A(\eta_i) \vbm$ operation.
 Therefore, if we have a series $\eta_1, \eta_2, \eta_3, \cdots, \eta_{n_{\eta}}$,
-there will have $n_{\eta}-1$ extra $A(\eta) \vbm$ operations compare to \textgreen{the} traditional conjugate gradient
+there will have $n_{\eta}-1$ extra $A(\eta) \vbm$ operations compare to {the} traditional conjugate gradient
 method.
-If the total number of iterations is much larger than \textgreen{\sout{the number of $\eta$ parameters}} $n_{\eta}$,
+If the total number of iterations is much larger than $n_{\eta}$,
 then this extra cost is negligible.
 For our simulation, this extra step would have rather significant impact on final result.
-To have a fair comparison between parameterized and traditional conjugate gradient method,
+To have a fair comparison between the parameterized and traditional conjugate gradient method,
 we will present our results with number of $\Pdagger \inv{N(\eta)} P\vbm$ operations as horizontal axis.
 
 
@@ -321,8 +322,8 @@ we will present our results with number of $\Pdagger \inv{N(\eta)} P\vbm$ operat
 \label{power spectrum}
 \end{figure}
 
-To compare these algorithms, we need to do some simple \textgreen{simulations} of scanning
-processes, and generate \textgreen{the} time ordered data from a random sky signal.\footnote{
+To compare these algorithms, we need to do some simple {simulations} of scanning
+processes, and generate {the} time ordered data from a random sky signal.\footnote{
 The source code and other information are available at \url{https://github.com/Bai-Qiang/map_making_perturbative_approach}
 }
 Our sky is a small rectangular area, with two orthogonal directions $x$ and
@@ -331,13 +332,12 @@ The signal has Stokes parameters $(I,Q,U)$ for intensity and linear polarization
 
 For the scanning process, our mock telescope contains nine detectors,
 each with different sensitivity to polarization $Q$ and $U$.
-\textgreen{
+{
 It scans the sky with a raster scanning pattern.
-Its scanning frequency $f_{\text{scan}} = 0.1$ Hz and sampling frequency $f_{\text{sample}} = 100$ Hz.
-The telescope scans the sky horizontally then vertically,
-after that it digitizes the position $(x, y)$ into $512\times 512$ pixels.
+Its scanning frequency is $f_{\text{scan}} = 0.1$ Hz and sampling frequency is $f_{\text{sample}} = 100$ Hz.
+The telescope scans the sky horizontally then vertically.
 }
-This gives noiseless signal $\vb{s} = P\vb{m}$.
+This gives the noiseless signal $\vb{s}$.  \kmh{The sky signal  in the timestream has an rms of $56$ $\mu$K.  The signal is continuous, so that it has structure on sub-pixel scales, but we find that our main conclusions remain the same when the input signal is pixelized.}  In map-making, we digitize the position $(x, y)$ into $512\times 512$ pixels.
 
 We model the noise power spectrum with
 \begin{align}
@@ -351,19 +351,19 @@ and it becomes a $1/f$-type noise model.
 
 \citet{2013ApJ...762...10D} measured the slopes of the atmospheric noise in the Atacama under different water vapor conditions, finding $\alpha = 2.7$ to $2.9$.
 Here we use $\sigma^2 = 10$ $\mu$K$^2$, $\alpha=3$, and compare the performance under different noise
-models.  In our calculations we choose different combination of $f_\text{knee}$ and $f_\text{apo}$.  Some of the power spectrum are shown in \Figure{power spectrum}.  The noise spectra with the most low frequency noise have high $f_\text{knee}$ or low cut-off $f_{\text{apo}}$.
+models.  In our calculations, we choose different combinations of $f_\text{knee}$ and $f_\text{apo}$ as in \Figure{power spectrum}.  The noise spectra with the most low frequency noise have high $f_\text{knee}$ or low cut-off $f_{\text{apo}}$.
 
 The noise covariance matrix 
 \begin{equation}
 N_{ff'} = P(f) \frac{\delta_{ff'}}{\Delta_f}
 \label{noise covariance matrix}
 \end{equation}
-is a diagonal matrix in frequency space, where $\Delta_f$ is equal to \textgreen{the} reciprocal
+is a diagonal matrix in frequency space, where $\Delta_f$ is equal to {the} reciprocal
 of total scanning time $T \approx 1.05\times 10^{4}$ seconds.
 
 
 Finally, we get the simulated time ordered data $\vb{d} = \vb{s} + \vb{n}$ by
-adding up \textgreen{the} signal and noise.
+adding up {the} signal and noise.
 
 \section{Results} \label{sec:results}
 
@@ -398,35 +398,31 @@ adding up \textgreen{the} signal and noise.
 \label{apo noise chi2}
 \end{figure*}
 
-\textgreen{
-Let's compare the standard conjugate gradient method versus conjugate gradient with our perturbed linear system.
-Both methods use simple preconditioner $\Pdagger P$.
+{
+We compare the standard conjugate gradient method versus the conjugate gradient with our perturbed linear system.
+Both methods use the simple preconditioner $\Pdagger P$.
 }
-\Figure{1/f noise chi2} shows \textgreen{the $\chi^2$ results} for \textgreen{\sout{a} $1/f$ noise models} ($f_\text{apo}=0$)  with different knee frequencies.
+\Figure{1/f noise chi2} shows {the $\chi^2$ results} for {$1/f$ noise models} ($f_\text{apo}=0$)  with different knee frequencies.
 Note that the $\chi^2$ values in all figures are calculated based on the standard $\chi^2(\vbm)$ in \Eq{chi2 formula},
-not the $\chi^2(\vbm, \eta)$ of the modified system (\Eq{chi2 eta formula}).
-The target minimum $\chi^2_{\text{min}}$ is calculated from a deliberately slowed and well-converged parameterized conjugate gradient
-method, one with 100 $\eta$ values and that halts when the final norm of the residual $\norm{\vb{r}(\vbm,1)}$
+not the $\eta$-dependent $\chi^2(\vbm, \eta)$ of the modified system (\Eq{chi2 eta formula}).
+The minimum $\chi^2_{\text{min}}$ that we use for comparison is calculated from a deliberately slowed and well-converged parameterized conjugate gradient
+method: one with 100 $\eta$ values and that halts when the final norm of the residual $\norm{\vb{r}(\vbm,1)}$
 is smaller than $10^{-5}\times\norm{\Pdagger N^{-1} \vbd}$, or 100 iterations after $\eta=1$.
-From \Figure{1/f noise chi2} we can see for the $1/f$ noise model,
-when $f_\text{knee} \gtrsim 10 f_\text{scan}$ the parameterized method starts showing advantage
-over \textgreen{the} vanilla conjugate gradient method.
+From \Figure{1/f noise chi2}, we can see for the $1/f$ noise model,
+when $f_\text{knee} \gtrsim 10 f_\text{scan}$ the parameterized method starts showing an advantage
+over {the} vanilla conjugate gradient method.
 
 
 In \Figure{apo noise chi2}, we fixed $f_\text{knee}=10$ Hz, and change $f_\text{apo}$.
-\textgreen{
-As we decrease $f_\text{apo}$ while fixing $f_\text{knee}$, initially these two methods perform similarly,
-eventually when $f_\text{apo}$ is much smaller than $f_\text{knee}$ the parameterized conjugate gradient method
-performs better.
+\kmh{
+As we decrease $f_\text{apo}$ relative to $f_\text{knee}$, increasing the amount of low-frequency noise,  the parameterized conjugate gradient method performs better.
 }
 
-If we look at the power spectrum in \Figure{power spectrum},
-when $f_\text{knee}$ is small or $f_\text{apo}$ is large there is not much low-frequency noise,
-\textgreen{
-like the left graphs in \Figure{1/f noise chi2} and \Figure{apo noise chi2}.
-The right graphs have significant amount of low frequency noise.
+Looking at the power spectrum in Figure \ref{power spectrum},
+when $f_\text{knee}$ is small, or $f_\text{apo}$ is large, there is not much low-frequency noise.  \kmh{These situations corrrespond to the left-side plots in Figure \ref{1/f noise chi2} and Figure \ref{apo noise chi2}.
+The right-side graphs have significant amount of low frequency noise.
 }
-We conclude that the introduction of the slowly-varying $\eta$ parameter could improve performance most when there are large low-frequency noise contributions.
+We conclude that the introduction of the slowly-varying $\eta$ parameter improves performance most when there are large low-frequency noise contributions.
 
 
 We also tried different $1/f$ noise slopes $\alpha$. For $\alpha=2$, the conclusion is the
@@ -434,7 +430,7 @@ same as $\alpha=3$. When $\alpha=1$, the low-frequency noise is reduced compared
 the vanilla conjugate gradient method is preferred, except some cases with very large
 knee frequency like $f_\text{knee} = 100$ Hz and $f_\text{apo}=0$ which favors the
 parameterized method.
-In \citet{2018A&A...620A..59P}, the slope $\alpha = 1$ and  the noise power spectrum is flattened at $f_\text{apo} \approx 0.1 f_\text{knee}$. Their knee frequency is the same as scanning frequency, so is most like our case when $f_\text{knee}=f_\text{scan}=0.1$~Hz.  Their case had little low-frequency noise, and we confirm their result that the standard conjugate gradient method converges faster in that case.  In general, however, we find cases with significantly more low-frequency noise benefit from the cooling/parameterized approach.
+In \citet{2018A&A...620A..59P}, the slope $\alpha = 1$ and  the noise power spectrum is flattened at $f_\text{apo} \approx 0.1 f_\text{knee}$. Their knee frequency is the same as their scanning frequency, so is most like our case when $f_\text{knee}=f_\text{scan}=0.1$~Hz.  Their case had little low-frequency noise, and we confirm their specific result that the standard conjugate gradient method converges faster in that case.  In general, however, we find cases with significantly more low-frequency noise benefit from the cooling/parameterized approach.
 
 
 
@@ -515,13 +511,12 @@ In \citet{2018A&A...620A..59P}, the slope $\alpha = 1$ and  the noise power spec
 \section{Conclusions} \label{sec:conclusions} 
 
 
-We analyzed \textgreen{\sout{a} the} parameterized conjugate gradient map-making method inspired by the messenger-field idea of
-separating the white noise out of \textgreen{the} noise covariance matrix.
-Then we gave an analytical expression for the series of $\eta$ parameters,
-and showed that this method would not introduce extra computational cost compared to \textgreen{\sout{a} the} traditional conjugate method 
-\textgreen{for each single step, but during the re-initializing process based on a new $\eta$ parameter will have extra single step equivalent cost.}
+We analyzed {the} parameterized conjugate gradient map-making method that is inspired by the messenger-field idea of
+separating the white noise out of {the} noise covariance matrix.
+\kmh{Then we gave an analytical expression for the series of $\eta$ parameters that govern how quickly the modified covariance adjusts to the correct covariance,
+and showed that this method adds only the extra computational cost of re-initializing the conjugate gradient process based on a new $\eta$ parameter.}
 
-We tested this method under different power \textgreen{spectra}, both flattened and non-flattened at low frequency.
+We tested this method for different noise power {spectra}, both flattened and non-flattened at low frequency.
 The results showed that the parameterized method is faster than the traditional conjugate gradient method 
 when there is a significant amount of low-frequency noise.
 It could be further improved if we could get a more accurate estimation for the change in $\chi^2$ as a function of the $\eta$ parameter, either before iteration or without using time ordered data during iteration.
@@ -530,14 +525,12 @@ Also note that we fixed the preconditioner as $M = \Pdagger P$ during our calcul
 this parameterizing process could be applied to any preconditioner and possibly improve performance when 
 there is significant amount of low-frequency noise.
 
-This type of \textgreen{estimating/estimation?} for the cooling parameter may also be apply to other areas, like the Wiener filter.
-\citet{2018A&A...620A..59P} showed that the messenger field method of \citet{2013A&A...549A.111E} for solving Wiener filter problem  could also be written as \textgreen{a} parameterized conjugate gradient algorithm.
-\textgreen{
-That system also may benefit from an analysis of the signal-to-noise properties then splitting and parameterizing its noise covariance.
-}
-(\citet{2017MNRAS.468.1782K} also suggests to split the signal covariance for the Wiener filter and combine the uniform parts of the signal and noise.)
+This type of analysis for the cooling parameter may also be apply to other areas, like the Wiener filter.
+\citet{2018A&A...620A..59P} showed that the messenger field method of \citet{2013A&A...549A.111E} for solving Wiener filter problem  could also be written as a parameterized conjugate gradient algorithm.
+\kmh{It stands to reason that such a system may also benefit from splitting and parameterizing its noise covariance, depending on the noise properties.}
+(In the Wiener filter, \citet{2017MNRAS.468.1782K} additionally suggests the splitting the signal covariance and combining the uniform parts of the signal and noise.)
 
-The benefits to map-making from a cooled messenger method seem to come from the cooling and not actually from the messenger field that inspired it.  However, the messenger field approach may still have a role in the analysis of CMB maps.  In particular, the close connection between the messenger method and Gibbs sampling may allow us to cheaply generate noise realizations of a converged map by generating samples from the map posterior distribution, something that we will continue to explore in future work.
+The benefits to map-making from a cooled messenger method seem to come from the cooling and not actually from the messenger field that inspired it.  However, the messenger field approach may still have a role in the production and analysis of CMB maps.  In particular, the close connection between the messenger method and Gibbs sampling may allow us to cheaply generate noise realizations of a converged map by generating samples from the map posterior distribution, something that we will continue to explore in future work.
 
 
 
@@ -556,7 +549,7 @@ The benefits to map-making from a cooled messenger method seem to come from the 
 %% compile with \acknowledgment you will get an error print to the screen
 %% and in the compiled pdf.
 \begin{acknowledgments}
-BQ and KH are supported by NSF award 1815887.
+For this work, BQQ and KMH are supported by NSF award 1815887.
 \end{acknowledgments}
 
 %% To help institutions obtain information on the effectiveness of their 
