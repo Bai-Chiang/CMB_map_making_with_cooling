@@ -1,4 +1,4 @@
-# map_making_perturbative
+# Cooling Improves Cosmic Microwave Background Map-Making When Low-Frequency Noise is Large
 
 Here `python` is `python3`
 
