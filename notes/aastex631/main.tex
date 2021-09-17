@@ -91,7 +91,7 @@ where  $\hatm$ provides the standard generalized least squares minimization of t
 \label{chi2 formula}
 \end{align}
 Here we assume that the noise has zero mean $\ev{\vbn} = \vb{0}$,
-and the noise covariance matrix $N = \ev{\vbn \vbn^{\dagger}}$ is diagonal in \textgreen{the} frequency space.
+and the noise covariance matrix $N = \ev{\vbn \vbn^{\dagger}}$ is diagonal in frequency space.
 In the case where the noise is Gaussian, the COBE solution is also the maximum likelihood solution.
 
 With current computational power, we cannot solve for $\hatm$
@@ -244,7 +244,7 @@ map as the initial guess (as recommended by \citealt{2018A&A...620A..59P}).
 
 Here is a way to interpret the role of $\eta$ that is less technical than Appendix \ref{appendix:eta calculation}.
 Our ultimate goal is to find $\hatm(1)$ which minimizes $\chi^2(\vbm)$ in \Eq{chi2 formula}.
-Since $N$ is diagonal in \textgreen{the} frequency space,
+Since $N$ is diagonal in frequency space,
 $\chi^2$ could be written as a sum of all frequency {modes}
 $\qty|(\vbd-P\vbm)_f|^2$ with weight $\inv{N}_f$, such as
 $\chi^2(\vbm) = \sum_f \qty|(\vbd-P\vbm)_f|^2 \inv{N}_f$.
@@ -381,7 +381,7 @@ The noise covariance matrix
 N_{ff'} = P(f) \frac{\delta_{ff'}}{\Delta_f}
 \label{noise covariance matrix}
 \end{equation}
-is a diagonal matrix in \textgreen{the} frequency space, where $\Delta_f$ is equal to {the} reciprocal
+is a diagonal matrix in frequency space, where $\Delta_f$ is equal to {the} reciprocal
 of total scanning time $T \approx 1.05\times 10^{4}$ seconds.
 
 
@@ -733,7 +733,7 @@ First, let us find the least upper bound
 \end{align}
 The upper bound in the second line is a little bit tricky.
 Both matrix $\Nbar$ and $\inv{N}_{\eta_m}$ 
-can be simultaneously diagonalized in \textgreen{the} frequency space.
+can be simultaneously diagonalized in frequency space.
 For each eigenvector $\vb{e}_f$,
 the corresponding eigenvalue of the matrix on the numerator
 $\inv{N}_{\eta_m} \Nbar \inv{N}_{\eta_m}$
