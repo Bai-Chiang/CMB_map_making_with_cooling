@@ -250,19 +250,12 @@ does not prioritize any frequency {modes}.
 As we slowly increase $\eta$, we decrease the weight for the high-noise modes,
 and focusing minimizing error for {the} low-noise part.
 If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
-gradient method, then {it}
+gradient method, then {the algorithm}
 will focus most on minimizing the low-noise part, such that $\chi^2$ would
-converge very fast on {the} low-noise modes (typically high temporal frequencies and small spatial scales), but slowly on the high-noise part (low frequencies and large scales).
-\strikeThrough{
-The solver may get stuck at \kmh{some local minimum {point}} in $\chi^2$ and have trouble getting to the global minimum.
-}
-\kmh{(Question: if $\chi^2$ is a quadratic form, are there any local minima other than the global one?)}
-\textgreen{
-(Good point, I think this part is an error, and I'm not sure why vanilla CG would be slow,.)
-}
+converge very fast on {the} low-noise modes (typically high temporal frequencies and small spatial scales), but slowly on the high-noise modes (low frequencies and large scales).
 However by introducing the $\eta$ parameter, we let the solver first treat every
-frequency equally,
-then as $\eta$ slowly increases, it gradually {gives} more focus to the lowest noise part.
+frequency equally.
+Then as $\eta$ slowly increases, it gradually {gives} more focus to the lowest noise part.
 
 
 \subsection{Computational Cost}
@@ -561,7 +554,7 @@ The benefits to map-making from a cooled messenger method seem to come from the 
 %% compile with \acknowledgment you will get an error print to the screen
 %% and in the compiled pdf.
 \begin{acknowledgments}
-For this work, \textgreen{\strikeThrough{BQQ} QBQ (just feel BQQ sounds like BBQ)}  and KMH are supported by NSF award 1815887.
+For this work, QBQ and KMH are supported by NSF award 1815887.
 \end{acknowledgments}
 
 %% To help institutions obtain information on the effectiveness of their 
@@ -679,8 +672,8 @@ We do not have the $\hatm(\eta_m)$ with which to calculate them and need to find
 
 Let us go back to \Eq{chi2 fractional decrease}.
 \textgreen{
-Since we can't calculate $\vbd - P\hatm(\eta_m)$, 
-}
+Since we cannot calculate $\vbd - P\hatm(\eta_m)$ before making the map, 
+} 
 we treat it as an arbitrary vector, then the least upper bound of \Eq{chi2 fractional decrease} is given by
 \begin{align}
 -\frac{\delta \chi^2(\hatm(\eta_0), \eta_0)}{\chi^2(\hatm(\eta_0), \eta_0)} 
