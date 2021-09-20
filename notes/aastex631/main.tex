@@ -96,8 +96,8 @@ In the case where the noise is Gaussian, the COBE solution is also the maximum l
 
 With current computational power, we cannot solve for $\hatm$
 by calculating $\PPinv{\inv{N}} \Pdagger \inv{N} \vbd$ directly.
-The noise covariance matrix $N$ is often sparse in \textgreen{the} frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain.
-In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable unless the covariance is uniform \textgreen{(proportional to the identity matrix $I$)}.
+The noise covariance matrix $N$ is often sparse in the frequency domain and the pointing matrix $P$ is sparse in the time-by-pixel domain.
+In experiments currently under design, there may be $\sim 10^{16}$ time samples and $\sim 10^{9}$ pixels, so these matrix inversions are intractable unless the covariance is uniform (proportional to the identity matrix $I$).
 We can use iterative methods, such as conjugate gradient descent, to avoid the matrix inversions, and execute each matrix multiplication in a basis where the matrix is sparse, using a fast Fourier transform to go between the frequency and time domain.
 
 As an alternative to conjugate gradient descent, \citet{Huffenberger_2018} showed that the ``messenger'' iterative method could be adapted to solve the linear map-making system, based on the  approach from \cite{2013A&A...549A.111E} to solve the linear Wiener filter.
@@ -105,11 +105,8 @@ This technique splits the noise covariance into a uniform part and the remainder
 This messenger field acts as an intermediary between the signal and the data and has a covariance that is conveniently sparse in every basis.
 \cite{2013A&A...549A.111E} also introduced a cooling scheme that takes advantage of the split covariance: over the course of the iterative solution, we adjust the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system, under the control of a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that a map produced by the cooled messenger method converged significantly faster than for standard conjugate gradient methods, and to higher fidelity, especially on large scales.  
 
-\citet{2018A&A...620A..59P} showed that the the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme. However in numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the map-making system, in contrast to the findings of \citet{Huffenberger_2018}.
-
-\textgreen{
-In our numerical experiments, we confirm the conclusion from \citet{2018A&A...620A..59P} that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.
-}
+\citet{2018A&A...620A..59P} showed that the the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme.  \kmh{With simulations, we have confirmed  this conclusion.}
+In their numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the map-making system, in contrast to the findings of \citet{Huffenberger_2018}.
 
 In this paper, we show that the difference arose because the numerical tests in \citet{2018A&A...620A..59P} used much less low-frequency (or $1/f$) noise than \citet{Huffenberger_2018}, and show that the cooling technique improves map-making performance especially when the low-frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.  \citet{2017MNRAS.468.1782K} showed that for Wiener filter the cooling parameter should be chosen as a geometric series.  In this work, we give an alternative interpretation of the parameterizing process and show that for map-making the optimal choice (unsurprisingly) is also a geometric series.
 
@@ -132,14 +129,8 @@ The remainder $\Nbar \equiv N - \tau I$ is the non-uniform part of the original 
 In this work we find it more convenient to work with the reciprocal of cooling parameter $\eta = \lambda^{-1}$
 which represents the degree of heteroscedasticity (non-uniformity) in the parameterized covariance
 \begin{equation}
-  N(\eta) = \tau I +  \eta \Nbar, 
+  N(\eta) = \tau I +  \eta \Nbar.
 \end{equation}
-\textgreen{
-\strikeThrough{
-a choice that leads to the same system of map-making equation.
-(This is because $N(\eta) = \lambda^{-1} N(\lambda)$ and the map-making equation (\ref{map making eq}) is insensitive to scalar multiples of the covariance.)
-}
-}
 When $\eta=1$ this parameterized covariance $N(\eta)$ equals $N$.
  
 
@@ -153,17 +144,17 @@ as we adjust the parameter through a set of levels $\{\eta_i\}$.
 (We use $\hatm$ with no $\eta$ argument to
 mean the estimated $\hatm$ in \Eq{map making eq},
 independent of $\eta$.)
-\textgreen{
+{
 This equation leads to the same system as the paramaterized equation in the messenger field method,
-because $N(\eta) = \lambda^{-1} N(\lambda)$ and the condition number does not change upon  scalar multiples of both sides of the equation.
+because $N(\eta) = \lambda^{-1} N(\lambda)$ and the condition number do not change upon \kmh{scalar multiplication to} both sides of the equation.
 }
 For concreteness we fix the preconditioner to $M= \Pdagger P$ for all calculations.
 
-\textgreen{
-\strikeThrough{
-In our numerical experiments, we confirm the conclusion from \citet{2018A&A...620A..59P} that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.
-}
-}
+%\textgreen{
+%\strikeThrough{
+%In our numerical experiments, we confirm the conclusion from \citet{2018A&A...620A..59P} that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.
+%}
+%}
 
 
 When $\eta = 0$, the noise covariance matrix $N(0)$ is homoscedastic (uniform), and the solution is given by the simple binned map
