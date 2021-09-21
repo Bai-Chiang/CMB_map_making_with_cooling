@@ -1,11 +1,11 @@
 \documentclass[twocolumn,linenumbers]{aastex631}
 \usepackage{physics}
 \usepackage{gensymb}
-\usepackage{CJK}
 %\usepackage{algorithm}
 %\usepackage{algorithmic}
 %\usepackage[ruled,vlined]{algorithm2e}
-\usepackage{lua-ul}
+\usepackage{lua-ul} 
+
 
 % Operators
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -48,7 +48,7 @@
 \title{Cooling Improves Cosmic Microwave Background Map-Making When Low-Frequency Noise is Large}
 
 
-  \author{Bai-Qiang Qiang} 
+\author{Bai-Qiang Qiang} 
 \affiliation{Department of Physics, Florida State University, Tallahassee, Florida 32306}
 
 \author[0000-0001-7109-0099]{Kevin M. Huffenberger}
@@ -105,7 +105,8 @@ This technique splits the noise covariance into a uniform part and the remainder
 This messenger field acts as an intermediary between the signal and the data and has a covariance that is conveniently sparse in every basis.
 \cite{2013A&A...549A.111E} also introduced a cooling scheme that takes advantage of the split covariance: over the course of the iterative solution, we adjust the relative weight of those two parts.  Starting with the uniform covariance, the modified linear system gradually transforms to the final system, under the control of a cooling parameter.  In numerical experiments, \citet{Huffenberger_2018} found that a map produced by the cooled messenger method converged significantly faster than for standard conjugate gradient methods, and to higher fidelity, especially on large scales.  
 
-\citet{2018A&A...620A..59P} showed that the the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme.  \kmh{With simulations, we have confirmed  this conclusion.}
+\citet{2018A&A...620A..59P} showed that the the messenger field approach is equivalent to a fixed point iteration scheme, and studied its convergence properties in detail.  Furthermore, they showed that the split covariance and the modified system that incorporates the cooling can be solved by other means, including a conjugate gradient technique, which should generally show better convergence properties than the fixed-point scheme.
+With simulations, we have confirmed  this conclusion.
 In their numerical tests, \citet{2018A&A...620A..59P} did not find benefits to the cooling modification of the map-making system, in contrast to the findings of \citet{Huffenberger_2018}.
 
 In this paper, we show that the difference arose because the numerical tests in \citet{2018A&A...620A..59P} used much less low-frequency (or $1/f$) noise than \citet{Huffenberger_2018}, and show that the cooling technique improves map-making performance especially when the low-frequency noise is large.  This performance boost depends on a proper choice for the pace of cooling.  \citet{2017MNRAS.468.1782K} showed that for Wiener filter the cooling parameter should be chosen as a geometric series.  In this work, we give an alternative interpretation of the parameterizing process and show that for map-making the optimal choice (unsurprisingly) is also a geometric series.
@@ -146,7 +147,7 @@ mean the estimated $\hatm$ in \Eq{map making eq},
 independent of $\eta$.)
 {
 This equation leads to the same system as the paramaterized equation in the messenger field method,
-because $N(\eta) = \lambda^{-1} N(\lambda)$ and the condition number do not change upon \kmh{scalar multiplication to} both sides of the equation.
+because $N(\eta) = \lambda^{-1} N(\lambda)$ and the condition number do not change upon scalar multiplication to both sides of the equation.
 }
 For concreteness we fix the preconditioner to $M= \Pdagger P$ for all calculations.
 
@@ -271,8 +272,8 @@ since we have determined $\qty{\eta_i}$ in advance,
 so it will not introduce extra computational cost.
 The most demanding part of conjugate gradient method is calculating
 its left hand side $A(\eta_i) \vbm$, because it contains a Fourier transform of
-$P\vbm$ from \textgreen{the} time domain to frequency domain and an inverse Fourier transform
-of $\inv{N(\eta_i)} P \vbm$ from \textgreen{the} frequency domain back to time domain,
+$P\vbm$ from the time domain to frequency domain and an inverse Fourier transform
+of $\inv{N(\eta_i)} P \vbm$ from the frequency domain back to time domain,
 which is order $\mathcal{O}(n\log n)$ with $n$ being the length of time ordered
 data.
 Compared to the traditional conjugate gradient method,
@@ -342,7 +343,7 @@ It scans the sky with a raster scanning pattern.
 Its scanning frequency is $f_{\text{scan}} = 0.1$ Hz and sampling frequency is $f_{\text{sample}} = 100$ Hz.
 The telescope scans the sky horizontally then vertically.
 This gives the noiseless signal $\vb{s}$.
-The sky signal  in the timestream has \strikeThrough{an rms} \textgreen{a root-mean-square (RMS)} of $56$ $\mu$K.
+The sky signal  in the timestream has a root-mean-square (RMS) of $56$ $\mu$K.
 The signal is continuous, so that it has structure on sub-pixel scales, but we find that our main conclusions remain the same when the input signal is pixelized.
 In map-making, we digitize the position $(x, y)$ into $512\times 512$ pixels.
 
@@ -671,9 +672,7 @@ As mentioned in the main text, we need to determine the entire series $\qty{\eta
 We do not have the $\hatm(\eta_m)$ with which to calculate them and need to find another approach.
 
 Let us go back to \Eq{chi2 fractional decrease}.
-\textgreen{
 Since we cannot calculate $\vbd - P\hatm(\eta_m)$ before making the map, 
-} 
 we treat it as an arbitrary vector, then the least upper bound of \Eq{chi2 fractional decrease} is given by
 \begin{align}
 -\frac{\delta \chi^2(\hatm(\eta_0), \eta_0)}{\chi^2(\hatm(\eta_0), \eta_0)} 
