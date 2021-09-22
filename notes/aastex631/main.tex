@@ -1,10 +1,7 @@
 \documentclass[twocolumn,linenumbers]{aastex631}
 \usepackage{physics}
 \usepackage{gensymb}
-%\usepackage{algorithm}
-%\usepackage{algorithmic}
-%\usepackage[ruled,vlined]{algorithm2e}
-\usepackage{lua-ul} 
+\usepackage{CJK}
 
 
 % Operators
@@ -41,14 +38,12 @@
 \graphicspath{{./}{figures/}}
 
 \begin{document}
+\begin{CJK*}{UTF8}{gbsn}
 
-%\title{Perturbative Approach to Solve the Map-Making Equation}
-%\title{Cosmic Microwave Background map-making solutions with a cooled or perturbative approach}
-%\title{Cosmic Microwave Background Map-Making Solutions Often Improve With Cooling}
 \title{Cooling Improves Cosmic Microwave Background Map-Making When Low-Frequency Noise is Large}
 
 
-\author{Bai-Qiang Qiang} 
+\author{Bai-Cheeang Cheeang (强百强)} 
 \affiliation{Department of Physics, Florida State University, Tallahassee, Florida 32306}
 
 \author[0000-0001-7109-0099]{Kevin M. Huffenberger}
@@ -61,7 +56,6 @@ In the context of Cosmic Microwave Background data analysis, we study the soluti
 As originally suggested in ``messenger'' methods for solving linear systems, we split the  noise covariance into uniform and non-uniform parts and adjust their relative weights during the iterative solution.
 With simulations, we study mock instrumental data with different noise properties, and find that this ``cooling'' or perturbative approach is particularly effective when there is significant low-frequency noise in the timestream.  In such cases, a conjugate gradient algorithm applied to this modified system converges faster and to a higher fidelity solution than the standard conjugate gradient approach. %, for the same computational cost per iteration.
 We give an analytic estimate for the parameter that controls how gradually the linear system should change during the course of the solution.
-% We show that this cooling technique is helpful when there are significant amount of low frequency noise.
 
 \end{abstract}
 
@@ -114,7 +108,6 @@ In this paper, we show that the difference arose because the numerical tests in 
 
 In Section \ref{sec:methods} we describe our methods for treating the map-making equation and our numerical experiments.
 In Section \ref{sec:results} we present our results. 
-%In Section \ref{sec:discussion} we intuitively interpret our method.
 In Section \ref{sec:conclusions}, we list our conclusions.
 In Appendix \ref{appendix:eta calculation} we derive the prescription for our cooling schedule.
 
@@ -145,17 +138,10 @@ as we adjust the parameter through a set of levels $\{\eta_i\}$.
 (We use $\hatm$ with no $\eta$ argument to
 mean the estimated $\hatm$ in \Eq{map making eq},
 independent of $\eta$.)
-{
 This equation leads to the same system as the paramaterized equation in the messenger field method,
 because $N(\eta) = \lambda^{-1} N(\lambda)$ and the condition number do not change upon scalar multiplication to both sides of the equation.
-}
 For concreteness we fix the preconditioner to $M= \Pdagger P$ for all calculations.
 
-%\textgreen{
-%\strikeThrough{
-%In our numerical experiments, we confirm the conclusion from \citet{2018A&A...620A..59P} that the conjugate gradient approach is converging faster than the fixed point iterations suggested by the messenger map-making method in \citet{Huffenberger_2018}.
-%}
-%}
 
 
 When $\eta = 0$, the noise covariance matrix $N(0)$ is homoscedastic (uniform), and the solution is given by the simple binned map
@@ -184,22 +170,6 @@ is an order of magnitude smaller than the norm of the right hand side of \Eq{map
 \label{norm threshold}
 \end{align}
 This is not stringent enough to completely converge at this $\eta$-level, but we find that it causes the system to converge sufficiently to allow us to move on to the next $\eta$.
-%\caption{Euclid algorithm}
-%\begin{algorithmic}[1]
-%\State $r = 1$
-%\end{algorithmic}
-%\begin{algorithm}
-%\begin{algorithmic}[5]
-%\If {$i\geq maxval$}
-%    \State $i\gets 0$
-%\Else
-%    \If {$i+k\leq maxval$}
-%        \State $i\gets i+k$
-%    \EndIf
-%\EndIf
-%\end{algorithmic}
-%\KwData{A(m)}
-%\end{algorithm}
 
 
 
@@ -282,16 +252,6 @@ since both methods need a fast Fourier transform and inverse fast Fourier transf
 at one iteration.
 
 
-% In Appendix \ref{appendix:eta calculation}
-% our analysis is based on
-% $\chi^2(\hatm(\eta_i), \eta_i)$ which is evaluated at 
-% $\hatm(\eta_i)$ the estimated map at $\eta_i$.
-% So we should update $\eta_i$ to $\eta_{i+1}$ when the map from our calculation
-% $\vbm \approx \hatm(\eta_i)$. 
-% How do we know this condition is satisfied?
-% Since for each new $\eta_i$ value, we are solving a different equation \ref{map making eq eta},
-% and we could stop the calculation and moving to next value $\eta_{i+1}$ when the 
-% norm of residual $\norm{\vb{r}(\vbm,\eta_i)}$ is small, see \Eq{norm threshold}.
 At each $\eta_i$ level, we use the residual to determine whether to switch to the next level ($\eta_{i+1}$), as  is Equation (\ref{norm threshold}).
 Calculation of the residual vector $\vb{r}(\vbm,\eta_i)$ is part of the conjugate gradient algorithm,
 so this will not add extra cost either.
@@ -381,7 +341,6 @@ adding up {the} signal and noise.
 \caption{
     Convergence properties depend on the amount of low-frequency noise,
     which increases from the left panel to the right panel with increasing knee frequency.
-    %Here we show the $\chi^2(\vbm)$ with respect to number of iterations. 
     The map-making equation \ref{map making eq} minimize the $\chi^2(\vbm)$, so
     the curve which falls fastest versus the number of operations is the preferred method.
     We compare the traditional conjugate gradient method (``{CG},'' blue line)
@@ -437,79 +396,6 @@ the vanilla conjugate gradient method is preferred, except some cases with very 
 knee frequency like $f_\text{knee} = 100$ Hz and $f_\text{apo}=0$ which favors the
 parameterized method.
 In \citet{2018A&A...620A..59P}, the slope $\alpha = 1$ and  the noise power spectrum is flattened at $f_\text{apo} \approx 0.1 f_\text{knee}$. Their knee frequency is the same as their scanning frequency, so is most like our case when $f_\text{knee}=f_\text{scan}=0.1$~Hz.  Their case had little low-frequency noise, and we confirm their specific result that the standard conjugate gradient method converges faster in that case.  In general, however, we find cases with significantly more low-frequency noise benefit from the cooling/parameterized approach.
-
-
-
-%\section{Discussion} \label{sec:discussion}
-
-
-
-
-%\subsection{Other $\eta$ Choices}
-%
-%\begin{figure*}[tb!]
-%\centering
-%\includegraphics[width=0.8\textwidth]{chi2_neta.pdf}
-%\caption{
-%    The horizontal and vertical axes are the same as in the previous figure.
-%    The blue line and the orange line are traditional conjugate gradient method
-%    and parameterized conjugate gradient method.
-%    For three extra lines, we fix the number of $\eta$ parameter $n_{\eta}$ manually.
-%    The $\eta$ series are determined by \Eq{neta eq}.
-%    The first graph shows in some cases the $\eta$ series given by \Eq{etai rule} is ideal,
-%    but the second and third graph show that \Eq{etai rule} may ends up too many $\eta$
-%    which yields slower convergence.
-%}
-%\label{chi2 neta}
-%\end{figure*}
-%
-%Now let us compare the performance difference between choosing $\eta$
-%parameters based on \Eq{etai rule}
-%and fixing number of $\eta$ parameters $n_{\eta}$ manually then
-%choose the $\eta_i$ from this geometric series
-%\begin{align}
-%\eta_i = \eta_1^{\frac{n_{\eta}-i}{n_{\eta} - 1}} \ \textrm{ with } i=1,2,\cdots,n_{\eta}
-%\label{neta eq}
-%\end{align}
-%with $\eta_1 = \tau/\max(\Nbar_f)$.
-%
-%The results are showed in \Figure{chi2 neta}.
-%In some cases the $\eta$ series determined by \Eq{etai rule} is ideal
-%(the first graph in \Figure{chi2 neta}), in other cases \Eq{etai rule}
-%gives too many $\eta$ values such that it is not optimal (the second and third
-%graph in \Figure{chi2 neta}).
-%So we need to find a way to improve \Eq{etai rule}.
-%
-
-
-%\subsection{Future Prospects}
-%
-%\begin{figure*}[tb!]
-%\centering
-%\includegraphics[width=0.8\textwidth]{chi2_exact_eta.pdf}
-%\caption{
-%    The blue line and orange line are traditional and parameterized conjugate gradient method for reference.
-%    The extra green line shows the result when $\delta\eta_m$ is determined from 
-%    \Eq{exact eta} not from \Eq{etai rule}.
-%    This shows that if we could update based on exact expression \Eq{exact eta},
-%    it could converge even faster.
-%    Especially in the third graph it would overcome the shortcomings of parameterized conjugate gradient method.
-%}
-%\label{chi2 exact eta}
-%\end{figure*}
-%
-%In Appendix~\ref{appendix:eta calculation}, we determine $\delta\eta_m$ value based on the least upper bound of 
-%$-\delta\chi^2(\hatm(\eta_m), \eta_m)/\chi^2(\hatm(\eta_m), \eta_m)$, and choose $\delta\eta_m$ such that 
-%the least upper bound is equal to $1$.
-%The reason we use this upper bound instead of using
-%\begin{align}
-%\delta\eta_m=-\chi^2(\hatm(\eta_m), \eta_m)/\dv{\eta}\chi^2(\hatm(\eta_m),\eta_m)
-%\label{exact eta}
-%\end{align}
-%directly, is that we don't want to keep the time ordered data $\vbd$ in system memory.
-%But we could do this in simulations.
-%In \Figure{chi2 exact eta} we can see if we use \Eq{exact eta} it only show marginally improvements
-%for $1/f$ noise model, and slightly improvements when there is not too many low frequency noise. 
 
 
 
@@ -756,7 +642,6 @@ Therefore
 \begin{align}
 \eta_{m+1} = \eta_m + \delta\eta_m = 2\eta_m + \frac{\tau }{\max (\Nbar_f)}
 \end{align}
-%The final term ${\tau }/{\max (\Nbar_f)} = \eta_1$ becomes subdominant after a few terms, and we see that the $\eta_m$ increase like a geometric series. 
 If written in the form $\eta_{m+1} + {\tau }/{\max(\Nbar_f)}
 = 2 \qty( \eta_m + {\tau}/{\max(\Nbar_f)})$
 it's easy to see that for $m \geq 1$,
@@ -817,6 +702,7 @@ boost.
 %% commands to see a summary list of all changes at the end of the article.
 %\listofchanges
 
+\end{CJK*}
 \end{document}
 
 % End of file `sample631.tex'.
