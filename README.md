@@ -5,7 +5,10 @@ You could find notes in `notes` directory.
 The codes are in the directory `codes`
 
 ## run the code
-- ` cd codes`
+- Change directory to `codes`
+  ```
+  cd codes
+  ```
 - read and change the parameters in `initialize_params.py`
 - Initialize parameters
   ```
@@ -25,7 +28,7 @@ The codes are in the directory `codes`
   ```
   mpiexec -n $(nproc) python calculate.py
   ```
-  or running at background direct standard output to `.out`
+  or running at background direct standard output to `out`
   ```
   nohup mpiexec -n $(nproc) python calculate.py > out 2>&1 &
   ```
