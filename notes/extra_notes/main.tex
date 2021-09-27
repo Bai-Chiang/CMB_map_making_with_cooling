@@ -767,34 +767,34 @@ initial guess corresponds to choosing $\eta_0=0$ and $\eta_1= \eta_2 = \cdots
 = 1$.
 
 
-\subsubsection{Intuitive Interpretation of $\eta$}\label{intuitive interp}
-
-In this section, let me introduce another way to understand the role of $\eta$.
-Our ultimate goal is to find $\hatm(1)$ which minimizes $\chi^2(\vbm)$ in Eq.~(\ref{chi2 formula}).
-Since $N$ is diagonal in frequency space,
-$\chi^2$ could be written as a sum of all frequency mode
-$\qty|(\vbd-P\vbm)_f|^2$ with weight $\inv{N}_f$, such as
-$\chi^2(\vbm) = \sum_f \qty|(\vbd-P\vbm)_f|^2 \inv{N}_f$.
-The weight is large for low noise frequency mode (small $N_f$), and vice versa.
-Which means $\chi^2(\vbm)$ would favor the low noise frequency mode over high
-noise ones.
-In other words the optimal map $\hatm$ focusing on minimize the error
-$\vb*{\varepsilon} \equiv \vbd - P\vbm$ in the low-noise part.
-
-After introducing $\eta$, we minimize
-$\chi^2(\vbm,\eta)$ in Eq.~(\ref{chi2 eta formula}) instead.
-For $\eta=0$, $N^{-1}(0) \propto I$ the system is homoscedastic and the estimated map $\hatm(0)$
-does not prioritize any frequency mode.
-As we slowly increase $\eta$, we decrease the weight for the high noise modes,
-and focusing minimizing error for low noise part.
-If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
-gradient method, then the entire conjugate gradient solver
-will focus most on minimizing the low noise part, such that $\chi^2$ would
-converge very fast at low noise region, but slowly on high noise part.
-It may be stuck at some local minimum point and hard to get to global minimum.
-However by introducing $\eta$ parameter, we let the solver first treat every
-frequency equally,
-then as $\eta$ slowly increases, it gradually give more focus to the lowest noise part.
+%\subsubsection{Intuitive Interpretation of $\eta$}\label{intuitive interp}
+%
+%In this section, let me introduce another way to understand the role of $\eta$.
+%Our ultimate goal is to find $\hatm(1)$ which minimizes $\chi^2(\vbm)$ in Eq.~(\ref{chi2 formula}).
+%Since $N$ is diagonal in frequency space,
+%$\chi^2$ could be written as a sum of all frequency mode
+%$\qty|(\vbd-P\vbm)_f|^2$ with weight $\inv{N}_f$, such as
+%$\chi^2(\vbm) = \sum_f \qty|(\vbd-P\vbm)_f|^2 \inv{N}_f$.
+%The weight is large for low noise frequency mode (small $N_f$), and vice versa.
+%Which means $\chi^2(\vbm)$ would favor the low noise frequency mode over high
+%noise ones.
+%In other words the optimal map $\hatm$ focusing on minimize the error
+%$\vb*{\varepsilon} \equiv \vbd - P\vbm$ in the low-noise part.
+%
+%After introducing $\eta$, we minimize
+%$\chi^2(\vbm,\eta)$ in Eq.~(\ref{chi2 eta formula}) instead.
+%For $\eta=0$, $N^{-1}(0) \propto I$ the system is homoscedastic and the estimated map $\hatm(0)$
+%does not prioritize any frequency mode.
+%As we slowly increase $\eta$, we decrease the weight for the high noise modes,
+%and focusing minimizing error for low noise part.
+%If we start with $\eta_1=1$ directly, which corresponds to the vanilla conjugate
+%gradient method, then the entire conjugate gradient solver
+%will focus most on minimizing the low noise part, such that $\chi^2$ would
+%converge very fast at low noise region, but slowly on high noise part.
+%It may be stuck at some local minimum point and hard to get to global minimum.
+%However by introducing $\eta$ parameter, we let the solver first treat every
+%frequency equally,
+%then as $\eta$ slowly increases, it gradually give more focus to the lowest noise part.
 
 %Our ultimate goal is to find $\hatm(\eta=1)$ which minimizes 
 %$\chi^2(\vbm) = (\vbd - P\vbm)^{\dagger} \inv{N} (\vbd - P\vbm)$.
